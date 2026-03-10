@@ -1,23 +1,32 @@
 package com.xapps.media.xmusic.widget;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.RenderEffect;
+import android.graphics.RenderNode;
+import android.graphics.Shader;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-
+import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import com.xapps.media.xmusic.common.PlaybackControlListener;
 import com.xapps.media.xmusic.models.LyricLine;
 import com.xapps.media.xmusic.models.LyricWord;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+
+
 
 public class LyricsView extends ScrollingView2 {
 
@@ -32,50 +41,60 @@ public class LyricsView extends ScrollingView2 {
 
     private int lastTopActiveIndex = -1;
     private boolean allowAutoScroll = true;
+    private boolean isLineCentered;
+    private boolean isRecovering = false;
 
     private static final long AUTO_SCROLL_DELAY_MS = 2000;
+    private static final float SCROLL_FRICTION = 0.12f;
     private final Handler handler = new Handler(Looper.getMainLooper());
 
     private PlaybackControlListener seekListener;
 
     private int normalLineSpacingPx;
-    private int horizontalPaddingPx;
-
+    private int leftPaddingPx, rightPaddingPx;
+    
+    private float[] lineOffsets = new float[0];
+    private ValueAnimator scrollAnimator;
+    
+    private final List<ValueAnimator> lineAnimators = new ArrayList<>();
+    
     public LyricsView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         float d = context.getResources().getDisplayMetrics().density;
         normalLineSpacingPx = (int) (48 * d);
-        horizontalPaddingPx = (int) (16 * d);
+        leftPaddingPx = (int) (16 * d);
+        rightPaddingPx = (int) (96 * d);
     }
 
-    /* ---------------------------------------- */
+    /* ------------------------Update Runnable---------------- */
 
     private final Runnable frameTick = new Runnable() {
         @Override
         public void run() {
             boolean needsRedraw = false;
+            int currentY = getScrollY();
 
-            int scrollY = getScrollY();
             int h = getHeight();
-    
-            int max = Math.min(lineViews.size(), lineTops.length);
-
-            for (int i = 0; i < max; i++) {
+            for (int i = 0; i < lineViews.size(); i++) {
+                LyricLineCanvasView v = lineViews.get(i);
+                v.updateManualScale();
+            
                 int top = lineTops[i];
-                int bottom = top + lineViews.get(i).getMeasuredHeight();
-
-                if (bottom < scrollY || top > scrollY + h) continue;
-
-                if (lineViews.get(i).consumeDirty()) {
-                    needsRedraw = true;
+                int bottom = top + v.getMeasuredHeight();
+            
+                if (bottom >= currentY && top <= currentY + h) {
+                    if (v.consumeDirty()) {
+                        needsRedraw = true;
+                    }
                 }
             }
-            invalidate();
+
+            if (needsRedraw) invalidate();
             postOnAnimation(this);
         }
     };
 
-    /* --------------------------------------- */
+    /* ---------------------Public setters------------------ */
 
     public void setLyrics(List<LyricLine> lyricLines) {
         lines.clear();
@@ -92,14 +111,18 @@ public class LyricsView extends ScrollingView2 {
             for (LyricLine l : lines) {
                 LyricLineCanvasView v = new LyricLineCanvasView(getContext(), null);
                 boolean small = l.isRomaji || l.isBackground;
-                v.setTextSizeSp(small ? 18f : 35f);
+                v.setTextSizeSp(small ? 18f : 30f);
                 v.setLyricLine(l);
                 lineViews.add(v);
             }
         }
 
+        lineOffsets = new float[lineViews.size()];
+
         requestLayout();
         invalidate();
+        allowAutoScroll = false;
+        refreshBlurStates();
         smoothScrollTo(0, 0, 350);
     }
 
@@ -123,10 +146,40 @@ public class LyricsView extends ScrollingView2 {
     }
 
     public void onProgress(int progressMs) {
+        refreshBlurStates();
         updateActiveLines(progressMs);
     }
 
-    /* ---------------------------------------- */
+    /* ------------------- internals --------------------- */
+    
+    private void refreshBlurStates() {
+    boolean shouldBlur = allowAutoScroll && !isRecovering;
+    
+        for (int i = 0; i < lineViews.size(); i++) {
+            LyricLineCanvasView view = lineViews.get(i);
+        
+            if (!shouldBlur) {
+                view.setBlurLevel(-1);
+                continue;
+            }
+
+            int minDelta = 3;
+            if (!persistedActiveIndices.isEmpty()) {
+                minDelta = Integer.MAX_VALUE;
+                for (int activeIdx : persistedActiveIndices) {
+                    int delta = Math.abs(i - activeIdx);
+                    if (delta < minDelta) minDelta = delta;
+                }
+            }
+
+            if (minDelta == 0) {
+                view.setBlurLevel(-1);
+            } else {
+                view.setBlurLevel(Math.min(minDelta - 1, 2));
+            }
+        }
+    }
+
 
     private void updateActiveLines(int progressMs) {
         if (lines.isEmpty()) return;
@@ -174,6 +227,11 @@ public class LyricsView extends ScrollingView2 {
             if (isActive) {
                 v.setCurrentProgress(progressMs);
             }
+            if (isActive && v.getScaleY() == 1f || v.getScaleX() == 1f) {
+                v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(400).start();
+            } else if (!isActive && v.getScaleY() == 1.1f || v.getScaleX() == 1.1f) {
+                v.animate().scaleX(1f).scaleY(1f).setDuration(400).start();
+            }
         }
 
         maybeStartFrameLoop();
@@ -200,18 +258,20 @@ public class LyricsView extends ScrollingView2 {
             }
         }
     }
+    
+    private boolean lineChange;
 
     private void maybeAutoScroll() {
         if (!allowAutoScroll || persistedActiveIndices.isEmpty()) return;
-
-        int top = Collections.min(persistedActiveIndices);
-        if (top != lastTopActiveIndex) {
-            lastTopActiveIndex = top;
-            centerLine(top);
+        int currentActiveTop = Collections.min(persistedActiveIndices);
+        if (currentActiveTop != lastTopActiveIndex || !isLineCentered) {
+            lastTopActiveIndex = currentActiveTop;
+            centerLine(currentActiveTop);
         }
     }
 
-    /* -------------------------------------- */
+
+    /* --------------------Children Logic------------------ */
 
     @Override
     protected void onMeasureForChild(int widthSpec, int heightSpec) {
@@ -221,7 +281,7 @@ public class LyricsView extends ScrollingView2 {
             viewHeight = getResources().getDisplayMetrics().heightPixels;
         }
 
-        int width = fullWidth - horizontalPaddingPx * 2;
+        int width = fullWidth - leftPaddingPx - rightPaddingPx;
         int y = viewHeight / 3;
 
         lineTops = new int[lineViews.size()];
@@ -235,7 +295,7 @@ public class LyricsView extends ScrollingView2 {
 
             LyricLineCanvasView v = lineViews.get(i);
             v.measure(
-                    MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(width, MeasureSpec.AT_MOST),
                     MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
             );
 
@@ -251,19 +311,19 @@ public class LyricsView extends ScrollingView2 {
     protected void onDrawForChild(@NonNull Canvas canvas) {
         int topVisible = getTopVisibleIndex();
         int bottomVisible = getBottomVisibleIndex();
-
         if (topVisible < 0 || bottomVisible < 0) return;
 
-        int max = Math.min(lineViews.size(), lineTops.length);
-        int start = Math.max(0, topVisible);
-        int end = Math.min(bottomVisible, max - 1);
+        for (int i = topVisible; i <= bottomVisible; i++) {
+            LyricLine line = lines.get(i);
+            LyricLineCanvasView view = lineViews.get(i);
 
-        for (int i = start; i <= end; i++) {
-            int top = lineTops[i];
-
+            float x = (line.vocalType == 2) 
+                ? (getWidth() - view.getMeasuredWidth() - leftPaddingPx) 
+                : leftPaddingPx;
+            float y = lineTops[i] + lineOffsets[i];
             canvas.save();
-            canvas.translate(horizontalPaddingPx, top);
-            lineViews.get(i).draw(canvas);
+            canvas.translate(x, y);
+            view.draw(canvas);
             canvas.restore();
         }
     }
@@ -292,6 +352,8 @@ public class LyricsView extends ScrollingView2 {
 
         int start = Math.max(0, topIndex);
         int end = Math.min(bottomIndex, lineTops.length - 1);
+        
+        allowAutoScroll = true;
 
         for (int i = start; i <= end; i++) {
             int top = lineTops[i];
@@ -309,34 +371,99 @@ public class LyricsView extends ScrollingView2 {
         }
     }
 
-    /* --------------------------------------- */
+    /* -------------------- Touch event ------------------- */
 
     @Override
     public boolean onTouchEvent(@NonNull MotionEvent e) {
         gestureDetector.onTouchEvent(e);
+
+        if (e.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            handler.removeCallbacksAndMessages(null); 
+        }
+
         if (e.getActionMasked() == MotionEvent.ACTION_MOVE) {
-            allowAutoScroll = false;
+            if (allowAutoScroll) {
+                if (scrollAnimator != null) scrollAnimator.cancel();
+                isLineCentered = false;
+                allowAutoScroll = false;
+                refreshBlurStates(); // Clear blurs during manual movement
+            }
             handler.removeCallbacksAndMessages(null);
         } else if (e.getActionMasked() == MotionEvent.ACTION_UP || e.getActionMasked() == MotionEvent.ACTION_CANCEL) {
-            handler.postDelayed(() -> allowAutoScroll = true, AUTO_SCROLL_DELAY_MS);
+            handler.removeCallbacksAndMessages(null); 
+            handler.postDelayed(() -> {
+                allowAutoScroll = true;
+                refreshBlurStates();
+                maybeAutoScroll();
+            }, AUTO_SCROLL_DELAY_MS);
         }
         return super.onTouchEvent(e);
     }
-    
+
     @Override
     protected boolean onTouchEventForChild(@NonNull MotionEvent event) {
         return false;
     }
 
-    /* ---------------------------------------- */
+    /* -------------------Scroll Logic --------------------- */
 
     private void centerLine(int index) {
-        if (index < 0) return;
-        if (index >= lineTops.length) return;
-        if (index >= lineViews.size()) return;
-    
-        int target = lineTops[index] - getHeight() / 3;
-        smoothScrollTo(0, Math.max(0, target));
+        if (index < 0 || index >= lineTops.length || index >= lineViews.size()) return;
+        int targetY = lineTops[index] - getHeight() / 3;
+        int currentY = getScrollY();
+        isLineCentered = true;    
+        animateScrollTo(targetY, index);
+    }
+
+    private void animateScrollTo(int targetY, int activeIndex) {
+        if (scrollAnimator != null) scrollAnimator.cancel();
+        final int startY = getScrollY();
+        final int delta = targetY - startY;
+        final int baseIndex = getTopVisibleIndex();
+
+        if (baseIndex < 0) return;
+
+        final float[] startOffsets = new float[lineOffsets.length];
+        System.arraycopy(lineOffsets, 0, startOffsets, 0, lineOffsets.length);
+
+        scrollAnimator = ValueAnimator.ofFloat(0f, 1f);
+        scrollAnimator.setDuration(1000);
+        scrollAnimator.setInterpolator(new android.view.animation.PathInterpolator(0.2f, 0f, 0f, 1f));
+
+        scrollAnimator.addUpdateListener(a -> {
+            float p = (float) a.getAnimatedValue();
+            int viewportY = (int) (startY + delta * p);
+            scrollTo(0, viewportY);
+
+            int centerY = viewportY + (getHeight() / 2);
+            float compress = (float) Math.sin(p * Math.PI) * 0.1f;
+
+            for (int i = 0; i < lineViews.size(); i++) {
+                LyricLineCanvasView view = lineViews.get(i);
+                
+                float lineCenter = lineTops[i] + view.getMeasuredHeight() / 2f;
+                float distFromCenter = lineCenter - centerY;
+                lineOffsets[i] = -distFromCenter * compress;
+        
+                int minDelta = Integer.MAX_VALUE;
+                if (persistedActiveIndices.isEmpty()) {
+                    minDelta = 6;
+                } else {
+                    for (int activeIdx : persistedActiveIndices) {
+                        minDelta = Math.min(minDelta, Math.abs(i - activeIdx));
+                    }
+                }
+
+                if (minDelta == 0) {
+                    view.setBlurLevel(-1); 
+                } else {
+                    view.setBlurLevel(Math.min(minDelta - 1, 4)); 
+                }
+            }
+            invalidate();
+        });
+        
+        scrollAnimator.start();
     }
     
     private int getTopVisibleIndex() {

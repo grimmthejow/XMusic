@@ -374,39 +374,52 @@ public class LyricsParser {
     }
 
     private static void finalizeSyllableTimings(List<LyricLine> lines) {
+    final int GAP_THRESHOLD_MS = 600;
+    final int MIN_SYL_DURATION = 300;
+
     for (int i = 0; i < lines.size(); i++) {
         LyricLine line = lines.get(i);
         if (line.words.isEmpty()) continue;
 
-        if (line.isSimpleLRC) {
-            int lineEndTime = -1;
-            
-            for (int j = i + 1; j < lines.size(); j++) {
-                if (!lines.get(j).isRomaji) {
-                    lineEndTime = lines.get(j).time;
-                    break;
+        for (int w = 0; w < line.words.size(); w++) {
+            LyricWord word = line.words.get(w);
+
+            for (int s = 0; s < word.syllables.size(); s++) {
+                LyricSyllable current = word.syllables.get(s);
+                LyricSyllable next = null;
+
+                if (s + 1 < word.syllables.size()) {
+                    next = word.syllables.get(s + 1);
+                } else if (w + 1 < line.words.size()) {
+                    next = line.words.get(w + 1).syllables.get(0);
+                }
+
+                if (next != null) {
+                    int originalEnd = current.endTime;
+                    int gap = next.startTime - originalEnd;
+
+                    if (gap > 0 && gap <= GAP_THRESHOLD_MS) {
+                        int halfGap = gap / 2;
+                        
+                        current.endTime = originalEnd + halfGap;
+                        next.startTime = next.startTime - (gap - halfGap); 
+                        
+                        current.nextStartTime = next.startTime;
+                    } else {
+                        current.endTime = Math.max(originalEnd, current.startTime + MIN_SYL_DURATION);
+                        current.nextStartTime = next.startTime;
+                    }
+                } else {
+                    current.endTime = Math.max(current.endTime, current.startTime + MIN_SYL_DURATION);
+                    current.nextStartTime = current.endTime;
                 }
             }
+        }
 
-            if (lineEndTime == -1) {
-                lineEndTime = line.time + 10000;
-            }
-
-            for (LyricWord word : line.words) {
-                for (LyricSyllable syl : word.syllables) {
-                    syl.startTime = line.time;
-                    syl.endTime = line.time; 
-                }
-            }
-            
-            line.endTime = lineEndTime;
-        } else {
-            line.time = line.words.get(0).getStartTime();
+        if (i + 1 < lines.size()) {
+            line.endTime = lines.get(i + 1).time;
         }
     }
 }
-
-
-
 
 }

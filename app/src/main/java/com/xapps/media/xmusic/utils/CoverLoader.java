@@ -16,7 +16,7 @@ import java.util.concurrent.Executors;
 
 public final class CoverLoader {
 
-    private static final int THREAD_COUNT =
+   /* private static final int THREAD_COUNT =
             Math.max(1, Runtime.getRuntime().availableProcessors() / 2);
 
     private static final ExecutorService EXECUTOR =
@@ -54,5 +54,5 @@ public final class CoverLoader {
                 }
             }
         });
-    }
+    }*/
 }

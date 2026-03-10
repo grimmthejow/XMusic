@@ -1,50 +1,35 @@
 {
   "allFiles": [
     {
-      "file": "/storage/emulated/0/AndroidIDEProjects/XMusicHighlyUnstable/app/src/main/java/com/xapps/media/xmusic/utils/LyricsParser.java",
+      "file": "/storage/emulated/0/AndroidIDEProjects/XMusicHighlyUnstable/app/src/main/java/com/xapps/media/xmusic/widget/LyricLineCanvasView.java",
       "selection": {
         "end": {
-          "column": 59,
-          "index": 7577,
-          "line": 188
+          "column": 65,
+          "index": 24775,
+          "line": 687
         },
         "start": {
-          "column": 59,
-          "index": 7577,
-          "line": 188
+          "column": 65,
+          "index": 24775,
+          "line": 687
         }
       }
     },
     {
-      "file": "/storage/emulated/0/AndroidIDEProjects/XMusicHighlyUnstable/app/src/main/java/com/xapps/media/xmusic/widget/LyricsView.java",
+      "file": "/storage/emulated/0/AndroidIDEProjects/XMusicHighlyUnstable/app/src/main/java/com/xapps/media/xmusic/models/KaraokeSpan.java",
       "selection": {
         "end": {
-          "column": 18,
-          "index": 6944,
-          "line": 232
+          "column": 0,
+          "index": 5183,
+          "line": 145
         },
         "start": {
-          "column": 18,
-          "index": 6944,
-          "line": 232
-        }
-      }
-    },
-    {
-      "file": "/storage/emulated/0/AndroidIDEProjects/XMusicHighlyUnstable/app/src/main/java/com/xapps/media/xmusic/helper/SongMetadataHelper.java",
-      "selection": {
-        "end": {
-          "column": 1,
-          "index": 15546,
-          "line": 411
-        },
-        "start": {
-          "column": 1,
-          "index": 15546,
-          "line": 411
+          "column": 0,
+          "index": 0,
+          "line": 0
         }
       }
     }
   ],
-  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/XMusicHighlyUnstable/app/src/main/java/com/xapps/media/xmusic/helper/SongMetadataHelper.java"
+  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/XMusicHighlyUnstable/app/src/main/java/com/xapps/media/xmusic/widget/LyricLineCanvasView.java"
 }

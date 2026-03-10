@@ -4,13 +4,16 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.Region;
+import android.graphics.RenderEffect;
+import android.graphics.RenderNode;
+import android.graphics.Shader;
 import android.graphics.Typeface;
 import android.graphics.text.LineBreaker;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Layout;
@@ -23,9 +26,6 @@ import android.view.View;
 import com.xapps.media.xmusic.data.LiveColors;
 import com.xapps.media.xmusic.models.LyricLine;
 import com.xapps.media.xmusic.models.LyricWord;
-import com.xapps.media.xmusic.utils.ColorPaletteUtils;
-import com.xapps.media.xmusic.utils.MaterialColorUtils;
-import com.xapps.media.xmusic.utils.XUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,17 +37,20 @@ public class LyricLineCanvasView extends View {
 
     private CharSequence text;
     private StaticLayout staticLayout;
+    
+    private ValueAnimator landingAnim;
 
     private static final float INACTIVE_ALPHA = 0.4f;
     private static final float ACTIVE_ALPHA = 1f;
-    private static final float ACTIVE_SCALE = 1.05f;
+    private static final float ACTIVE_SCALE = 1.2f;
     private static final float INACTIVE_SCALE = 1.0f;
+    
+    private static final float MIN_GLOW_INTENSITY = 0.1f;
+    private static final float MAX_GLOW_INTENSITY = 1.5f;
 
     private static final int FADE_DURATION_MS = 250;
     private static final int MIN_WORD_DURATION_MS = 150;
     private static final int MAX_WORD_DURATION_MS = 3000;
-    private static final float MIN_GLOW_INTENSITY = 0.1f;
-    private static final float MAX_GLOW_INTENSITY = 1.5f;
 
     private static final int MIN_SPLIT_THRESHOLD = 20;
     private static final int DEFAULT_SPLIT_CHARS = 20;
@@ -61,6 +64,10 @@ public class LyricLineCanvasView extends View {
 
     private static final long DROP_DELAY_MS = 0;
     private static final long DROP_DURATION_MS = 300;
+    
+    private float currentScale = 1.0f;
+    private boolean dirty = false;
+    private static final float SCALE_INTERPOLATION = 0.1f;
 
     private LyricLine lyricLine;
     private boolean isUpdating = false;
@@ -83,10 +90,18 @@ public class LyricLineCanvasView extends View {
 
     public static final int ALIGN_LEFT = 0;
     public static final int ALIGN_RIGHT = 1;
+    
+    private int currentBlurLevel = -1;
+    private static final BlurMaskFilter VERY_WEAK_BLUR = new BlurMaskFilter(6f, BlurMaskFilter.Blur.NORMAL);
+    private static final BlurMaskFilter WEAK_BLUR = new BlurMaskFilter(8f, BlurMaskFilter.Blur.NORMAL);
+    private static final BlurMaskFilter MEDIUM_BLUR = new BlurMaskFilter(10f, BlurMaskFilter.Blur.NORMAL);
+    private static final BlurMaskFilter STRONG_BLUR = new BlurMaskFilter(12f, BlurMaskFilter.Blur.NORMAL);
+    private static final BlurMaskFilter VERY_STRONG_BLUR = new BlurMaskFilter(14f, BlurMaskFilter.Blur.NORMAL);
 
     private static class SpanTiming {
         long start;
         long end;
+        long nextStart;
 
         SpanTiming(long start, long end) {
             this.start = start;
@@ -112,11 +127,9 @@ public class LyricLineCanvasView extends View {
             new Runnable() {
                 @Override
                 public void run() {
-                    if (
-                    /*isUpdating*/ false ) {
+                    if (false) {
                         long elapsed = System.currentTimeMillis() - lastUpdateTime;
                         updateSpanProgress(lastProgressMs + (int) elapsed);
-                        //invalidate();
                         postOnAnimation(this);
                     }
                 }
@@ -126,7 +139,7 @@ public class LyricLineCanvasView extends View {
         super(context, attrs);
         setClipToOutline(false);
         textPaint.setColor(lineColor);
-        textPaint.setTextSize(spToPx(30));
+        textPaint.setTextSize(spToPx(25));
         textPaint.setTypeface(Typeface.DEFAULT);
         
     }
@@ -151,6 +164,17 @@ public class LyricLineCanvasView extends View {
                             this.skipNextAnimation = false;
                         },
                         50);
+    }
+
+    public void setBlurLevel(int level) {
+        if (this.currentBlurLevel == level) return;
+        this.currentBlurLevel = level;
+        if (level == -1) {
+            setLayerType(LAYER_TYPE_HARDWARE, null);
+        } else {
+            setLayerType(LAYER_TYPE_SOFTWARE, null);
+        }
+        invalidate();
     }
 
     public void setAlignment(int alignment) {
@@ -279,6 +303,7 @@ public class LyricLineCanvasView extends View {
         }
 
         staticLayout = buildLayout(viewWidth, align);
+        
         setPivotX(align == Layout.Alignment.ALIGN_OPPOSITE ? getWidth() : 0f);
         setPivotY(getHeight() / 2f);
 
@@ -415,8 +440,7 @@ public class LyricLineCanvasView extends View {
         return result;
     }
 
-    private void addVirtualWord(
-            List<VirtualWord> list, LyricWord parent, String subText, int relStart) {
+    private void addVirtualWord(List<VirtualWord> list, LyricWord parent, String subText, int relStart) {
         if (subText.isEmpty()) return;
         long totalDuration = parent.getEndTime() - parent.getStartTime();
         int parentLen = parent.getText().length();
@@ -436,38 +460,32 @@ public class LyricLineCanvasView extends View {
         return 0;
     }
 
-    private void createAndAttachSpan(
-        SpannableString spannable,
-        int start,
-        int end,
-        long startTime,
-        long endTime,
-        float peakIntensity) {
-    if (start >= spannable.length()) return;
-    if (end > spannable.length()) end = spannable.length();
+    private void createAndAttachSpan(SpannableString spannable, int start, int end, long startTime, long endTime, float peakIntensity) {
+        if (start >= spannable.length()) return;
+        if (end > spannable.length()) end = spannable.length();
 
-    boolean isSingleChar = (end - start == 1);
-    char firstChar = spannable.charAt(start);
+        boolean isSingleChar = (end - start == 1);
+        char firstChar = spannable.charAt(start);
     
-    boolean isCjk = Character.UnicodeBlock.of(firstChar) == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS
+        boolean isCjk = Character.UnicodeBlock.of(firstChar) == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS
             || Character.UnicodeBlock.of(firstChar) == Character.UnicodeBlock.HIRAGANA
             || Character.UnicodeBlock.of(firstChar) == Character.UnicodeBlock.KATAKANA
             || Character.UnicodeBlock.of(firstChar) == Character.UnicodeBlock.HANGUL_SYLLABLES;
 
-    boolean shouldAllowEffects = isCjk? isSingleChar : true;
+        boolean shouldAllowEffects = isCjk? isSingleChar : true;
     
-    long duration = endTime - startTime;
-    boolean bounce = shouldAllowEffects && duration >= 1600;
-    float finalPeakGlow = shouldAllowEffects ? peakIntensity : 0f;
+        long duration = endTime - startTime;
+        boolean bounce = shouldAllowEffects && duration >= 1600;
+        float finalPeakGlow = shouldAllowEffects ? peakIntensity : 0f;
+    
+        KaraokeSpan span = new KaraokeSpan(ACTIVE_ALPHA);
+        span.shouldBounce = bounce;
 
-    KaraokeSpan span = new KaraokeSpan(ACTIVE_ALPHA);
-    span.shouldBounce = bounce;
-
-    spanMap.put(start, span);
-    spanPeakGlowMap.put(start, finalPeakGlow);
-    spanTimingMap.put(start, new SpanTiming(startTime, endTime));
-    spannable.setSpan(span, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-}
+        spanMap.put(start, span);
+        spanPeakGlowMap.put(start, finalPeakGlow);
+        spanTimingMap.put(start, new SpanTiming(startTime, endTime));
+        spannable.setSpan(span, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+    }
 
 
     private float calculatePeakIntensity(long duration) {
@@ -544,11 +562,11 @@ public class LyricLineCanvasView extends View {
             if (spanAlphaAnimator != null) spanAlphaAnimator.cancel();
 
             animate()
-                    .alpha(1.0f)
-                    .scaleX(INACTIVE_SCALE)
-                    .scaleY(INACTIVE_SCALE)
-                    .setDuration(FADE_DURATION_MS)
-                    .start();
+                .alpha(1.0f)
+                .scaleX(INACTIVE_SCALE)
+                .scaleY(INACTIVE_SCALE)
+                .setDuration(FADE_DURATION_MS)
+                .start();
 
             for (KaraokeSpan span : spanMap.values()) {
                 span.glowAlpha = 0f;
@@ -609,120 +627,161 @@ public class LyricLineCanvasView extends View {
         invalidate();
     }
 
-    private ValueAnimator landingAnim;
-
     private void startLandingAnimation() {
-    isLanding = true;
-    if (landingAnim != null) landingAnim.cancel();
+        isLanding = true;
+        if (landingAnim != null) landingAnim.cancel();
 
-    final Map<Integer, Float> startOffsets = new HashMap<>();
-    for (Map.Entry<Integer, KaraokeSpan> entry : spanMap.entrySet()) {
-        startOffsets.put(entry.getKey(), entry.getValue().externalWordDrop);
+        final Map<Integer, Float> startOffsets = new HashMap<>();
+        for (Map.Entry<Integer, KaraokeSpan> entry : spanMap.entrySet()) {
+            startOffsets.put(entry.getKey(), entry.getValue().externalWordDrop);
+        }
+    
+        landingAnim = ValueAnimator.ofFloat(1f, 0f);
+        landingAnim.setDuration(DROP_DURATION_MS);
+        landingAnim.setInterpolator(new android.view.animation.DecelerateInterpolator());
+
+        landingAnim.addUpdateListener(animation -> {
+            float f = (float) animation.getAnimatedValue();
+            for (Map.Entry<Integer, KaraokeSpan> entry : spanMap.entrySet()) {
+                Float startOffset = startOffsets.get(entry.getKey());
+                if (startOffset != null) {
+                    entry.getValue().externalWordDrop = startOffset * f;
+                }
+            }
+            invalidate();
+        });
+
+        landingAnim.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                for (KaraokeSpan span : spanMap.values()) {
+                    span.progress = -1.0f;
+                    span.wordCompleted = false;
+                    span.externalWordDrop = 0f;
+                }
+                spanCompleteTimeMap.clear();
+                isLanding = false;
+                invalidate();
+            }
+        });
+        landingAnim.start();
     }
 
-    landingAnim = ValueAnimator.ofFloat(1f, 0f);
-    landingAnim.setDuration(DROP_DURATION_MS);
-    landingAnim.setInterpolator(new android.view.animation.DecelerateInterpolator());
+    private void updateSpanProgress(int progressMs) {
+        if (spanMap.isEmpty()) return;
 
-    landingAnim.addUpdateListener(animation -> {
-        float f = (float) animation.getAnimatedValue();
+        float maxLift = textPaint.getTextSize() * 0.08f;
+        long now = System.currentTimeMillis();
+        boolean needsInvalidate = false;
+
         for (Map.Entry<Integer, KaraokeSpan> entry : spanMap.entrySet()) {
-            Float startOffset = startOffsets.get(entry.getKey());
-            if (startOffset != null) {
-                entry.getValue().externalWordDrop = startOffset * f;
-            }
-        }
-        invalidate();
-    });
 
-    landingAnim.addListener(new AnimatorListenerAdapter() {
-        @Override
-        public void onAnimationEnd(Animator animation) {
-            for (KaraokeSpan span : spanMap.values()) {
-                span.progress = -1.0f;
-                span.wordCompleted = false;
-                span.externalWordDrop = 0f;
-            }
-            spanCompleteTimeMap.clear();
-            isLanding = false;
-            invalidate();
-        }
-    });
-    landingAnim.start();
-}
+            int startIndex = entry.getKey();
+            KaraokeSpan span = entry.getValue();
+            SpanTiming timing = spanTimingMap.get(startIndex);
 
-private void updateSpanProgress(int progressMs) {
-    if (spanMap.isEmpty()) return;
+            if (isActiveLine && timing != null) {
 
-    float maxLift = textPaint.getTextSize() * 0.05f;
-    long now = System.currentTimeMillis();
-    boolean needsInvalidate = false;
+                float oldProgress = span.progress;
 
-    for (Map.Entry<Integer, KaraokeSpan> entry : spanMap.entrySet()) {
-        int startIndex = entry.getKey();
-        KaraokeSpan span = entry.getValue();
-        SpanTiming timing = spanTimingMap.get(startIndex);
+                long start = timing.start;
+                long nextStart = timing.nextStart > 0 ? timing.nextStart : timing.end;
+                long duration = Math.max(1, nextStart - start);
 
-        if (isActiveLine && timing != null) {
-            float oldProgress = span.progress;
-            if (progressMs < timing.start) {
-                span.progress = -1.0f;
-                span.wordCompleted = false;
-                span.externalWordDrop = 0f;
-                spanCompleteTimeMap.remove(startIndex);
-            } else if (progressMs >= timing.end) {
-                span.progress = 1.0f;
-                if (!span.wordCompleted) {
-                    span.wordCompleted = true;
-                    spanCompleteTimeMap.put(startIndex, now);
-                }
-            } else {
-                float wordProgress = (float) (progressMs - timing.start) / (timing.end - timing.start);
-                span.progress = Math.max(0f, Math.min(1f, wordProgress));
-                float liftProgress = (float) Math.sin(span.progress * (Math.PI / 2));
-                span.externalWordDrop = -maxLift * liftProgress;
-                float glowCurve = (float) Math.sin(span.progress * Math.PI);
-                Float peak = spanPeakGlowMap.get(startIndex);
-                span.glowAlpha = glowCurve * (peak != null ? peak : 0.5f);
-            }
-            if (oldProgress != span.progress) dirty = true;
-        }
+                if (progressMs <= start) {
 
-        if (span.wordCompleted && !isLanding) {
-            Long t0 = spanCompleteTimeMap.get(startIndex);
-            if (t0 != null) {
-                long elapsed = now - t0;
-                float t = Math.min(1f, (float) elapsed / DROP_DURATION_MS);
-                float interpolator = (float) (1f - Math.cos(t * Math.PI * 0.5f));
-                span.externalWordDrop = -maxLift + (maxLift * interpolator);
-                if (t >= 1f) {
+                    span.progress = 0f;
+                    span.wordCompleted = false;
                     span.externalWordDrop = 0f;
                     spanCompleteTimeMap.remove(startIndex);
+
+                } else if (progressMs >= nextStart) {
+
+                    span.progress = 1f;
+
+                    if (!span.wordCompleted) {
+                        span.wordCompleted = true;
+                        spanCompleteTimeMap.put(startIndex, now);
+                    }
+
+                } else {
+
+                    float p = (float)(progressMs - start) / duration;
+                    span.progress = p;
+
+                    float lift = (float)Math.sin(p * (Math.PI / 2));
+                    span.externalWordDrop = -maxLift * lift;
+
+                    float glowCurve = (float)Math.sin(p * Math.PI);
+                    Float peak = spanPeakGlowMap.get(startIndex);
+                span.glowAlpha = glowCurve * (peak != null ? peak : 0.5f);
                 }
-                needsInvalidate = true;
+
+                if (oldProgress != span.progress) dirty = true;
+            }
+
+            if (span.wordCompleted && !isLanding) {
+
+                Long t0 = spanCompleteTimeMap.get(startIndex);
+                if (t0 != null) {
+
+                    long elapsed = now - t0;
+                    float t = Math.min(1f, (float)elapsed / DROP_DURATION_MS);
+                    float interpolator = (float)(1f - Math.cos(t * Math.PI * 0.5f));
+                    span.externalWordDrop = -maxLift + (maxLift * interpolator);
+
+                    if (t >= 1f) {
+                        span.externalWordDrop = 0f;
+                        spanCompleteTimeMap.remove(startIndex);
+                    }
+
+                    needsInvalidate = true;
+                }
             }
         }
+
+        if (needsInvalidate) invalidate();
     }
-    if (needsInvalidate) invalidate();
-}
 
+    public void updateManualScale() {
+        float target = isActiveLine ? ACTIVE_SCALE : INACTIVE_SCALE;
+        if (Math.abs(currentScale - target) > 0.001f) {
+            currentScale += (target - currentScale) * SCALE_INTERPOLATION;
+            dirty = true;
+        } else {
+            currentScale = target;
+        }
+    }
 
-    private boolean dirty = false;
-
-public boolean consumeDirty() {
-    boolean d = dirty;
-    dirty = false;
-    return d;
-}
+    public boolean consumeDirty() {
+        boolean d = dirty;
+        dirty = false;
+        return d;
+    }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (lyricLine.isRomaji || lyricLine.isBackground) textPaint.setAlpha(100);
-        super.onDraw(canvas);
-        if (staticLayout == null) return;
+        if (lyricLine == null || staticLayout == null) return;
+    
         canvas.save();
+        float pivotX = (lyricLine.vocalType == 2) ? getMeasuredWidth() : 0f;
+        float pivotY = getMeasuredHeight() / 2f;
+    
+        canvas.scale(currentScale, currentScale, pivotX, pivotY);
         canvas.translate(getPaddingLeft(), getPaddingTop());
-        staticLayout.draw(canvas);
+
+        if (currentBlurLevel != -1 && Math.abs(currentScale - 1.0f) < 0.01f) {
+            if (currentBlurLevel == 0) textPaint.setMaskFilter(VERY_WEAK_BLUR);
+            else if (currentBlurLevel == 1) textPaint.setMaskFilter(WEAK_BLUR);
+            else if (currentBlurLevel == 2) textPaint.setMaskFilter(MEDIUM_BLUR);
+            else if (currentBlurLevel == 3) textPaint.setMaskFilter(STRONG_BLUR);
+            else textPaint.setMaskFilter(VERY_STRONG_BLUR);
+        
+            staticLayout.draw(canvas);
+            textPaint.setMaskFilter(null);
+        } else {
+            staticLayout.draw(canvas);
+        }
         canvas.restore();
     }
 

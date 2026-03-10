@@ -1,107 +1,46 @@
 package com.xapps.media.xmusic.fragment;
 
-import android.animation.*;
-import android.widget.ImageView;
-import androidx.annotation.NonNull;
-import android.app.*;
 import android.content.*;
-import android.content.res.*;
 import android.graphics.*;
 import android.graphics.drawable.*;
-import android.media.*;
-import android.net.*;
 import android.net.Uri;
 import android.os.*;
-import android.text.*;
-import android.text.Spanned;
-import android.text.style.*;
-import android.text.style.ForegroundColorSpan;
-import android.transition.Transition;
-import android.util.*;
-import android.util.TypedValue;
 import android.view.*;
-import android.view.View.*;
-import android.view.animation.*;
-import android.webkit.*;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.window.OnBackInvokedDispatcher;
-import androidx.activity.*;
 import androidx.annotation.*;
-import androidx.annotation.experimental.*;
-import androidx.appcompat.*;
-import androidx.appcompat.resources.*;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.core.*;
+import androidx.annotation.NonNull;
 import androidx.core.content.*;
-import androidx.core.content.res.ResourcesCompat;
-import androidx.core.ktx.*;
-import androidx.core.splashscreen.*;
 import androidx.core.view.ViewKt;
-import androidx.customview.*;
-import androidx.customview.poolingcontainer.*;
-import androidx.emoji2.*;
-import androidx.emoji2.viewsintegration.*;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.livedata.core.*;
-import androidx.lifecycle.process.*;
-import androidx.lifecycle.runtime.*;
-import androidx.lifecycle.viewmodel.*;
-import androidx.lifecycle.viewmodel.savedstate.*;
-import androidx.media.*;
-import androidx.media3.common.*;
-import androidx.media3.exoplayer.*;
-import androidx.media3.session.MediaController;
-import androidx.palette.*;
-import androidx.profileinstaller.*;
-import androidx.recyclerview.widget.*;
 import androidx.recyclerview.widget.ConcatAdapter;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.RecyclerView.ViewHolder;
-import androidx.savedstate.*;
-import androidx.startup.*;
-import androidx.transition.*;
-import com.appbroker.roundedimageview.*;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.ListPreloader;
-import com.bumptech.glide.Priority;
-import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
-import com.bumptech.glide.util.FixedPreloadSizeProvider;
-import com.google.android.material.*;
-import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDragHandleView;
-import com.google.android.material.color.MaterialColors;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.search.*;
-import com.xapps.media.xmusic.common.SongLoadListener;
-import com.xapps.media.xmusic.activity.MainActivity;
 import com.xapps.media.xmusic.R;
-import com.xapps.media.xmusic.data.DataManager;
+import com.xapps.media.xmusic.activity.MainActivity;
+import com.xapps.media.xmusic.common.SongLoadListener;
 import com.xapps.media.xmusic.data.RuntimeData;
-import com.xapps.media.xmusic.helper.SongMetadataHelper;
 import com.xapps.media.xmusic.databinding.*;
 import com.xapps.media.xmusic.databinding.ActivityMainBinding;
-import com.xapps.media.xmusic.fragment.SettingsFragment;
+import com.xapps.media.xmusic.helper.SongMetadataHelper;
 import com.xapps.media.xmusic.service.PlayerService;
 import com.xapps.media.xmusic.utils.*;
 import com.xapps.media.xmusic.widget.VuMeterView;
-import java.io.*;
-import java.text.*;
 import java.util.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.regex.*;
 import kotlin.Unit;
 import me.zhanghai.android.fastscroll.FastScroller;
 import me.zhanghai.android.fastscroll.FastScrollerBuilder;
-import org.json.*;
 
 public class MusicListFragment extends BaseFragment {
 	
@@ -153,15 +92,12 @@ public class MusicListFragment extends BaseFragment {
         activity = a.getBinding();
         placeholder = ContextCompat.getDrawable(getActivity(), R.drawable.placeholder_small);
         imageSize = XUtils.convertToPx(getActivity(), 45f);
-        binding.swipeRefreshLayout.setProgressBackgroundColorSchemeColor(MaterialColorUtils.colorSurfaceContainerHigh);
-        binding.swipeRefreshLayout.setColorSchemeColors(MaterialColorUtils.colorPrimary);
         activity.bottomNavigation.post(() -> {
             if (getActivity() == null) return;
             a.setMusicListFragmentInstance(this);
             lastSpacing = XUtils.convertToPx(getActivity(), 5f) + activity.miniPlayerDetailsLayout.getHeight()*2 + activity.bottomNavigation.getHeight();
             binding.songsList.addItemDecoration(new BottomSpacingDecoration(lastSpacing));
-                binding.songsList.setLayoutManager(new LinearLayoutManager(getContext()));
-                
+            binding.songsList.setLayoutManager(new LinearLayoutManager(getContext()));
         });
         
         binding.songsList.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -198,6 +134,7 @@ public class MusicListFragment extends BaseFragment {
             songsAdapter.notifyDataSetChanged();
             XUtils.showMessage(getActivity(), "done");
         });
+        
         
         binding.swipeRefreshLayout.setOnRefreshListener(() -> {
             forceUpdate = true;

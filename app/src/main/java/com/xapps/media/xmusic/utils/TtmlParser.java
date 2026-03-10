@@ -114,41 +114,55 @@ public class TtmlParser {
     }
 
     private static LyricLine assembleLine(
-            List<Element> spans, int lineStart, int vocalType, boolean isBg) {
-        List<LyricWord> words = new ArrayList<>();
-        StringBuilder fullLineText = new StringBuilder();
-        int cursor = 0;
+        List<Element> spans, int lineStart, int vocalType, boolean isBg) {
+    List<LyricWord> words = new ArrayList<>();
+    StringBuilder fullLineText = new StringBuilder();
+    int cursor = 0;
 
-        for (int i = 0; i < spans.size(); i++) {
-            Element span = spans.get(i);
-            String text = span.getTextContent();
-            if (isBg) text = text.replace("(", "").replace(")", "");
-            if (text.isEmpty()) continue;
+    for (int i = 0; i < spans.size(); i++) {
+        Element span = spans.get(i);
+        String text = span.getTextContent();
+        if (isBg) text = text.replace("(", "").replace(")", "");
+        if (text.isEmpty()) continue;
 
-            int start = (int) parseTimestamp(span.getAttribute("begin"));
-            int end = (int) parseTimestamp(span.getAttribute("end"));
-
-            LyricWord word = new LyricWord(cursor);
-            LyricSyllable syllable = new LyricSyllable(start, text, 0);
-            syllable.endTime = end;
-            word.syllables.add(syllable);
-            words.add(word);
-
-            fullLineText.append(text);
-            cursor += text.length();
-
-            if (i < spans.size() - 1 && !text.endsWith(" ")) {
-                fullLineText.append(" ");
-                cursor++;
+        int start = (int) parseTimestamp(span.getAttribute("begin"));
+        
+        int end;
+        if (i < spans.size() - 1) {
+            // Use the next span's begin as this span's end for continuity
+            end = (int) parseTimestamp(spans.get(i + 1).getAttribute("begin"));
+        } else {
+            // Last span uses its own end attribute or a default duration
+            String endAttr = span.getAttribute("end");
+            if (!endAttr.isEmpty()) {
+                end = (int) parseTimestamp(endAttr);
+            } else {
+                end = start + 300; 
             }
         }
 
-        LyricLine lyricLine =
-                new LyricLine(lineStart, new SpannableString(fullLineText.toString()), words);
-        lyricLine.vocalType = vocalType;
-        lyricLine.isBackground = isBg;
-        return lyricLine;
+        LyricWord word = new LyricWord(cursor);
+        LyricSyllable syllable = new LyricSyllable(start, text, 0);
+        syllable.endTime = end;
+        word.syllables.add(syllable);
+        words.add(word);
+
+        fullLineText.append(text);
+        cursor += text.length();
+
+        if (i < spans.size() - 1 && !text.endsWith(" ")) {
+            fullLineText.append(" ");
+            cursor++;
+        }
     }
+
+    LyricLine lyricLine =
+            new LyricLine(lineStart, new SpannableString(fullLineText.toString()), words);
+    lyricLine.vocalType = vocalType;
+    lyricLine.isBackground = isBg;
+    return lyricLine;
+}
+
 
     private static void findBackgroundSpans(Node node, Set<Node> result, boolean isBgParent) {
         if (node.getNodeType() == Node.ELEMENT_NODE) {
