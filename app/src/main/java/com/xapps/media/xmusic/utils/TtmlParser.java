@@ -129,10 +129,8 @@ public class TtmlParser {
         
         int end;
         if (i < spans.size() - 1) {
-            // Use the next span's begin as this span's end for continuity
             end = (int) parseTimestamp(spans.get(i + 1).getAttribute("begin"));
         } else {
-            // Last span uses its own end attribute or a default duration
             String endAttr = span.getAttribute("end");
             if (!endAttr.isEmpty()) {
                 end = (int) parseTimestamp(endAttr);

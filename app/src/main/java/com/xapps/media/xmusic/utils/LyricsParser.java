@@ -375,7 +375,6 @@ public class LyricsParser {
 
     private static void finalizeSyllableTimings(List<LyricLine> lines) {
     final int GAP_THRESHOLD_MS = 600;
-    final int MIN_SYL_DURATION = 300;
 
     for (int i = 0; i < lines.size(); i++) {
         LyricLine line = lines.get(i);
@@ -394,7 +393,7 @@ public class LyricsParser {
                     next = line.words.get(w + 1).syllables.get(0);
                 }
 
-                if (next != null) {
+                if (next != null && !line.isSimpleLRC) {
                     int originalEnd = current.endTime;
                     int gap = next.startTime - originalEnd;
 
@@ -406,11 +405,11 @@ public class LyricsParser {
                         
                         current.nextStartTime = next.startTime;
                     } else {
-                        current.endTime = Math.max(originalEnd, current.startTime + MIN_SYL_DURATION);
+                        current.endTime = Math.max(originalEnd, current.startTime);
                         current.nextStartTime = next.startTime;
                     }
                 } else {
-                    current.endTime = Math.max(current.endTime, current.startTime + MIN_SYL_DURATION);
+                    current.endTime = Math.max(current.endTime, current.startTime);
                     current.nextStartTime = current.endTime;
                 }
             }

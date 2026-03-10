@@ -89,7 +89,7 @@ public class LyricsView extends ScrollingView2 {
                 }
             }
 
-            if (needsRedraw) invalidate();
+            /*if (needsRedraw)*/ invalidate();
             postOnAnimation(this);
         }
     };
@@ -121,7 +121,7 @@ public class LyricsView extends ScrollingView2 {
 
         requestLayout();
         invalidate();
-        allowAutoScroll = false;
+        allowAutoScroll = true;
         refreshBlurStates();
         smoothScrollTo(0, 0, 350);
     }
@@ -181,62 +181,54 @@ public class LyricsView extends ScrollingView2 {
     }
 
 
-    private void updateActiveLines(int progressMs) {
-        if (lines.isEmpty()) return;
+    private final List<Integer> scratchActive = new ArrayList<>();
 
-        List<Integer> newActive = new ArrayList<>();
+private void updateActiveLines(int progressMs) {
+    if (lines.isEmpty()) return;
 
-        for (int i = 0; i < lines.size(); i++) {
-            LyricLine line = lines.get(i);
-            if (line.isRomaji) continue;
+    scratchActive.clear();
 
-            long start = line.time;
-            long end = getLineEndTime(i);
+    for (int i = 0; i < lines.size(); i++) {
+        LyricLine line = lines.get(i);
+        if (line.isRomaji) continue;
 
-            if (progressMs >= start && progressMs <= end) {
-                newActive.add(i);
-            }
+        long start = line.time;
+        long end = getLineEndTime(i);
+
+        if (progressMs >= start && progressMs <= end) {
+            scratchActive.add(i);
         }
-
-        if (newActive.isEmpty() && !persistedActiveIndices.isEmpty()) {
-            newActive.addAll(persistedActiveIndices);
-        }
-
-        currentActiveIndices.clear();
-        currentActiveIndices.addAll(newActive);
-
-        persistedActiveIndices.clear();
-        persistedActiveIndices.addAll(newActive);
-
-        int max = Math.min(
-            Math.min(lines.size(), lineViews.size()),
-            lineTops.length
-        );
-
-        for (int i = 0; i < max; i++) {
-            LyricLineCanvasView v = lineViews.get(i);
-
-            boolean isActive;
-            if (lines.get(i).isRomaji) {
-                isActive = i > 0 && currentActiveIndices.contains(i - 1);
-            } else {
-                isActive = currentActiveIndices.contains(i);
-            }
-
-            v.setCurrent(isActive, i);
-            if (isActive) {
-                v.setCurrentProgress(progressMs);
-            }
-            if (isActive && v.getScaleY() == 1f || v.getScaleX() == 1f) {
-                v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(400).start();
-            } else if (!isActive && v.getScaleY() == 1.1f || v.getScaleX() == 1.1f) {
-                v.animate().scaleX(1f).scaleY(1f).setDuration(400).start();
-            }
-        }
-
-        maybeStartFrameLoop();
-        maybeAutoScroll();
     }
+
+    if (scratchActive.isEmpty() && !persistedActiveIndices.isEmpty()) {
+        scratchActive.addAll(persistedActiveIndices);
+    }
+
+    currentActiveIndices.clear();
+    currentActiveIndices.addAll(scratchActive);
+
+    persistedActiveIndices.clear();
+    persistedActiveIndices.addAll(scratchActive);
+
+    for (int i = 0; i < lineViews.size(); i++) {
+        LyricLineCanvasView v = lineViews.get(i);
+        
+        boolean isActive = lines.get(i).isRomaji 
+            ? (i > 0 && currentActiveIndices.contains(i - 1)) 
+            : currentActiveIndices.contains(i);
+
+        if (v.isActive() != isActive) {
+            v.setCurrent(isActive, i);
+        }
+
+        if (isActive) {
+            v.setCurrentProgress(progressMs);
+        }
+    }
+
+    maybeStartFrameLoop();
+    maybeAutoScroll();
+}
 
     private void maybeStartFrameLoop() {
         int scrollY = getScrollY();

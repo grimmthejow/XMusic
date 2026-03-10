@@ -311,8 +311,24 @@ public class PlayerService extends MediaLibraryService {
             choreographer.postFrameCallback(this);
         }
     };
+    
+    private final Handler progressHandler = new Handler(Looper.getMainLooper());
 
-    private void startUpdates() {
+private final Runnable progressRunnable = new Runnable() {
+    @Override
+    public void run() {
+        if (player != null && isExecutorStarted) {
+            currentProgress = player.getCurrentPosition();
+            RuntimeData.currentProgress = currentProgress;
+            ServiceCallback.Hub.send(ServiceCallback.CALLBACK_PROGRESS_UPDATE);
+            
+            ExoPlayerHandler.postDelayed(this, 17);
+        }
+    }
+};
+    
+
+    /*private void startUpdates() {
         if (isExecutorStarted) return;
         isExecutorStarted = true;
         choreographer.postFrameCallback(playerProgressCallback);
@@ -321,7 +337,22 @@ public class PlayerService extends MediaLibraryService {
     private void stopUpdates() {
         isExecutorStarted = false;
         choreographer.removeFrameCallback(playerProgressCallback);
-    }
+    }*/
+    
+    private void startUpdates() {
+    if (isExecutorStarted) return;
+    isExecutorStarted = true;
+   
+    ExoPlayerHandler.removeCallbacks(progressRunnable);
+    
+    ExoPlayerHandler.post(progressRunnable);
+}
+
+private void stopUpdates() {
+    isExecutorStarted = false;
+    ExoPlayerHandler.removeCallbacks(progressRunnable);
+}
+    
 
 	
     

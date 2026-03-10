@@ -93,10 +93,10 @@ public class LyricLineCanvasView extends View {
     
     private int currentBlurLevel = -1;
     private static final BlurMaskFilter VERY_WEAK_BLUR = new BlurMaskFilter(6f, BlurMaskFilter.Blur.NORMAL);
-    private static final BlurMaskFilter WEAK_BLUR = new BlurMaskFilter(8f, BlurMaskFilter.Blur.NORMAL);
-    private static final BlurMaskFilter MEDIUM_BLUR = new BlurMaskFilter(10f, BlurMaskFilter.Blur.NORMAL);
-    private static final BlurMaskFilter STRONG_BLUR = new BlurMaskFilter(12f, BlurMaskFilter.Blur.NORMAL);
-    private static final BlurMaskFilter VERY_STRONG_BLUR = new BlurMaskFilter(14f, BlurMaskFilter.Blur.NORMAL);
+    private static final BlurMaskFilter WEAK_BLUR = new BlurMaskFilter(10f, BlurMaskFilter.Blur.NORMAL);
+    private static final BlurMaskFilter MEDIUM_BLUR = new BlurMaskFilter(14f, BlurMaskFilter.Blur.NORMAL);
+    private static final BlurMaskFilter STRONG_BLUR = new BlurMaskFilter(18f, BlurMaskFilter.Blur.NORMAL);
+    private static final BlurMaskFilter VERY_STRONG_BLUR = new BlurMaskFilter(22f, BlurMaskFilter.Blur.NORMAL);
 
     private static class SpanTiming {
         long start;
@@ -478,7 +478,7 @@ public class LyricLineCanvasView extends View {
         boolean bounce = shouldAllowEffects && duration >= 1600;
         float finalPeakGlow = shouldAllowEffects ? peakIntensity : 0f;
     
-        KaraokeSpan span = new KaraokeSpan(ACTIVE_ALPHA);
+        KaraokeSpan span = new KaraokeSpan(ACTIVE_ALPHA * (lyricLine.isBackground || lyricLine.isRomaji ? 0.4f : 1f));
         span.shouldBounce = bounce;
 
         spanMap.put(start, span);
@@ -519,7 +519,7 @@ public class LyricLineCanvasView extends View {
         }
 
         isFadedOut = false;
-        setAlpha(1.0f);
+        setAlpha(1.0f * (lyricLine.isBackground || lyricLine.isRomaji ? 0.4f : 1f));
 
         if (spanAlphaAnimator != null) spanAlphaAnimator.cancel();
         spanAlphaAnimator = ValueAnimator.ofFloat(0f, ACTIVE_ALPHA);
@@ -528,7 +528,7 @@ public class LyricLineCanvasView extends View {
                 animation -> {
                     float val = (float) animation.getAnimatedValue();
                     for (KaraokeSpan span : spanMap.values()) {
-                        span.alpha = val;
+                        span.alpha = val * (lyricLine.isBackground || lyricLine.isRomaji ? 0.4f : 1f);
                     }
                     invalidate();
                 });
@@ -562,7 +562,7 @@ public class LyricLineCanvasView extends View {
             if (spanAlphaAnimator != null) spanAlphaAnimator.cancel();
 
             animate()
-                .alpha(1.0f)
+                .alpha(1.0f * (lyricLine.isBackground || lyricLine.isRomaji ? 0.4f : 1f))
                 .scaleX(INACTIVE_SCALE)
                 .scaleY(INACTIVE_SCALE)
                 .setDuration(FADE_DURATION_MS)
@@ -570,7 +570,7 @@ public class LyricLineCanvasView extends View {
 
             for (KaraokeSpan span : spanMap.values()) {
                 span.glowAlpha = 0f;
-                span.alpha = ACTIVE_ALPHA;
+                span.alpha = ACTIVE_ALPHA * (lyricLine.isBackground || lyricLine.isRomaji ? 0.4f : 1f);
             }
 
             startLandingAnimation();
@@ -587,7 +587,7 @@ public class LyricLineCanvasView extends View {
                 animation -> {
                     float val = (float) animation.getAnimatedValue();
                     for (KaraokeSpan span : spanMap.values()) {
-                        span.alpha = val;
+                        span.alpha = val * (lyricLine.isBackground || lyricLine.isRomaji ? 0.4f : 1f);
                         span.glowAlpha = Math.min(span.glowAlpha, val);
                     }
                     invalidate();
@@ -667,81 +667,59 @@ public class LyricLineCanvasView extends View {
         landingAnim.start();
     }
 
-    private void updateSpanProgress(int progressMs) {
-        if (spanMap.isEmpty()) return;
+private void updateSpanProgress(int progressMs) {
+    if (spanMap.isEmpty()) return;
 
-        float maxLift = textPaint.getTextSize() * 0.08f;
-        long now = System.currentTimeMillis();
-        boolean needsInvalidate = false;
+    float maxLift = textPaint.getTextSize() * 0.08f;
+    long now = System.currentTimeMillis();
 
-        for (Map.Entry<Integer, KaraokeSpan> entry : spanMap.entrySet()) {
+    for (Map.Entry<Integer, KaraokeSpan> entry : spanMap.entrySet()) {
+        int startIndex = entry.getKey();
+        KaraokeSpan span = entry.getValue();
+        SpanTiming timing = spanTimingMap.get(startIndex);
 
-            int startIndex = entry.getKey();
-            KaraokeSpan span = entry.getValue();
-            SpanTiming timing = spanTimingMap.get(startIndex);
-
-            if (isActiveLine && timing != null) {
-
-                float oldProgress = span.progress;
-
-                long start = timing.start;
-                long nextStart = timing.nextStart > 0 ? timing.nextStart : timing.end;
-                long duration = Math.max(1, nextStart - start);
-
-                if (progressMs <= start) {
-
-                    span.progress = 0f;
-                    span.wordCompleted = false;
-                    span.externalWordDrop = 0f;
-                    spanCompleteTimeMap.remove(startIndex);
-
-                } else if (progressMs >= nextStart) {
-
-                    span.progress = 1f;
-
-                    if (!span.wordCompleted) {
-                        span.wordCompleted = true;
-                        spanCompleteTimeMap.put(startIndex, now);
-                    }
-
-                } else {
-
-                    float p = (float)(progressMs - start) / duration;
-                    span.progress = p;
-
-                    float lift = (float)Math.sin(p * (Math.PI / 2));
-                    span.externalWordDrop = -maxLift * lift;
-
-                    float glowCurve = (float)Math.sin(p * Math.PI);
-                    Float peak = spanPeakGlowMap.get(startIndex);
-                span.glowAlpha = glowCurve * (peak != null ? peak : 0.5f);
+        if (isActiveLine && timing != null) {
+            if (progressMs < timing.start) {
+                span.progress = -1.0f;
+                span.wordCompleted = false;
+                span.externalWordDrop = 0f;
+                spanCompleteTimeMap.remove(startIndex);
+            } else if (progressMs >= timing.end) {
+                span.progress = 1.0f;
+                if (!span.wordCompleted) {
+                    span.wordCompleted = true;
+                    spanCompleteTimeMap.put(startIndex, now);
                 }
-
-                if (oldProgress != span.progress) dirty = true;
-            }
-
-            if (span.wordCompleted && !isLanding) {
-
-                Long t0 = spanCompleteTimeMap.get(startIndex);
-                if (t0 != null) {
-
-                    long elapsed = now - t0;
-                    float t = Math.min(1f, (float)elapsed / DROP_DURATION_MS);
-                    float interpolator = (float)(1f - Math.cos(t * Math.PI * 0.5f));
-                    span.externalWordDrop = -maxLift + (maxLift * interpolator);
-
-                    if (t >= 1f) {
-                        span.externalWordDrop = 0f;
-                        spanCompleteTimeMap.remove(startIndex);
-                    }
-
-                    needsInvalidate = true;
-                }
+            } else {
+                float wordProgress = (float) (progressMs - timing.start) / (timing.end - timing.start);
+                span.progress = Math.max(0f, Math.min(1f, wordProgress));
+                
+                float liftProgress = (float) Math.sin(span.progress * (Math.PI / 2));
+                span.externalWordDrop = -maxLift * liftProgress;
+                
+                float glowCurve = (float) Math.sin(span.progress * Math.PI);
+                Float peak = spanPeakGlowMap.get(startIndex);
+                span.glowAlpha = glowCurve * (peak != null ? peak : 0.5f) * (lyricLine.isBackground || lyricLine.isRomaji ? 0.4f : 1f);
             }
         }
 
-        if (needsInvalidate) invalidate();
+        if (span.wordCompleted && !isLanding) {
+            Long t0 = spanCompleteTimeMap.get(startIndex);
+            if (t0 != null) {
+                long elapsed = now - t0;
+                float t = Math.min(1f, (float) elapsed / DROP_DURATION_MS);
+                float interpolator = (float) (1f - Math.cos(t * Math.PI * 0.5f));
+                
+                span.externalWordDrop = -maxLift + (maxLift * interpolator);
+                
+                if (t >= 1f) {
+                    span.externalWordDrop = 0f;
+                    spanCompleteTimeMap.remove(startIndex);
+                }
+            }
+        }
     }
+}
 
     public void updateManualScale() {
         float target = isActiveLine ? ACTIVE_SCALE : INACTIVE_SCALE;
