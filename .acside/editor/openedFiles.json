@@ -1,35 +1,20 @@
 {
   "allFiles": [
     {
-      "file": "/storage/emulated/0/AndroidIDEProjects/XMusicHighlyUnstable/app/src/main/java/com/xapps/media/xmusic/widget/LyricLineCanvasView.java",
+      "file": "/storage/emulated/0/AndroidIDEProjects/XMusicHighlyUnstable/.github/workflows/main.yml",
       "selection": {
         "end": {
-          "column": 0,
-          "index": 25956,
-          "line": 726
+          "column": 27,
+          "index": 1209,
+          "line": 47
         },
         "start": {
-          "column": 0,
-          "index": 25956,
-          "line": 726
-        }
-      }
-    },
-    {
-      "file": "/storage/emulated/0/AndroidIDEProjects/XMusicHighlyUnstable/app/src/main/java/com/xapps/media/xmusic/models/KaraokeSpan.java",
-      "selection": {
-        "end": {
-          "column": 0,
-          "index": 5183,
-          "line": 145
-        },
-        "start": {
-          "column": 0,
-          "index": 0,
-          "line": 0
+          "column": 27,
+          "index": 1209,
+          "line": 47
         }
       }
     }
   ],
-  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/XMusicHighlyUnstable/app/src/main/java/com/xapps/media/xmusic/widget/LyricLineCanvasView.java"
+  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/XMusicHighlyUnstable/.github/workflows/main.yml"
 }
