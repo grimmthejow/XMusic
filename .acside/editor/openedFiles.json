@@ -1,65 +1,20 @@
 {
   "allFiles": [
     {
-      "file": "/storage/emulated/0/AndroidIDEProjects/XMusicHighlyUnstable/app/src/main/java/com/xapps/media/xmusic/widget/LyricsView.java",
+      "file": "/storage/emulated/0/AndroidIDEProjects/XMusicHighlyUnstable/app/src/main/java/com/xapps/media/xmusic/widget/SpringOverScrollLayout.java",
       "selection": {
         "end": {
-          "column": 35,
-          "index": 9833,
-          "line": 316
+          "column": 59,
+          "index": 1155,
+          "line": 27
         },
         "start": {
-          "column": 35,
-          "index": 9833,
-          "line": 316
-        }
-      }
-    },
-    {
-      "file": "/storage/emulated/0/AndroidIDEProjects/XMusicHighlyUnstable/app/src/main/java/com/xapps/media/xmusic/service/PlayerService.java",
-      "selection": {
-        "end": {
-          "column": 28,
-          "index": 14030,
-          "line": 325
-        },
-        "start": {
-          "column": 28,
-          "index": 14030,
-          "line": 325
-        }
-      }
-    },
-    {
-      "file": "/storage/emulated/0/AndroidIDEProjects/XMusicHighlyUnstable/app/src/main/java/com/xapps/media/xmusic/widget/LyricLineCanvasView.java",
-      "selection": {
-        "end": {
-          "column": 41,
-          "index": 20788,
-          "line": 572
-        },
-        "start": {
-          "column": 36,
-          "index": 20783,
-          "line": 572
-        }
-      }
-    },
-    {
-      "file": "/storage/emulated/0/AndroidIDEProjects/XMusicHighlyUnstable/app/src/main/java/com/xapps/media/xmusic/models/KaraokeSpan.java",
-      "selection": {
-        "end": {
-          "column": 27,
-          "index": 3999,
-          "line": 112
-        },
-        "start": {
-          "column": 19,
-          "index": 3991,
-          "line": 112
+          "column": 59,
+          "index": 1155,
+          "line": 27
         }
       }
     }
   ],
-  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/XMusicHighlyUnstable/app/src/main/java/com/xapps/media/xmusic/widget/LyricLineCanvasView.java"
+  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/XMusicHighlyUnstable/app/src/main/java/com/xapps/media/xmusic/widget/SpringOverScrollLayout.java"
 }

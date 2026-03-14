@@ -57,10 +57,10 @@ public class PlayerService extends MediaLibraryService {
 	private Bitmap icon;  
 	public static boolean isPlaying, isRunning;  
 	private int currentState;
-	public static String currentTitle;  
+	/*public static String currentTitle;  
 	public static String currentArtist;  
 	public static String currentCover;
-	public static Bitmap currentArt;
+	public static Bitmap currentArt;*/
 	public static int lastProgress = 0;
 	public static int lastMax = 0;
     public static int currentPosition = 0;
@@ -232,7 +232,7 @@ public class PlayerService extends MediaLibraryService {
     private ExecutorService executor_ = Executors.newFixedThreadPool(2);
     private long lastUpdate = 0;
     
-    private void sendUpdate(boolean isFromNotif) {
+    public void sendUpdate(boolean isFromNotif) {
         if (System.currentTimeMillis() - lastUpdate < 50 || currentPosition < 0) return;
         lastUpdate = System.currentTimeMillis();
         executor_.execute(() -> {
@@ -641,7 +641,6 @@ private void stopUpdates() {
     private void handleAudioFocusChange(int focusChange) {
         
     }
-
 
     public void abandonAudioFocus() {
         audioManager.abandonAudioFocusRequest(audioFocusRequest);

@@ -1,4 +1,5 @@
 package com.xapps.media.xmusic.helper;
+import com.xapps.media.xmusic.service.PlayerService;
 
 public interface ServiceCallback {
     
@@ -7,7 +8,7 @@ public interface ServiceCallback {
     public static int CALLBACK_VUMETER_UPDATE = 3;
     
     void onServiceEvent(int data);
-
+    
     class Hub {
         private static ServiceCallback callback;
 

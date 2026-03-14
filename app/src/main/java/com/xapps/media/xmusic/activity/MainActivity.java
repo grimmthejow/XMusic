@@ -8,6 +8,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -24,6 +25,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.IBinder;
 import android.os.Looper;
 import android.text.TextPaint;
 import android.util.Log;
@@ -74,6 +76,7 @@ import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.resources.TypefaceUtils;
+import com.google.android.material.search.SearchView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.transition.MaterialFadeThrough;
 import com.google.android.material.transition.MaterialSharedAxis;
@@ -123,15 +126,17 @@ public class MainActivity extends AppCompatActivity implements ServiceCallback, 
 
     private MusicListFragment musicListFragment;
     private SearchFragment searchFragment;
+    private SettingsFragment settingsFragment;
     private ActivityMainBinding binding;
     private MediaController mediaController;
     ExecutorService executor = Executors.newSingleThreadExecutor();
     private ArrayList<HashMap<String, Object>> songsMap = new ArrayList<>();
     private Context context = this;
     private Handler handler, backgroundHandler;
-    private boolean isRestoring, wasAdjusted, seekbarFree, isBnvHidden, isColorAnimated, isAnimated, isBsInvisible, isOledTheme, isResuming = false;
+    private boolean isRestoring, wasAdjusted, seekbarFree, isBnvHidden, isColorAnimated, isAnimated, isBsInvisible, isOledTheme, isResuming, bound = false;
     private ListenableFuture<MediaController> controllerFuture;
     private SessionToken sessionToken;
+    private PlayerService service;
     private MainActivityViewModel viewmodel;
     public BottomSheetBehavior bottomSheetBehavior, innerBottomSheetBehavior;
     private HandlerThread handlerThread = new HandlerThread("BackgroundThread");
@@ -149,6 +154,26 @@ public class MainActivity extends AppCompatActivity implements ServiceCallback, 
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         saveUIState();
         super.onSaveInstanceState(outState);
+    }
+        
+    private final ServiceConnection connection = new ServiceConnection() {
+    
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder binder) {
+            PlayerService.LocalBinder b = (PlayerService.LocalBinder) binder;
+            service = b.getService();
+            bound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            service = null;
+            bound = false;
+        }
+    };
+    
+    public PlayerService getService() {
+        return service;
     }
 
     @Override
@@ -430,6 +455,7 @@ public class MainActivity extends AppCompatActivity implements ServiceCallback, 
         Intent playIntent = new Intent(this, PlayerService.class);
         playIntent.setAction("ACTION_UPDATE");
         startService(playIntent);
+        bindService(new Intent(this, PlayerService.class), connection, BIND_AUTO_CREATE);
     }
     
     private void saveUIState() {
@@ -541,18 +567,19 @@ public class MainActivity extends AppCompatActivity implements ServiceCallback, 
         
         binding.lyricsButton.setOnClickListener(v -> {
             boolean b = binding.lyricsButton.isChecked();
+            innerBottomSheetBehavior.setDraggable(!b);
+            bottomSheetBehavior.setDraggable(!b);
             if (binding.lyricsContainer.getVisibility() != View.GONE && !(binding.lyricsContainer.getVisibility() == View.VISIBLE && binding.lyricsContainer.getAlpha() == 1f)) {
                 binding.lyricsButton.setChecked(!b);
                 return;
             }
             callback3.setEnabled(b);
             callback.setEnabled(!b);
-            innerBottomSheetBehavior.setDraggable(!b);
-            bottomSheetBehavior.setDraggable(!b);
             binding.lyricsContainer.setClickable(b);
             binding.lyricsContainer.setFocusable(b);
             binding.lyricsContainer.setFocusableInTouchMode(b);
             if (b) {
+                binding.extendableLayout.animate().translationY(innerBottomSheetBehavior.getPeekHeight()).setDuration(300).start();
                 binding.lyricsContainer.setAlpha(0f);
                 binding.lyricsContainer.setScaleX(1.1f);
                 binding.lyricsContainer.setScaleY(1.1f);
@@ -618,9 +645,10 @@ public class MainActivity extends AppCompatActivity implements ServiceCallback, 
         transition.setDuration(500);
 
         binding.bottomNavigation.setOnItemSelectedListener(item -> {
+            if (searchFragment.binding.searchView.getCurrentTransitionState() == SearchView.TransitionState.SHOWING) return false;
             TransitionManager.beginDelayedTransition(binding.Coordinator, transition);
             int id = item.getItemId();
-
+            searchFragment.binding.searchView.hide();
             if (id == R.id.menuHomeFragment) {
                 binding.searchFrag.setVisibility(View.GONE);
                 binding.settingsFrag.setVisibility(View.GONE);
@@ -791,6 +819,7 @@ public class MainActivity extends AppCompatActivity implements ServiceCallback, 
                 callback3.setEnabled(false);
                 callback.setEnabled(true);
                 binding.lyricsButton.setChecked(false);
+                binding.extendableLayout.animate().translationY(0).setDuration(300).start();
             }
 
             @RequiresApi(api = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
@@ -910,29 +939,35 @@ public class MainActivity extends AppCompatActivity implements ServiceCallback, 
     private void syncPlayerUI(int position) {
         updateMaxValue(position);
         updateCoverPager(position);
+
         if (!isResuming) {
             binding.artistBigTitle.animate().alpha(0f).translationX(-20f).setDuration(100).start();
             binding.songBigTitle.animate().alpha(0f).translationX(-20f).setDuration(100).start();
             binding.totalDurationText.animate().alpha(0f).translationX(-20f).setDuration(100).start();
             binding.currentDurationText.animate().alpha(0f).translationX(-20f).setDuration(100).start();
-            binding.songInfoText.animate().alpha(0f).setDuration(100).start();
-            handler = new Handler(Looper.getMainLooper());   
+
+            handler = new Handler(Looper.getMainLooper());
+
             handler.postDelayed(() -> {
                 updateTexts(position);
+                updateSongInfoLayout(position);
+
                 binding.totalDurationText.setTranslationX(20f);
                 binding.currentDurationText.setTranslationX(20f);
                 binding.songBigTitle.setTranslationX(20f);
                 binding.artistBigTitle.setTranslationX(20f);
             }, 110);
+
             handler.postDelayed(() -> {
-                binding.songInfoText.animate().alpha(1f).setDuration(100).start();
                 binding.artistBigTitle.animate().alpha(1f).translationX(0f).setDuration(120).start();
                 binding.songBigTitle.animate().alpha(1f).translationX(0f).setDuration(120).start();
                 binding.currentDurationText.animate().alpha(1f).translationX(0f).setDuration(120).start();
                 binding.totalDurationText.animate().alpha(1f).translationX(0f).setDuration(120).start();
             }, 120);
+
         } else {
             updateTexts(position);
+            updateSongInfoLayout(position);
         }
     }
     
@@ -957,58 +992,85 @@ public class MainActivity extends AppCompatActivity implements ServiceCallback, 
     
     public void updateTexts(int pos) {
         if (RuntimeData.songsMap.size() > 0 && mediaController != null) {
-            int p =  mediaController.getCurrentMediaItemIndex();
-            binding.totalDurationText.setText(RuntimeData.songsMap.get(pos == -1? p : pos).get("duration").toString());
-            binding.artistBigTitle.setText(RuntimeData.songsMap.get(pos == -1? p : pos).get("author").toString());
-            binding.songBigTitle.setText(RuntimeData.songsMap.get(pos == -1? p : pos).get("title").toString());
-            binding.currentSongTitle.setText(RuntimeData.songsMap.get(pos == -1? p : pos).get("title").toString());
-            binding.currentSongArtist.setText(RuntimeData.songsMap.get(pos == -1? p : pos).get("author").toString());
-            binding.songInfoText.setText(RuntimeData.songsMap.get(pos == -1? p : pos).get("mimeType").toString() + " • " +  getNormalizedBitrate(RuntimeData.songsMap.get(pos == -1? p : pos).get("path").toString()) + " • " + getNormalizedSampleRate(RuntimeData.songsMap.get(pos == -1? p : pos).get("path").toString()));
+            int p = mediaController.getCurrentMediaItemIndex();
+
+            binding.totalDurationText.setText(RuntimeData.songsMap.get(pos == -1 ? p : pos).get("duration").toString());
+            binding.artistBigTitle.setText(RuntimeData.songsMap.get(pos == -1 ? p : pos).get("author").toString());
+            binding.songBigTitle.setText(RuntimeData.songsMap.get(pos == -1 ? p : pos).get("title").toString());
+            binding.currentSongTitle.setText(RuntimeData.songsMap.get(pos == -1 ? p : pos).get("title").toString());
+            binding.currentSongArtist.setText(RuntimeData.songsMap.get(pos == -1 ? p : pos).get("author").toString());
+    
         } else if (isRestoring || PlayerService.isPlaying) {
-            int p =  viewmodel.loadLastPosition();
-            binding.totalDurationText.setText(RuntimeData.songsMap.get(pos == -1? p : pos).get("duration").toString());
-            binding.artistBigTitle.setText(RuntimeData.songsMap.get(pos == -1? p : pos).get("author").toString());
-            binding.songBigTitle.setText(RuntimeData.songsMap.get(pos == -1? p : pos).get("title").toString());
-            binding.currentSongTitle.setText(RuntimeData.songsMap.get(pos == -1? p : pos).get("title").toString());
-            binding.currentSongArtist.setText(RuntimeData.songsMap.get(pos == -1? p : pos).get("author").toString());
+            int p = viewmodel.loadLastPosition();
+    
+            binding.totalDurationText.setText(RuntimeData.songsMap.get(pos == -1 ? p : pos).get("duration").toString());
+            binding.artistBigTitle.setText(RuntimeData.songsMap.get(pos == -1 ? p : pos).get("author").toString());
+            binding.songBigTitle.setText(RuntimeData.songsMap.get(pos == -1 ? p : pos).get("title").toString());
+            binding.currentSongTitle.setText(RuntimeData.songsMap.get(pos == -1 ? p : pos).get("title").toString());
+            binding.currentSongArtist.setText(RuntimeData.songsMap.get(pos == -1 ? p : pos).get("author").toString());
+    
             isRestoring = false;
         }
     }
     
-    public static String getNormalizedBitrate(String path) {
-        try {
-            MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-            mmr.setDataSource(path);
-            String raw = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE);
-            mmr.release();
-    
-            if (raw == null) return "Unknown";
+    private void updateSongInfoLayout(int pos) {
 
-            int bps = Integer.parseInt(raw);
-            if (bps >= 1_000_000) return (bps / 1_000_000) + " Mbps";
-            return (bps / 1000) + " kbps";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "Unknown";
+        int p;
+
+        if (mediaController != null) {
+            p = mediaController.getCurrentMediaItemIndex();
+        } else {
+            p = viewmodel.loadLastPosition();
         }
-    }
+
+        int index = pos == -1 ? p : pos;
+
+        String mime = RuntimeData.songsMap.get(index).get("mimeType").toString();
+        String path = RuntimeData.songsMap.get(index).get("path").toString();
+
+        binding.songInfoText.animate().alpha(0f).setDuration(100).start();
+
+        new Thread(() -> {
+
+            int kbps = -1;
+            String sampleRate = "Unknown";
+
+            try {
+                MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+                mmr.setDataSource(path);
+
+                String br = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE);
+                String sr = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_SAMPLERATE);
+
+                mmr.release();
+
+                if (br != null) kbps = Math.abs(Integer.parseInt(br) / 1000);
+
+                if (sr != null) {
+                    int hz = Integer.parseInt(sr);
+                    sampleRate = hz >= 1000 ? (hz / 1000f) + " kHz" : hz + " Hz";
+                }
     
-    public static String getNormalizedSampleRate(String path) {
-        try{
-            MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-            mmr.setDataSource(path);
-            String raw = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_SAMPLERATE);
-            mmr.release();
+            } catch (Exception ignored) {}
 
-            if (raw == null) return "Unknown";
+                int finalKbps = kbps;
+                String finalSampleRate = sampleRate;
 
-            int hz = Integer.parseInt(raw);
-            if (hz >= 1000) return (hz / 1000f) + " kHz";
-            return hz + " Hz";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "Unknown";
-        }
+                new Handler(Looper.getMainLooper()).post(() -> {
+
+                    String text;
+
+                    if (finalKbps > 0) {
+                        text = mime + " • " + finalKbps + " kbps • " + finalSampleRate;
+                    } else {
+                        text = mime + " • " + finalSampleRate;
+                    }
+
+                    binding.songInfoText.setText(text);
+                    binding.songInfoText.setAlpha(0f);
+                    binding.songInfoText.animate().alpha(1f).setDuration(120).start();
+                });
+        }).start();
     }
     
     public void updateMaxValue(int pos) {
@@ -1209,6 +1271,10 @@ public class MainActivity extends AppCompatActivity implements ServiceCallback, 
     public void setSearchFragmentInstance(SearchFragment f) {
         searchFragment = f;
         if (mediaController != null && mediaController.getMediaItemCount() > 0) searchFragment.updateActiveItem(mediaController.getCurrentMediaItemIndex());
+    }
+    
+    public void setSettingsFragmentInstance(SettingsFragment f) {
+        settingsFragment = f;
     }
 
     public void setDarkStatusBar(Window window, boolean dark) {

@@ -5,6 +5,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.*;
 import android.provider.Settings;
@@ -73,6 +74,11 @@ public class WelcomeActivity extends AppCompatActivity {
         setupInsets();
         setupClickListeners();
         setupPermsLaunchers();
+        GradientDrawable bg = new GradientDrawable();
+        bg.setShape(GradientDrawable.RECTANGLE);
+        bg.setColor(MaterialColorUtils.colorPrimaryContainer);
+        bg.setCornerRadius(Float.MAX_VALUE);
+        binding.progressBar.setBackground(bg);
     }
     
     public void setupLottie() {
@@ -80,7 +86,7 @@ public class WelcomeActivity extends AppCompatActivity {
             binding.lottie.addValueCallback(new KeyPath(".primaryContainer", "**"), LottieProperty.COLOR, frameInfo -> MaterialColorUtils.colorPrimaryContainer);
             binding.lottie.addValueCallback(new KeyPath(".onSecondary", "**"), LottieProperty.COLOR, frameInfo -> MaterialColorUtils.colorOnSecondary);
             binding.lottie.addValueCallback(new KeyPath(".surfaceContainer", "**"), LottieProperty.COLOR, frameInfo -> MaterialColorUtils.colorSurfaceContainer);
-        });
+            });
     }
     
     @Override
@@ -111,7 +117,13 @@ public class WelcomeActivity extends AppCompatActivity {
                 executor.execute(() -> {
                     SongMetadataHelper.getAllSongs(this, new SongLoadListener(){
                         @Override
+                        public void onStarted(int i) {
+                            binding.progressBar.setMax(i);
+                        }
+                        
+                        @Override
                         public void onProgress(java.util.ArrayList<HashMap<String, Object>> songs, int count) {
+                            binding.progressBar.setProgressCompat(count, true);
                         }
                 
                         @Override
@@ -122,7 +134,7 @@ public class WelcomeActivity extends AppCompatActivity {
                                 i.setClass(WelcomeActivity.this, MainActivity.class);
                                 startActivity(i);
                                 finish();
-                            }, 500);
+                            }, 1000);
                         }
                     });
                 });
@@ -171,6 +183,8 @@ public class WelcomeActivity extends AppCompatActivity {
         binding.secondGrantButton.setOnClickListener(v -> {
             if (Build.VERSION.SDK_INT >= 33) { 
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+            } else if (Build.VERSION.SDK_INT <= 29) {
+                requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
             }
         });
         

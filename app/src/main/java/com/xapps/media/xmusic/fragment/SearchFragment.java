@@ -172,9 +172,9 @@ public class SearchFragment extends BaseFragment {
         
         binding.searchView.addTransitionListener(
         (searchView, previousState, newState) -> {
-            if (newState == SearchView.TransitionState.SHOWN) {
+            if (newState == SearchView.TransitionState.SHOWING) {
                 a.HideBNV(true);
-            } else if (newState == SearchView.TransitionState.HIDDEN) {
+            } else if (newState == SearchView.TransitionState.HIDING) {
                 a.HideBNV(false);
             }
         });

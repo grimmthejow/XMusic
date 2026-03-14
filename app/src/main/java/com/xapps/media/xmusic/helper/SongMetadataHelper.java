@@ -69,6 +69,11 @@ public class SongMetadataHelper {
             if (listener != null) listener.onComplete(songListMap);
             return;
         }
+        
+        int totalSongs = cursor.getCount();
+        if (listener != null) {
+            listener.onStarted(totalSongs);
+        }
 
         int idIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID);
         int pathIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);

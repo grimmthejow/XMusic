@@ -5,14 +5,20 @@ import androidx.fragment.app.Fragment;
 import androidx.preference.PreferenceFragmentCompat;
 
 import com.xapps.media.xmusic.R;
+import com.xapps.media.xmusic.activity.MainActivity;
 import com.xapps.media.xmusic.common.SettingsItem;
+import com.xapps.media.xmusic.service.PlayerService;
+import com.xapps.media.xmusic.utils.ColorPaletteUtils;
 import java.util.ArrayList;
 import java.util.List;
 
 public class NowPlayingEditFragment extends BasePrefsFragment {
+
+    private MainActivity activity;
     
     @Override
     protected List<SettingsItem> provideItems() {
+        activity = (MainActivity) getActivity();
         List<SettingsItem> items = new ArrayList<>();
 
         items.add(new SettingsItem(
@@ -63,5 +69,15 @@ public class NowPlayingEditFragment extends BasePrefsFragment {
                 .addToBackStack(null)
                 .commit();
         } catch (Exception ignored) {}
+    }
+
+    @Override
+    protected void onSwitchChanged(SettingsItem item, boolean value) {
+        super.onSwitchChanged(item, value);
+        switch (item.id) {
+            case "stable_colors":
+                activity.getService().sendUpdate(false);
+            break;
+        }
     }
 }

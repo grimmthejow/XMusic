@@ -95,6 +95,11 @@ public class ColorPaletteUtils {
     }
 
     public static void generateFromColor(int color, ResultCallback callback) {
+    
+        int hash = color;
+        if (hash == lastBitmapHash && lightColors != null && darkColors != null) {
+            return;
+        }
         Hct seed = Hct.fromInt(color);
 
         Map<String, Integer> newLight =
@@ -112,6 +117,8 @@ public class ColorPaletteUtils {
 
         lightColors = newLight;
         darkColors = newDark;
+        
+        lastBitmapHash = color;
 
         if (callback != null) {
             callback.onResult(lightColors, darkColors);

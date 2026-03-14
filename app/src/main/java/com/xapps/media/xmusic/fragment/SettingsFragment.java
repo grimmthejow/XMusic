@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.transition.ChangeBounds;
 import androidx.transition.Fade;
 import androidx.transition.TransitionManager;
@@ -39,6 +40,7 @@ public class SettingsFragment extends BaseFragment {
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		binding = FragmentSettingsBinding.inflate(inflater, container, false);
         activity = (MainActivity) getActivity();
+        activity.setSettingsFragmentInstance(this);
 		setupUI();
         setupListeners();
 		return binding.getRoot();
@@ -50,7 +52,7 @@ public class SettingsFragment extends BaseFragment {
         t.setTypeface(ResourcesCompat.getFont(getActivity(), R.font.google_sans_flex));
         t.setFontVariationSettings("'ROND' 100, 'wght' 500");
     }
-
+    
     private void setupListeners() {
         binding.firstCategory.setOnClickListener(v -> {
             getActivity().getSupportFragmentManager()
@@ -64,7 +66,7 @@ public class SettingsFragment extends BaseFragment {
             getActivity().getSupportFragmentManager()
             .beginTransaction()
             .replace(R.id.settings_frag, new NowPlayingEditFragment())
-            .addToBackStack(null)
+            .addToBackStack("root")
             .commit();
         });
         
@@ -72,7 +74,7 @@ public class SettingsFragment extends BaseFragment {
             getActivity().getSupportFragmentManager()
             .beginTransaction()
             .replace(R.id.settings_frag, new AboutFragment())
-            .addToBackStack(null)
+            .addToBackStack("root")
             .commit();
         });
     }

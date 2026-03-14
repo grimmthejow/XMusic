@@ -61,6 +61,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingVertical="16dp"
+                    android:textStyle="bold"
                     android:textSize="18sp"
                     android:text="Start"
                     android:layout_margin="16dp"
@@ -297,18 +298,32 @@
                         android:text="Let's go!" />
                 </LinearLayout>
             </LinearLayout>
-            <LinearLayout
-                android:id="@+id/part_2_view"
-                android:layout_height="match_parent"
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:orientation="vertical"
+                android:layout_height="match_parent"
                 android:visibility="gone"
-                android:gravity="center">
-                <com.google.android.material.loadingindicator.LoadingIndicator
+                android:gravity="center"
+                android:id="@+id/part_2_view">
+                <LinearLayout
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    style="@style/Widget.Material3.LoadingIndicator.Contained" />
-            </LinearLayout>
+                    android:layout_gravity="center"
+                    android:orientation="vertical">
+                    <com.google.android.material.loadingindicator.LoadingIndicator
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:layout_margin="16dp"
+                        style="@style/Widget.Material3.LoadingIndicator.Contained" />
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/progress_bar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        app:trackThickness="5dp"
+                        app:indicatorTrackGapSize="4dp"
+                        app:trackStopIndicatorSize="0dp" />
+                </LinearLayout>
+            </FrameLayout>
         </LinearLayout>
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
