@@ -218,17 +218,7 @@ public class SongMetadataHelper {
     }
 
     private static String hashFilePath(String filePath) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = digest.digest(filePath.getBytes());
-            StringBuilder hexString = new StringBuilder();
-            for (byte b : hashBytes) {
-                hexString.append(String.format("%02x", b));
-            }
-            return hexString.toString();
-        } catch (NoSuchAlgorithmException e) {
-            return String.valueOf(filePath.hashCode());
-        }
+        return String.valueOf(filePath.hashCode());
     }
 
     public static String millisecondsToDuration(long milliseconds) {

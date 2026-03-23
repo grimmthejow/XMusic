@@ -173,7 +173,10 @@ public class SearchFragment extends BaseFragment {
         binding.searchView.addTransitionListener(
         (searchView, previousState, newState) -> {
             if (newState == SearchView.TransitionState.SHOWING) {
+                a.bottomSheetBehavior.setDraggable(false);
                 a.HideBNV(true);
+            } else if (newState == SearchView.TransitionState.SHOWN) {
+                a.bottomSheetBehavior.setDraggable(true);
             } else if (newState == SearchView.TransitionState.HIDING) {
                 a.HideBNV(false);
             }
@@ -429,7 +432,7 @@ public class SearchFragment extends BaseFragment {
         if (!isAdded() || getContext() == null) return;
         new Handler(Looper.getMainLooper()).post(() -> {
             ArrayList<HashMap<String, Object>> initial = SongSearchHelper.search("", true, true, true, true);
-            searchAdapter = new SearchListAdapter(getActivity(), initial);
+            searchAdapter = new SearchListAdapter(requireContext(), initial);
             binding.searchRecycler.setAdapter(searchAdapter);
         });
     }

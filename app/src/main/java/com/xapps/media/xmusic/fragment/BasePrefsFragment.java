@@ -253,4 +253,8 @@ public abstract class BasePrefsFragment extends BaseFragment {
             }
         }
     }
+
+    public FragmentBasePrefsBinding getBinding() {
+        return binding;
+    }
 }

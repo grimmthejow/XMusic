@@ -9,4 +9,15 @@
         <item>@color/grad_7</item>
         <item>@color/grad_8</item>
     </string-array>
+    <string-array name="toggle_shapes">
+        <item>Square</item>
+        <item>Soft Burst</item>
+        <item>Cookie 9</item>
+        <item>Pentagon</item>
+        <item>Pill</item>
+        <item>Sunny</item>
+        <item>Cookie 4</item>
+        <item>Circle</item>
+        <item>Cookie 12</item>
+    </string-array>
 </resources>

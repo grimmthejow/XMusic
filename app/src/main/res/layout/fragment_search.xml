@@ -46,19 +46,25 @@
         android:id="@+id/search_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:autoShowKeyboard="false"
+        app:autoShowKeyboard="true"
         app:layout_anchor="@id/search_bar">
 
         <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/search_recycler"
+            <com.xapps.media.xmusic.widget.SpringOverScrollRelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingHorizontal="12dp"
-                app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+                app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/search_recycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingHorizontal="12dp" />
+
+            </com.xapps.media.xmusic.widget.SpringOverScrollRelativeLayout>
 
             <com.google.android.material.appbar.AppBarLayout
                 android:layout_width="match_parent"
@@ -97,8 +103,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Songs"
-                            android:checkable="true" 
-                            style="@style/Widget.Material3.Chip.Filter"/>
+                            android:checkable="true"
+                            style="@style/Widget.Material3.Chip.Filter" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/chip_artist"

@@ -306,6 +306,10 @@ public class BottomSheetBehavior<V extends View> extends CoordinatorLayout.Behav
   float halfExpandedRatio = 0.5f;
 
   int collapsedOffset;
+    
+  private int collapsedOffsetExtra = 0;
+  
+  private ValueAnimator offsetAnimator;
 
   float elevation = -1;
 
@@ -557,6 +561,7 @@ public class BottomSheetBehavior<V extends View> extends CoordinatorLayout.Behav
   @Override
   public boolean onLayoutChild(
       @NonNull CoordinatorLayout parent, @NonNull final V child, int layoutDirection) {
+          
     if (parent.getFitsSystemWindows() && !child.getFitsSystemWindows()) {
       child.setFitsSystemWindows(true);
     }
@@ -564,8 +569,9 @@ public class BottomSheetBehavior<V extends View> extends CoordinatorLayout.Behav
     if (viewRef == null) {
       peekHeightMin =
           parent.getResources().getDimensionPixelSize(R.dimen.design_bottom_sheet_peek_height_min);
-      setWindowInsetsListener(child);
-      ViewCompat.setWindowInsetsAnimationCallback(child, new InsetsAnimationCallback(child));
+      // REMOVED : Google logic for handling insets sucks, imma just disable it
+      //setWindowInsetsListener(child);
+      //ViewCompat.setWindowInsetsAnimationCallback(child, new InsetsAnimationCallback(child));
       viewRef = new WeakReference<>(child);
       bottomContainerBackHelper = new MaterialBottomContainerBackHelper(child);
       if (materialShapeDrawable != null) {
@@ -625,6 +631,12 @@ public class BottomSheetBehavior<V extends View> extends CoordinatorLayout.Behav
     }
     return true;
   }
+    
+    public boolean io = false;
+    
+    public void hhh(boolean b) {
+        io = b;
+    }
 
   @Override
   public boolean onInterceptTouchEvent(
@@ -1605,10 +1617,12 @@ public class BottomSheetBehavior<V extends View> extends CoordinatorLayout.Behav
     int peek = calculatePeekHeight();
 
     if (fitToContents) {
-      collapsedOffset = max(parentHeight - peek, fitToContentsOffset);
+        collapsedOffset = max(parentHeight - peek, fitToContentsOffset);
     } else {
-      collapsedOffset = parentHeight - peek;
+        collapsedOffset = parentHeight - peek;
     }
+
+    //collapsedOffset += (io? 200 : 0);
   }
 
   private void calculateHalfExpandedOffset() {
@@ -1824,6 +1838,7 @@ public class BottomSheetBehavior<V extends View> extends CoordinatorLayout.Behav
           @SuppressWarnings("deprecation") 
           public WindowInsetsCompat onApplyWindowInsets(
               View view, WindowInsetsCompat insets, RelativePadding initialPadding) {
+            
             Insets systemBarInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             Insets mandatoryGestureInsets =
                 insets.getInsets(WindowInsetsCompat.Type.mandatorySystemGestures());
@@ -2524,4 +2539,51 @@ public class BottomSheetBehavior<V extends View> extends CoordinatorLayout.Behav
     }
     return new GradientProtection(Side.BOTTOM, color);
   }
+
+    /**
+    * Programmatically sets the bottom sheet position based on a fraction.
+    * * @param offset Range [-1.0, 1.0]
+    * 1.0  = Fully Expanded
+    * 0.0  = Collapsed (Peek Height)
+    * -1.0 = Fully Hidden (if hideable)
+    */
+    public void setScrollOffset(@FloatRange(from = -1.0, to = 1.0) float offset) {
+        V child = viewRef != null ? viewRef.get() : null;
+        if (child == null) return;
+
+        int expandedTop = getExpandedOffset();
+        int collapsedTop = collapsedOffset;
+        int targetTop;
+
+        if (offset >= 0) {
+            int distance = collapsedTop - expandedTop;
+            targetTop = (int) (collapsedTop - (distance * offset));
+        } else {
+            if (!hideable) {
+                targetTop = collapsedTop;
+            } else {
+                int distance = parentHeight - collapsedTop;
+                targetTop = (int) (collapsedTop + (distance * Math.abs(offset)));
+            }
+        }
+
+        int currentTop = child.getTop();
+        int dy = targetTop - currentTop;
+    
+        ViewCompat.offsetTopAndBottom(child, dy);
+        dispatchOnSlide(child.getTop());
+    }
+    
+    /**
+    * Returns the current slide offset.
+    * @return 1.0 = Expanded, 0.0 = Collapsed, -1.0 = Hidden.
+    */
+    public float getCurrentSlideOffset() {
+        if (viewRef == null || viewRef.get() == null) {
+            return -1f;
+        }
+        V child = viewRef.get();
+        return calculateSlideOffsetWithTop(child.getTop());
+    }
+    
 }

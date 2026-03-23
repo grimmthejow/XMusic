@@ -122,7 +122,7 @@ public class PlayerToggle extends FrameLayout {
 
 	private void startContinuousRotation() {
 		if (rotateAnimation != null && rotateAnimation.isRunning()) return;
-		rotateAnimation = ObjectAnimator.ofFloat(shapeLayout, "rotation", 0f, 360f);
+		rotateAnimation = ObjectAnimator.ofFloat(shapeLayout, "rotation", shapeLayout.getRotation(), shapeLayout.getRotation() + 360f);
 		rotateAnimation.setDuration(5000);
 		rotateAnimation.setRepeatCount(ValueAnimator.INFINITE);
 		rotateAnimation.setInterpolator(new LinearInterpolator());

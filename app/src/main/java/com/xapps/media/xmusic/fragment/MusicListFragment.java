@@ -16,20 +16,27 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.ConcatAdapter;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.transition.TransitionManager;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDragHandleView;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.button.MaterialSplitButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.listitem.ListItemViewHolder;
+import com.google.android.material.transition.MaterialSharedAxis;
 import com.xapps.media.xmusic.R;
 import com.xapps.media.xmusic.activity.MainActivity;
 import com.xapps.media.xmusic.common.SongLoadListener;
+import com.xapps.media.xmusic.data.DataManager;
 import com.xapps.media.xmusic.data.RuntimeData;
 import com.xapps.media.xmusic.databinding.*;
 import com.xapps.media.xmusic.databinding.ActivityMainBinding;
 import com.xapps.media.xmusic.helper.SongMetadataHelper;
+import com.xapps.media.xmusic.helper.SongSorter;
 import com.xapps.media.xmusic.service.PlayerService;
 import com.xapps.media.xmusic.utils.*;
 import com.xapps.media.xmusic.widget.VuMeterView;
@@ -45,6 +52,7 @@ import me.zhanghai.android.fastscroll.FastScrollerBuilder;
 public class MusicListFragment extends BaseFragment {
 	
 	public MusicListFragmentBinding binding;
+    private int currentSongID, oldSongID = -1;
     private int oldPos = -1;
     private int currentPos= -1;
 	public final Fragment f = this;
@@ -193,7 +201,7 @@ public class MusicListFragment extends BaseFragment {
 		    View view = holder.itemView;
             binding = SongItemMiddleBinding.bind(view);  
             if (a.getController() != null && !a.getController().isPlaying()) binding.vumeterView.pause(); else binding.vumeterView.resume();
-            if (position == currentPos) {  
+            if (getItemId(position) == currentSongID) {  
                 binding.item.setChecked(true);  
                 binding.vumeterFrame.setVisibility(View.VISIBLE);  
                 binding.SongTitle.setTextColor(c1);  
@@ -289,6 +297,10 @@ public class MusicListFragment extends BaseFragment {
 			}
 		}
         
+        public void updateData(ArrayList<HashMap<String, Object>> a) {
+            data = a;
+            notifyDataSetChanged();
+        }
 	}
 
     public class HeaderAdapter extends RecyclerView.Adapter<HeaderAdapter.HeaderViewHolder> {
@@ -306,6 +318,176 @@ public class MusicListFragment extends BaseFragment {
 			View view = holder.itemView;
 			TextView sg = (TextView) view.findViewById(R.id.songs_count);
 			sg.setText("0 Songs".replace("0",String.valueOf(size)));
+            MaterialButton orderButton = (MaterialButton) view.findViewById(R.id.order_type_button);
+            orderButton.setChecked(!DataManager.isDescendingOrder());
+            MaterialButton filterButton = (MaterialButton) view.findViewById(R.id.sort_filter_button);
+            MaterialSplitButton msb = (MaterialSplitButton) view.findViewById(R.id.split_button);
+            orderButton.setOnClickListener(v -> {
+                boolean b = orderButton.isChecked();
+                DataManager.setDescendingOrder(!b);
+                SongSorter.sort(RuntimeData.songsMap, DataManager.getSongFilterType(), !b, sortedMap -> {
+                    RuntimeData.songsMap = sortedMap;
+                    songsAdapter.updateData(sortedMap);
+                    a.updateSongsQueue(RuntimeData.songsMap);
+                });
+            });
+            filterButton.setOnClickListener(v -> {
+                LayoutFiltersContainerBinding b = LayoutFiltersContainerBinding.inflate(getLayoutInflater());
+                BottomSheetDialog bs = new BottomSheetDialog(requireContext());
+                bs.setContentView(b.getRoot());
+                switch (DataManager.getSongFilterType()) {
+                    case TITLE :
+                        b.firstItem.setChecked(true);
+                        b.firstRadio.setChecked(true);
+                    break;
+                    case ARTIST :
+                        b.secondItem.setChecked(true);
+                        b.secondRadio.setChecked(true);
+                    break;
+                    case ALBUM :
+                        b.thirdItem.setChecked(true);
+                        b.thirdRadio.setChecked(true);
+                    break;
+                    case ALBUM_ARTIST :
+                        b.fourthItem.setChecked(true);
+                        b.fourthRadio.setChecked(true);
+                    break;
+                    case YEAR :
+                        b.fifthItem.setChecked(true);
+                        b.fifthRadio.setChecked(true);
+                    break;
+                    case TRACK :
+                        b.sixthItem.setChecked(true);
+                        b.sixthRadio.setChecked(true);
+                    break;
+                    case DURATION :
+                        b.seventhItem.setChecked(true);
+                        b.seventhRadio.setChecked(true);
+                    break;
+                    case DATE_ADDED :
+                        b.eighthItem.setChecked(true);
+                        b.eighthRadio.setChecked(true);
+                    break;
+                    case DATE_MODIFIED :
+                        b.ninethItem.setChecked(true);
+                        b.ninethRadio.setChecked(true);
+                    break;
+                    case SIZE :
+                        b.tenthItem.setChecked(true);
+                        b.tenthRadio.setChecked(true);
+                    break;
+                    case BITRATE :
+                        b.eleventhItem.setChecked(true);
+                        b.eleventhRadio.setChecked(true);
+                    break;
+                }
+                b.firstItem.setOnClickListener(v2 -> {
+                    DataManager.setSongFilterType(SongSorter.SortBy.TITLE);
+                    SongSorter.sort(RuntimeData.songsMap, SongSorter.SortBy.TITLE, DataManager.isDescendingOrder(), sortedMap -> {
+                        RuntimeData.songsMap = sortedMap;
+                        songsAdapter.updateData(sortedMap);
+                        a.updateSongsQueue(RuntimeData.songsMap);
+                    });
+                    bs.dismiss();
+                });
+                b.secondItem.setOnClickListener(v2 -> {
+                    DataManager.setSongFilterType(SongSorter.SortBy.ARTIST);
+                    SongSorter.sort(RuntimeData.songsMap, SongSorter.SortBy.ARTIST, DataManager.isDescendingOrder(), sortedMap -> {
+                        RuntimeData.songsMap = sortedMap;
+                        songsAdapter.updateData(sortedMap);
+                        a.updateSongsQueue(RuntimeData.songsMap);
+                    });
+                    bs.dismiss();
+                });
+                b.thirdItem.setOnClickListener(v2 -> {
+                    DataManager.setSongFilterType(SongSorter.SortBy.ALBUM);
+                    SongSorter.sort(RuntimeData.songsMap, SongSorter.SortBy.ALBUM, DataManager.isDescendingOrder(), sortedMap -> {
+                        RuntimeData.songsMap = sortedMap;
+                        songsAdapter.updateData(sortedMap);
+                        a.updateSongsQueue(RuntimeData.songsMap);
+                    });
+                    bs.dismiss();
+                });
+                b.fourthItem.setOnClickListener(v2 -> {
+                    DataManager.setSongFilterType(SongSorter.SortBy.ALBUM_ARTIST);
+                    SongSorter.sort(RuntimeData.songsMap, SongSorter.SortBy.ALBUM_ARTIST, DataManager.isDescendingOrder(), sortedMap -> {
+                        RuntimeData.songsMap = sortedMap;
+                        songsAdapter.updateData(sortedMap);
+                        a.updateSongsQueue(RuntimeData.songsMap);
+                    });
+                    bs.dismiss();
+                });
+                b.fifthItem.setOnClickListener(v2 -> {
+                    DataManager.setSongFilterType(SongSorter.SortBy.YEAR);
+                    SongSorter.sort(RuntimeData.songsMap, SongSorter.SortBy.YEAR, DataManager.isDescendingOrder(), sortedMap -> {
+                        RuntimeData.songsMap = sortedMap;
+                        songsAdapter.updateData(sortedMap);
+                        a.updateSongsQueue(RuntimeData.songsMap);
+                    });
+                    bs.dismiss();
+                });
+                b.sixthItem.setOnClickListener(v2 -> {
+                    DataManager.setSongFilterType(SongSorter.SortBy.TRACK);
+                    SongSorter.sort(RuntimeData.songsMap, SongSorter.SortBy.TRACK, DataManager.isDescendingOrder(), sortedMap -> {
+                        RuntimeData.songsMap = sortedMap;
+                        songsAdapter.updateData(sortedMap);
+                        a.updateSongsQueue(RuntimeData.songsMap);
+                    });
+                    bs.dismiss();
+                });
+                b.seventhItem.setOnClickListener(v2 -> {
+                    DataManager.setSongFilterType(SongSorter.SortBy.DURATION);
+                    SongSorter.sort(RuntimeData.songsMap, SongSorter.SortBy.DURATION, DataManager.isDescendingOrder(), sortedMap -> {
+                        RuntimeData.songsMap = sortedMap;
+                        songsAdapter.updateData(sortedMap);
+                        a.updateSongsQueue(RuntimeData.songsMap);
+                    });
+                    bs.dismiss();
+                });
+                b.eighthItem.setOnClickListener(v2 -> {
+                    DataManager.setSongFilterType(SongSorter.SortBy.DATE_ADDED);
+                    SongSorter.sort(RuntimeData.songsMap, SongSorter.SortBy.DATE_ADDED, DataManager.isDescendingOrder(), sortedMap -> {
+                        RuntimeData.songsMap = sortedMap;
+                        songsAdapter.updateData(sortedMap);
+                        a.updateSongsQueue(RuntimeData.songsMap);
+                    });
+                    bs.dismiss();
+                });
+                b.ninethItem.setOnClickListener(v2 -> {
+                    DataManager.setSongFilterType(SongSorter.SortBy.DATE_MODIFIED);
+                    SongSorter.sort(RuntimeData.songsMap, SongSorter.SortBy.DATE_MODIFIED, DataManager.isDescendingOrder(), sortedMap -> {
+                        RuntimeData.songsMap = sortedMap;
+                        songsAdapter.updateData(sortedMap);
+                        a.updateSongsQueue(RuntimeData.songsMap);
+                    });
+                    bs.dismiss();
+                });
+                b.tenthItem.setOnClickListener(v2 -> {
+                    DataManager.setSongFilterType(SongSorter.SortBy.SIZE);
+                    SongSorter.sort(RuntimeData.songsMap, SongSorter.SortBy.SIZE, DataManager.isDescendingOrder(), sortedMap -> {
+                        RuntimeData.songsMap = sortedMap;
+                        songsAdapter.updateData(sortedMap);
+                        a.updateSongsQueue(RuntimeData.songsMap);
+                    });
+                    bs.dismiss();
+                });
+                b.eleventhItem.setOnClickListener(v2 -> {
+                    DataManager.setSongFilterType(SongSorter.SortBy.BITRATE);
+                    SongSorter.sort(RuntimeData.songsMap, SongSorter.SortBy.BITRATE, DataManager.isDescendingOrder(), sortedMap -> {
+                        RuntimeData.songsMap = sortedMap;
+                        songsAdapter.updateData(sortedMap);
+                        a.updateSongsQueue(RuntimeData.songsMap);
+                    });
+                    bs.dismiss();
+                });
+                bs.setTitle("Sort By");
+                bs.show();
+                if (DataManager.isBlurOn() && XUtils.areBlursOrDynamicColorsSupported()) XUtils.animateBlur(activity.Coordinator, true, 300);
+                bs.setOnDismissListener(dialog -> {
+                    if (DataManager.isBlurOn() && XUtils.areBlursOrDynamicColorsSupported()) XUtils.animateBlur(activity.Coordinator, false, 50);
+                });
+            });
+            
 		}
 		
 		@Override
@@ -349,25 +531,26 @@ public class MusicListFragment extends BaseFragment {
 
     public void shuffle() {
         Uri uri = Uri.parse("android.resource://" + getActivity().getPackageName() + "/" + R.drawable.placeholder);
-            String placeholderUri = uri.toString();
-            int r = new Random().nextInt((RuntimeData.songsMap.size()-1 - 0) + 1) + 0;
-            long currentTime = System.currentTimeMillis();
-            if (currentTime - lastClickTime < DEBOUNCE_MS) {
-                return;
-            }
-            lastClickTime = currentTime;
-            activity.miniPlayerBottomSheet.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.rounded_corners_bottom_sheet));
-            a.setSong(r, forceUpdate);
-            if (forceUpdate) forceUpdate = false;
-            updateActiveItem(r);
+        String placeholderUri = uri.toString();
+        int r = new Random().nextInt((RuntimeData.songsMap.size()-1 - 0) + 1) + 0;
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastClickTime < DEBOUNCE_MS) {
+            return;
+        }
+        lastClickTime = currentTime;
+        a.setSong(r, forceUpdate);
+        if (forceUpdate) forceUpdate = false;
+        updateActiveItem(r);
     }
     
     public void updateActiveItem(int i) {
         oldPos = currentPos;
+        oldSongID = currentSongID;
+        if (i != -1) currentSongID = (int) songsAdapter.getItemId(i); else currentSongID = -1;
         currentPos = i;
-        if (currentPos == oldPos || a.getController() == null) return;
-        if (oldPos != -1) songsAdapter.notifyItemChanged(oldPos, "color");
-        if (currentPos != -1) songsAdapter.notifyItemChanged(currentPos, "color");
+        if (currentPos == oldPos || a.getController() == null || oldSongID == currentSongID) return;
+        if (oldSongID != -1 && oldPos != -1) songsAdapter.notifyItemChanged(oldPos, "color");
+        if (currentSongID != -1 && currentPos != -1) songsAdapter.notifyItemChanged(currentPos, "color");
     }
     
     public void updateVumeter(boolean b) {
@@ -390,24 +573,34 @@ public class MusicListFragment extends BaseFragment {
                 @Override
                 public void onComplete(ArrayList<HashMap<String, Object>> map) {
                     if (getActivity() == null) return;
-                    RuntimeData.songsMap = map;
-                    size = RuntimeData.songsMap.size();
-                    songsAdapter = new SongsListAdapter(getActivity(), RuntimeData.songsMap);
-                    MainActivity act = (MainActivity) getActivity();
-                    HeaderAdapter headerAdapter = new HeaderAdapter();
-                    concatAdapter = new ConcatAdapter(headerAdapter, songsAdapter);
-                    mainHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            binding.songsList.setAdapter(concatAdapter);
-                            binding.songsList.setItemAnimator(null);
-                            binding.emptyLayout.setVisibility(View.GONE);
-                            ViewKt.doOnLayout(binding.collapsingToolbar, v -> {
-                                binding.shuffleButton.setTranslationY(v.getHeight() / 2f);
-                                return Unit.INSTANCE;
-                            });
-                        }
+                    SongSorter.sort(map, DataManager.getSongFilterType(), DataManager.isDescendingOrder(), sortedList -> {
+                        RuntimeData.songsMap = sortedList;
+                        a.updateSongsQueue(sortedList);
+                        size = RuntimeData.songsMap.size();
+                        songsAdapter = new SongsListAdapter(getActivity(), RuntimeData.songsMap);
+                        MainActivity act = (MainActivity) getActivity();
+                        HeaderAdapter headerAdapter = new HeaderAdapter();
+                        concatAdapter = new ConcatAdapter(headerAdapter, songsAdapter);
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                binding.songsList.setAdapter(concatAdapter);
+                                binding.songsList.setItemAnimator(null);
+                                MaterialSharedAxis msa = new MaterialSharedAxis(MaterialSharedAxis.Y, true);
+                                msa.setDuration(500);
+                                if (binding.emptyLayout.getVisibility() == View.VISIBLE) TransitionManager.beginDelayedTransition(binding.coordinator, msa);
+                                binding.emptyLayout.setVisibility(View.GONE);
+                                binding.swipeRefreshLayout.setVisibility(View.VISIBLE);
+                                ViewKt.doOnLayout(binding.collapsingToolbar, v -> {
+                                    binding.shuffleButton.setTranslationY(v.getHeight() / 2f);
+                                    binding.shuffleButton.show();
+                                    return Unit.INSTANCE;
+                                });
+                                
+                            }
+                        });
                     });
+                    
                 }
                     
                 @Override
@@ -417,6 +610,4 @@ public class MusicListFragment extends BaseFragment {
             });
         });
     }
-    
-
 }

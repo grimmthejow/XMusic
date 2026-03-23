@@ -39,11 +39,17 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view"
-        android:layout_width="match_parent"
+    <com.xapps.media.xmusic.widget.SpringOverScrollRelativeLayout
         android:layout_height="match_parent"
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" 
-        android:transitionGroup="true"/>
+        android:layout_width="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:transitionGroup="true" />
+
+    </com.xapps.media.xmusic.widget.SpringOverScrollRelativeLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

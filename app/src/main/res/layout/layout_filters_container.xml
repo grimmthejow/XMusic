@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:gravity="center_horizontal"
+    android:padding="8dp"
+    android:orientation="vertical"
+    android:id="@+id/bs_container">
+
+    <com.google.android.material.bottomsheet.BottomSheetDragHandleView
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content" />
+
+    <TextView
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:textSize="34.0sp"
+        android:textColor="?colorPrimary"
+        android:layout_marginLeft="8dp"
+        android:layout_marginBottom="24dp"
+        android:gravity="left"
+        android:textStyle="bold"
+        android:text="Sort By" />
+
+    <com.xapps.media.xmusic.widget.SpringOverScrollRelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/nested_scroll_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <com.xapps.media.xmusic.widget.CheckableLinearLayout
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_marginBottom="2dp"
+                    android:background="@drawable/rv_ripple_top"
+                    android:padding="4dp"
+                    android:orientation="horizontal"
+                    android:id="@+id/first_item">
+
+                    <TextView
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:textSize="16.0sp"
+                        android:textColor="?colorOnSurface"
+                        android:layout_marginLeft="8dp"
+                        android:layout_weight="1"
+                        android:text="Name" />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/firstRadio"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:clickable="false"
+                        android:focusable="false" />
+
+                </com.xapps.media.xmusic.widget.CheckableLinearLayout>
+
+                <com.xapps.media.xmusic.widget.CheckableLinearLayout
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_marginBottom="2dp"
+                    android:background="@drawable/rv_ripple"
+                    android:padding="4dp"
+                    android:orientation="horizontal"
+                    android:id="@+id/second_item">
+
+                    <TextView
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:textSize="16.0sp"
+                        android:textColor="?colorOnSurface"
+                        android:layout_marginLeft="8dp"
+                        android:layout_weight="1"
+                        android:text="Artist" />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/second_radio"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:clickable="false"
+                        android:focusable="false" />
+
+                </com.xapps.media.xmusic.widget.CheckableLinearLayout>
+
+                <com.xapps.media.xmusic.widget.CheckableLinearLayout
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_marginBottom="2dp"
+                    android:background="@drawable/rv_ripple"
+                    android:padding="4dp"
+                    android:orientation="horizontal"
+                    android:id="@+id/third_item">
+
+                    <TextView
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:textSize="16.0sp"
+                        android:textColor="?colorOnSurface"
+                        android:layout_marginLeft="8dp"
+                        android:layout_weight="1"
+                        android:text="Album" />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/third_radio"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:clickable="false"
+                        android:focusable="false" />
+
+                </com.xapps.media.xmusic.widget.CheckableLinearLayout>
+
+                <com.xapps.media.xmusic.widget.CheckableLinearLayout
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_marginBottom="2dp"
+                    android:background="@drawable/rv_ripple"
+                    android:padding="4dp"
+                    android:orientation="horizontal"
+                    android:id="@+id/fourth_item">
+
+                    <TextView
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:textSize="16.0sp"
+                        android:textColor="?colorOnSurface"
+                        android:layout_marginLeft="8dp"
+                        android:layout_weight="1"
+                        android:text="Album artist" />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/fourth_radio"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:clickable="false"
+                        android:focusable="false" />
+
+                </com.xapps.media.xmusic.widget.CheckableLinearLayout>
+
+                <com.xapps.media.xmusic.widget.CheckableLinearLayout
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_marginBottom="2dp"
+                    android:background="@drawable/rv_ripple"
+                    android:padding="4dp"
+                    android:orientation="horizontal"
+                    android:id="@+id/fifth_item">
+
+                    <TextView
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:textSize="16.0sp"
+                        android:textColor="?colorOnSurface"
+                        android:layout_marginLeft="8dp"
+                        android:layout_weight="1"
+                        android:text="Year" />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/fifth_radio"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:clickable="false"
+                        android:focusable="false" />
+
+                </com.xapps.media.xmusic.widget.CheckableLinearLayout>
+
+                <com.xapps.media.xmusic.widget.CheckableLinearLayout
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_marginBottom="2dp"
+                    android:background="@drawable/rv_ripple"
+                    android:padding="4dp"
+                    android:orientation="horizontal"
+                    android:id="@+id/sixth_item">
+
+                    <TextView
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:textSize="16.0sp"
+                        android:textColor="?colorOnSurface"
+                        android:layout_marginLeft="8dp"
+                        android:layout_weight="1"
+                        android:text="Track" />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/sixth_radio"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:clickable="false"
+                        android:focusable="false" />
+
+                </com.xapps.media.xmusic.widget.CheckableLinearLayout>
+
+                <com.xapps.media.xmusic.widget.CheckableLinearLayout
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_marginBottom="2dp"
+                    android:background="@drawable/rv_ripple"
+                    android:padding="4dp"
+                    android:orientation="horizontal"
+                    android:id="@+id/seventh_item">
+
+                    <TextView
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:textSize="16.0sp"
+                        android:textColor="?colorOnSurface"
+                        android:layout_marginLeft="8dp"
+                        android:layout_weight="1"
+                        android:text="Song Duration" />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/seventh_radio"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:clickable="false"
+                        android:focusable="false" />
+
+                </com.xapps.media.xmusic.widget.CheckableLinearLayout>
+
+                <com.xapps.media.xmusic.widget.CheckableLinearLayout
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_marginBottom="2dp"
+                    android:background="@drawable/rv_ripple"
+                    android:padding="4dp"
+                    android:orientation="horizontal"
+                    android:id="@+id/eighth_item">
+
+                    <TextView
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:textSize="16.0sp"
+                        android:textColor="?colorOnSurface"
+                        android:layout_marginLeft="8dp"
+                        android:layout_weight="1"
+                        android:text="Date added" />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/eighth_radio"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:clickable="false"
+                        android:focusable="false" />
+
+                </com.xapps.media.xmusic.widget.CheckableLinearLayout>
+
+                <com.xapps.media.xmusic.widget.CheckableLinearLayout
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_marginBottom="2dp"
+                    android:background="@drawable/rv_ripple"
+                    android:padding="4dp"
+                    android:orientation="horizontal"
+                    android:id="@+id/nineth_item">
+
+                    <TextView
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:textSize="16.0sp"
+                        android:textColor="?colorOnSurface"
+                        android:layout_marginLeft="8dp"
+                        android:layout_weight="1"
+                        android:text="Date modified" />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/nineth_radio"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:clickable="false"
+                        android:focusable="false" />
+
+                </com.xapps.media.xmusic.widget.CheckableLinearLayout>
+
+                <com.xapps.media.xmusic.widget.CheckableLinearLayout
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_marginBottom="2dp"
+                    android:background="@drawable/rv_ripple"
+                    android:padding="4dp"
+                    android:orientation="horizontal"
+                    android:id="@+id/tenth_item">
+
+                    <TextView
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:textSize="16.0sp"
+                        android:textColor="?colorOnSurface"
+                        android:layout_marginLeft="8dp"
+                        android:layout_weight="1"
+                        android:text="Size" />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/tenth_radio"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:clickable="false"
+                        android:focusable="false" />
+
+                </com.xapps.media.xmusic.widget.CheckableLinearLayout>
+
+                <com.xapps.media.xmusic.widget.CheckableLinearLayout
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_marginBottom="2dp"
+                    android:background="@drawable/rv_ripple_bottom"
+                    android:padding="4dp"
+                    android:orientation="horizontal"
+                    android:id="@+id/eleventh_item">
+
+                    <TextView
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:textSize="16.0sp"
+                        android:textColor="?colorOnSurface"
+                        android:layout_marginLeft="8dp"
+                        android:layout_weight="1"
+                        android:text="Bitrate" />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/eleventh_radio"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:clickable="false"
+                        android:focusable="false" />
+
+                </com.xapps.media.xmusic.widget.CheckableLinearLayout>
+
+            </LinearLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
+    </com.xapps.media.xmusic.widget.SpringOverScrollRelativeLayout>
+
+</LinearLayout>

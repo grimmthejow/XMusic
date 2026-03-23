@@ -60,7 +60,7 @@
                 app:navigationIcon="@drawable/ic_arrow_back"
                 android:theme="@style/ThemeOverlay.Material3.Toolbar.CircleNavigationButton"
                 app:layout_collapseMode="pin"
-                android:id="@+id/toolbar" >
+                android:id="@+id/toolbar">
 
                 <TextView
                     android:id="@+id/toolbar_text"
@@ -79,106 +79,115 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/nested_scroll_view"
+    <com.xapps.media.xmusic.widget.SpringOverScrollRelativeLayout
+        android:id="@+id/spring_scroll_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipChildren="false"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
-        <LinearLayout
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/nested_scroll_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="16dp"
-            android:padding="16dp"
-            android:orientation="vertical">
-
-            <TextView
-                android:textSize="14.0sp"
-                android:textColor="?colorPrimary"
-                android:id="@+id/first_header"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:layout_marginBottom="8.0dp"
-                android:textStyle="bold"
-                android:text="App Informations"
-                android:layout_marginHorizontal="16.0dp" />
+            android:clipChildren="false"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
             <LinearLayout
-                android:id="@+id/first_item"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="2dp"
-                android:background="@drawable/rv_ripple_top"
-                android:padding="16dp">
+                android:layout_height="match_parent"
+                android:layout_marginTop="16dp"
+                android:padding="16dp"
+                android:orientation="vertical">
 
-                <TextView
-                    android:textSize="16.0sp"
-                    android:textColor="?colorOnSurface"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Package name" />
                 <TextView
                     android:textSize="14.0sp"
-                    android:textColor="?colorOutline"
+                    android:textColor="?colorPrimary"
+                    android:id="@+id/first_header"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="com.xapps.media.xmusic" />
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="8.0dp"
+                    android:textStyle="bold"
+                    android:text="App Informations"
+                    android:layout_marginHorizontal="16.0dp" />
+
+                <LinearLayout
+                    android:id="@+id/first_item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="2dp"
+                    android:background="@drawable/rv_ripple_top"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:textSize="16.0sp"
+                        android:textColor="?colorOnSurface"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Package name" />
+                    <TextView
+                        android:textSize="14.0sp"
+                        android:textColor="?colorOutline"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="com.xapps.media.xmusic" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/second_item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="2dp"
+                    android:background="@drawable/rv_ripple"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:textSize="16.0sp"
+                        android:textColor="?colorOnSurface"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Version" />
+                    <TextView
+                        android:id="@+id/version_text"
+                        android:textSize="14.0sp"
+                        android:textColor="?colorOutline"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/third_item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="2dp"
+                    android:background="@drawable/rv_ripple_bottom"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:textSize="16.0sp"
+                        android:textColor="?colorOnSurface"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Build Type" />
+                    <TextView
+                        android:id="@+id/build_text"
+                        android:textSize="14.0sp"
+                        android:textColor="?colorOutline"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="" />
+                </LinearLayout>
 
             </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/second_item"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="2dp"
-                android:background="@drawable/rv_ripple"
-                android:padding="16dp">
-
-                <TextView
-                    android:textSize="16.0sp"
-                    android:textColor="?colorOnSurface"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Version" />
-                <TextView
-                    android:id="@+id/version_text"
-                    android:textSize="14.0sp"
-                    android:textColor="?colorOutline"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/third_item"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="2dp"
-                android:background="@drawable/rv_ripple_bottom"
-                android:padding="16dp">
-
-                <TextView
-                    android:textSize="16.0sp"
-                    android:textColor="?colorOnSurface"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Build Type" />
-                <TextView
-                    android:id="@+id/build_text"
-                    android:textSize="14.0sp"
-                    android:textColor="?colorOutline"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="" />
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </androidx.core.widget.NestedScrollView>
+            
+        </androidx.core.widget.NestedScrollView>
+        
+    </com.xapps.media.xmusic.widget.SpringOverScrollRelativeLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -34,338 +34,399 @@
                 app:navigationIcon="@drawable/ic_arrow_back"
                 android:theme="@style/ThemeOverlay.Material3.Toolbar.CircleNavigationButton"
                 app:layout_collapseMode="pin"
-                android:id="@+id/toolbar"/>
+                android:id="@+id/toolbar" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/nested_scroll_view"
+    <com.xapps.media.xmusic.widget.SpringOverScrollRelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingTop="24dp"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
-        <LinearLayout
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/nested_scroll_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="16dp"
-            android:orientation="vertical">
-
-             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="12dp"
-                android:layout_marginHorizontal="16dp"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:textColor="?colorPrimary"
-                android:text="Theme and Colors" />
-
+            android:paddingTop="4dp">
+            
             <LinearLayout
-                android:id="@+id/top_pref"
-                android:layout_height="wrap_content"
+                android:id="@+id/main_container"
                 android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:padding="16dp"
-                android:background="@drawable/rv_ripple_top"
                 android:orientation="vertical">
 
-                <LinearLayout
-                    android:id="@+id/top_content"
-                    android:layout_height="wrap_content"
-                    android:layout_width="match_parent"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_height="wrap_content"
-                        android:layout_width="wrap_content"
-                        android:text="Theme"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="2dp"
-                        android:textColor="?colorOnSurface"/>
-
-                    <TextView
-                        android:layout_height="wrap_content"
-                        android:layout_width="wrap_content"
-                        android:text="Switch between dark and light theme to your liking"
-                        android:textSize="14sp"
-                        android:textColor="?colorOutline"/>
-
-                </LinearLayout>
-
-                <com.google.android.material.button.MaterialButtonToggleGroup
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:paddingHorizontal="4dp"
-                    android:background="@drawable/fully_round_bg"
-                    android:layout_marginTop="12dp"
-                    app:selectionRequired="true"
-                    app:singleSelection="true">
-
-                    <com.google.android.material.button.MaterialButton   
-                        android:id="@+id/system_theme"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:textSize="16dp"
-                        android:layout_width="wrap_content"
-                        style="@style/Widget.Material3.Button.TextButton"
-                        android:text="System"
-                    />
-
-                     <com.google.android.material.button.MaterialButton   
-                        android:id="@+id/dark_theme"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:textSize="16dp"
-                        android:layout_width="wrap_content"
-                        style="@style/Widget.Material3.Button.TextButton"
-                        android:text="Dark"
-                    />
-
-                     <com.google.android.material.button.MaterialButton   
-                        android:id="@+id/light_theme"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_width="wrap_content"
-                        android:textSize="16dp"
-                        style="@style/Widget.Material3.Button.TextButton"
-                        android:text="Light"
-                    />
-
-                </com.google.android.material.button.MaterialButtonToggleGroup>
-
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/first_pref"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                android:layout_marginTop="2dp"
-                android:padding="16dp"
-                android:background="@drawable/rv_ripple"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:id="@+id/first_content"
-                    android:layout_height="wrap_content"
-                    android:layout_width="match_parent"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_height="wrap_content"
-                        android:layout_width="wrap_content"
-                        android:text="Dynamic Theme"
-                        android:textStyle="bold"
-                        android:textSize="16sp"
-                        android:layout_marginBottom="4dp"
-                        android:textColor="?colorOnSurface"/>
-
-                    <TextView
-                        android:layout_height="wrap_content"
-                        android:layout_width="wrap_content"
-                        android:text="Use Material you colors for app theme"
-                        android:textSize="14sp"
-                        android:textColor="?colorOutline"/>
-
-                </LinearLayout>
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/first_switch"
-                    android:layout_height="wrap_content"
+                <TextView
                     android:layout_width="wrap_content"
-                    style="@style/CustomSwitch"
-                />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/olde_pref"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                android:layout_marginTop="2dp"
-                android:padding="16dp"
-                android:background="@drawable/rv_ripple"
-                android:orientation="horizontal">
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="12dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="?colorPrimary"
+                    android:text="Theme and Colors" />
 
                 <LinearLayout
-                    android:id="@+id/oled_content"
+                    android:id="@+id/top_pref"
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_height="wrap_content"
-                        android:layout_width="wrap_content"
-                        android:text="Pure black theme"
-                        android:textStyle="bold"
-                        android:textSize="16sp"
-                        android:layout_marginBottom="2dp"
-                        android:textColor="?colorOnSurface"/>
-
-                    <TextView
-                        android:layout_height="wrap_content"
-                        android:layout_width="wrap_content"
-                        android:text="Use a pure black background color to save energy on Amoled devices"
-                        android:textSize="14sp"
-                        android:textColor="?colorOutline"/>
-
-                </LinearLayout>
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/oled_switch"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    style="@style/CustomSwitch"
-                />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/second_pref"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                android:layout_marginTop="2dp"
-                android:padding="0dp"
-                android:background="@drawable/rv_ripple_bottom"
-                android:orientation="vertical">
-
-                <LinearLayout
                     android:padding="16dp"
-                    android:layout_height="wrap_content"
-                    android:layout_width="match_parent"
-                    android:orientation="horizontal">
+                    android:background="@drawable/rv_ripple_top"
+                    android:orientation="vertical">
 
                     <LinearLayout
-                        android:id="@+id/second_content"
+                        android:id="@+id/top_content"
                         android:layout_height="wrap_content"
                         android:layout_width="match_parent"
                         android:layout_weight="1"
                         android:orientation="vertical">
-                        
-                        <LinearLayout
-                            android:layout_height="wrap_content"
-                            android:layout_width="match_parent"
-                            android:orientation="horizontal">
-
-                            <TextView
-                                android:layout_height="wrap_content"
-                                android:layout_width="wrap_content"
-                                android:text="Custom Dynamic Color"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:layout_marginBottom="2dp"
-                                android:textColor="?colorOnSurface"/>
-
-                            <ImageView
-                                android:id="@+id/icon1"
-                                android:layout_height="16dp"
-                                android:layout_width="16dp"
-                                android:src="@drawable/ic_test_tube"
-                                android:tint="?attr/colorError"
-                            />
-
-                        </LinearLayout>
 
                         <TextView
                             android:layout_height="wrap_content"
                             android:layout_width="wrap_content"
-                            android:text="Need a color to set different from your Device's? Luckily you have this!"
+                            android:text="Theme"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="2dp"
+                            android:textColor="?colorOnSurface" />
+
+                        <TextView
+                            android:layout_height="wrap_content"
+                            android:layout_width="wrap_content"
+                            android:text="Switch between dark and light theme to your liking"
                             android:textSize="14sp"
-                            android:textColor="?colorOutline"/>
+                            android:textColor="?colorOutline" />
+
+                    </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButtonToggleGroup
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:paddingHorizontal="4dp"
+                        android:background="@drawable/fully_round_bg"
+                        android:layout_marginTop="12dp"
+                        app:selectionRequired="true"
+                        app:singleSelection="true">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/system_theme"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textSize="16dp"
+                            android:layout_width="wrap_content"
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:text="System"
+                        />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/dark_theme"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textSize="16dp"
+                            android:layout_width="wrap_content"
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:text="Dark"
+                        />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/light_theme"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_width="wrap_content"
+                            android:textSize="16dp"
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:text="Light"
+                        />
+
+                    </com.google.android.material.button.MaterialButtonToggleGroup>
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/first_pref"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_marginTop="2dp"
+                    android:padding="16dp"
+                    android:background="@drawable/rv_ripple"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:id="@+id/first_content"
+                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_height="wrap_content"
+                            android:layout_width="wrap_content"
+                            android:text="Dynamic Theme"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:layout_marginBottom="4dp"
+                            android:textColor="?colorOnSurface" />
+
+                        <TextView
+                            android:layout_height="wrap_content"
+                            android:layout_width="wrap_content"
+                            android:text="Use Material you colors for app theme"
+                            android:textSize="14sp"
+                            android:textColor="?colorOutline" />
 
                     </LinearLayout>
 
                     <com.google.android.material.materialswitch.MaterialSwitch
-                        android:id="@+id/second_switch"
+                        android:id="@+id/first_switch"
                         android:layout_height="wrap_content"
                         android:layout_width="wrap_content"
                         style="@style/CustomSwitch"
                     />
-                    
+
                 </LinearLayout>
 
-                <com.rtugeek.android.colorseekbar.ColorSeekBar
-                    android:id="@+id/colorSeekBar"
+                <LinearLayout
+                    android:id="@+id/olde_pref"
+                    android:layout_height="wrap_content"
                     android:layout_width="match_parent"
-                    android:layout_marginTop="8dp"
-                    app:colorSeekBarColorSeeds="@array/material_colors"
-                    app:colorSeekBarBarHeight="24dp"
-                    android:layout_height="wrap_content"/>
+                    android:layout_marginTop="2dp"
+                    android:padding="16dp"
+                    android:background="@drawable/rv_ripple"
+                    android:orientation="horizontal">
 
-                <com.google.android.material.button.MaterialButton   
+                    <LinearLayout
+                        android:id="@+id/oled_content"
+                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_height="wrap_content"
+                            android:layout_width="wrap_content"
+                            android:text="Pure black theme"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:layout_marginBottom="2dp"
+                            android:textColor="?colorOnSurface" />
+
+                        <TextView
+                            android:layout_height="wrap_content"
+                            android:layout_width="wrap_content"
+                            android:text="Use a pure black background color to save energy on Amoled devices"
+                            android:textSize="14sp"
+                            android:textColor="?colorOutline" />
+
+                    </LinearLayout>
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/oled_switch"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        style="@style/CustomSwitch"
+                    />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/second_pref"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_marginTop="2dp"
+                    android:padding="0dp"
+                    android:background="@drawable/rv_ripple_bottom"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:padding="16dp"
+                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:id="@+id/second_content"
+                            android:layout_height="wrap_content"
+                            android:layout_width="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <LinearLayout
+                                android:layout_height="wrap_content"
+                                android:layout_width="match_parent"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_height="wrap_content"
+                                    android:layout_width="wrap_content"
+                                    android:text="Custom Dynamic Color"
+                                    android:textSize="16sp"
+                                    android:textStyle="bold"
+                                    android:layout_marginBottom="2dp"
+                                    android:textColor="?colorOnSurface" />
+
+                                <ImageView
+                                    android:id="@+id/icon1"
+                                    android:layout_height="16dp"
+                                    android:layout_width="16dp"
+                                    android:src="@drawable/ic_test_tube"
+                                    android:tint="?attr/colorError"
+                                />
+
+                            </LinearLayout>
+
+                            <TextView
+                                android:layout_height="wrap_content"
+                                android:layout_width="wrap_content"
+                                android:text="Need a color to set different from your Device's? Luckily you have this!"
+                                android:textSize="14sp"
+                                android:textColor="?colorOutline" />
+
+                        </LinearLayout>
+
+                        <com.google.android.material.materialswitch.MaterialSwitch
+                            android:id="@+id/second_switch"
+                            android:layout_height="wrap_content"
+                            android:layout_width="wrap_content"
+                            style="@style/CustomSwitch"
+                        />
+
+                    </LinearLayout>
+
+                    <com.rtugeek.android.colorseekbar.ColorSeekBar
+                        android:id="@+id/colorSeekBar"
+                        android:layout_width="match_parent"
+                        android:layout_marginTop="8dp"
+                        app:colorSeekBarColorSeeds="@array/material_colors"
+                        app:colorSeekBarBarHeight="24dp"
+                        android:layout_height="wrap_content" />
+
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/apply_button"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_width="match_parent"
                         android:layout_margin="16dp"
                         android:text="Apply" />
-                
-            </LinearLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="12dp"
-                android:layout_marginHorizontal="16dp"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:textColor="?colorPrimary"
-                android:text="App icon" />
-
-            <LinearLayout
-                android:id="@+id/icon_pref"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                android:layout_marginTop="2dp"
-                android:padding="16dp"
-                android:background="@drawable/rv_ripple_single"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:id="@+id/icon_content"
-                    android:layout_height="wrap_content"
-                    android:layout_width="match_parent"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_height="wrap_content"
-                        android:layout_width="wrap_content"
-                        android:text="Use redesigned icon style"
-                        android:textStyle="bold"
-                        android:textSize="16sp"
-                        android:layout_marginBottom="2dp"
-                        android:textColor="?colorOnSurface"/>
-
-                    <TextView
-                        android:layout_height="wrap_content"
-                        android:layout_width="wrap_content"
-                        android:text="Try this if the default icon is boring"
-                        android:textSize="14sp"
-                        android:textColor="?colorOutline"/>
 
                 </LinearLayout>
 
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/icon_switch"
-                    android:layout_height="wrap_content"
+                <TextView
                     android:layout_width="wrap_content"
-                    style="@style/CustomSwitch"
-                />
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="12dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="?colorPrimary"
+                    android:text="App icon" />
+
+                <LinearLayout
+                    android:id="@+id/icon_pref"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_marginTop="2dp"
+                    android:padding="16dp"
+                    android:background="@drawable/rv_ripple_single"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:id="@+id/icon_content"
+                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_height="wrap_content"
+                            android:layout_width="wrap_content"
+                            android:text="Use redesigned icon style"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:layout_marginBottom="2dp"
+                            android:textColor="?colorOnSurface" />
+
+                        <TextView
+                            android:layout_height="wrap_content"
+                            android:layout_width="wrap_content"
+                            android:text="Try this if the default icon is boring"
+                            android:textSize="14sp"
+                            android:textColor="?colorOutline" />
+
+                    </LinearLayout>
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/icon_switch"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        style="@style/CustomSwitch"
+                    />
+
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="12dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="?colorPrimary"
+                    android:text="Interface" />
+
+                <LinearLayout
+                    android:id="@+id/blur_pref"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_marginTop="2dp"
+                    android:padding="16dp"
+                    android:background="@drawable/rv_ripple_single"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:id="@+id/blur_content"
+                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_height="wrap_content"
+                            android:layout_width="wrap_content"
+                            android:text="Enable Blur"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:layout_marginBottom="2dp"
+                            android:textColor="?colorOnSurface" />
+
+                        <TextView
+                            android:layout_height="wrap_content"
+                            android:layout_width="wrap_content"
+                            android:text="Enable Blur effects across the app, still WIP"
+                            android:textSize="14sp"
+                            android:textColor="?colorOutline" />
+
+                    </LinearLayout>
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/blur_switch"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        style="@style/CustomSwitch"
+                    />
+
+                </LinearLayout>
 
             </LinearLayout>
 
-        </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
 
-    </androidx.core.widget.NestedScrollView>
+    </com.xapps.media.xmusic.widget.SpringOverScrollRelativeLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

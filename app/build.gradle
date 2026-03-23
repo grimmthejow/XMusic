@@ -10,8 +10,8 @@ android {
         applicationId "com.xapps.media.xmusic"
         minSdk 26
         targetSdk 36
-        versionCode 24
-        versionName "0.24 Alpha"
+        versionCode 30
+        versionName "0.3 Alpha"
 
         def localProps = new Properties()
         def localPropsFile = rootProject.file("local.properties")
@@ -24,10 +24,6 @@ android {
             else if (System.getenv(key) != null) return System.getenv(key)
             else throw new GradleException("$key is missing.")
         }
-
-        buildConfigField "String", "TG_BOT_TOKEN", "\"${getSecret('TG_BOT_TOKEN')}\""
-        buildConfigField "String", "TG_CHAT_ID", "\"${getSecret('TG_CHAT_ID')}\""
-        buildConfigField "String", "LOG_CHAT_ID", "\"${getSecret('LOG_CHAT_ID')}\""
     }
 
     buildFeatures {

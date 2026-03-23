@@ -13,6 +13,10 @@
                 motion:framePosition="80"
                 motion:motionTarget="@+id/controls_layout" />
             <KeyAttribute
+                android:alpha="0.0"
+                motion:framePosition="80"
+                motion:motionTarget="@+id/song_info_layout" />
+            <KeyAttribute
                 motion:framePosition="80"
                 motion:motionTarget="@id/covers_pager"
                 android:elevation="2dp" />

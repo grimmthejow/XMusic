@@ -24,8 +24,8 @@ public class SpringOverScrollLayout extends RelativeLayout implements NestedScro
     private static final float THRESHOLD_RATIO = 2.5f;
     private static final float LOCKED_OFFSET = 200f;
     
-    private static final float FRICTION_BASE = 0.9f;
-    private static final float FRICTION_BUMP_STRENGTH = 0.5f;
+    private static final float FRICTION_BASE = 1f;
+    private static final float FRICTION_BUMP_STRENGTH = 0.8f;
     private static final float BUMP_WIDTH = 50f;
     private static final float JUMP_BOOST = 180f;
 
@@ -72,8 +72,8 @@ public class SpringOverScrollLayout extends RelativeLayout implements NestedScro
             }
         }, 0f);
         springAnim.setSpring(new SpringForce(0f)
-                .setStiffness(SpringForce.STIFFNESS_LOW)
-                .setDampingRatio(SpringForce.DAMPING_RATIO_MEDIUM_BOUNCY));
+                .setStiffness(500f)
+                .setDampingRatio(SpringForce.DAMPING_RATIO_NO_BOUNCY));
     }
 
     private void setupIndicatorSprings() {

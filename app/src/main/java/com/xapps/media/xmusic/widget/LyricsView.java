@@ -409,58 +409,31 @@ public class LyricsView extends ScrollingView2 {
         animateScrollTo(targetY, index);
     }
 
-    private void animateScrollTo(int targetY, int activeIndex) {
+        private void animateScrollTo(int targetY, int activeIndex) {
         if (scrollAnimator != null) scrollAnimator.cancel();
+        
         final int startY = getScrollY();
         final int delta = targetY - startY;
-        final int baseIndex = getTopVisibleIndex();
-
-        if (baseIndex < 0) return;
-
-        final float[] startOffsets = new float[lineOffsets.length];
-        System.arraycopy(lineOffsets, 0, startOffsets, 0, lineOffsets.length);
 
         scrollAnimator = ValueAnimator.ofFloat(0f, 1f);
-        scrollAnimator.setDuration(1000);
+        scrollAnimator.setDuration(600);
         scrollAnimator.setInterpolator(new android.view.animation.PathInterpolator(0.2f, 0f, 0f, 1f));
 
         scrollAnimator.addUpdateListener(a -> {
             float p = (float) a.getAnimatedValue();
             int viewportY = (int) (startY + delta * p);
             scrollTo(0, viewportY);
-
-            int centerY = viewportY + (getHeight() / 2);
-            float compress = (float) Math.sin(p * Math.PI) * 0.1f;
-
-            for (int i = 0; i < lineViews.size(); i++) {
-
-                if (i >= lineTops.length || i >= lineOffsets.length) continue;
-                
-                LyricLineCanvasView view = lineViews.get(i);
-                float lineCenter = lineTops[i] + view.getMeasuredHeight() / 2f;
-                float distFromCenter = lineCenter - centerY;
-                lineOffsets[i] = -distFromCenter * compress;
-
-                int minDelta = Integer.MAX_VALUE;
-                if (persistedActiveIndices.isEmpty()) {
-                    minDelta = 6;
-                } else {
-                    for (int activeIdx : persistedActiveIndices) {
-                        minDelta = Math.min(minDelta, Math.abs(i - activeIdx));
-                    }
-                }
-
-                if (minDelta == 0) {
-                    view.setBlurLevel(-1);
-                } else {
-                    view.setBlurLevel(Math.min(minDelta - 1, 4));
-                }
+            
+            for (int i = 0; i < lineOffsets.length; i++) {
+                lineOffsets[i] = 0;
             }
+            
             invalidate();
         });
         
         scrollAnimator.start();
     }
+
     
     private int getTopVisibleIndex() {
         int scrollY = getScrollY();

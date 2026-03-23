@@ -1,6 +1,7 @@
 package com.xapps.media.xmusic.utils;
 
 import android.Manifest;
+import android.animation.Animator;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
@@ -9,6 +10,8 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Paint;
+import android.graphics.RenderEffect;
+import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
@@ -258,6 +261,35 @@ public class XUtils {
         } else {
             return false;
         }
+    }
+    
+    public static boolean areBlursOrDynamicColorsSupported() {
+        return Build.VERSION.SDK_INT >= 31;
+    }
+    
+    public static void animateBlur(View view, boolean enable, long duration) {
+        ValueAnimator va = ValueAnimator.ofFloat(enable? 0f : 1f, enable? 1f : 0f);
+        va.setDuration(duration);
+        va.addUpdateListener(a -> {
+            float progress = (float) a.getAnimatedValue();
+            view.setRenderEffect(RenderEffect.createBlurEffect(25f*progress, 25f*progress, Shader.TileMode.CLAMP));
+        });
+        va.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationEnd(Animator a) {
+                if (!enable) view.setRenderEffect(null);
+            }
+            @Override
+            public void onAnimationStart(Animator a) {
+            }
+            @Override
+            public void onAnimationRepeat(Animator a) {
+            }
+            @Override
+            public void onAnimationCancel(Animator a) {
+            }
+        });
+        va.start();
     }
 
 }

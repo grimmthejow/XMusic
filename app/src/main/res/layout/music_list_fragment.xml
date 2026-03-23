@@ -49,6 +49,8 @@
         android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:visibility="gone"
+        android:transitionGroup="true"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
         <FrameLayout
             android:id="@+id/indicatorContainer"
@@ -66,6 +68,7 @@
             android:id="@+id/songsList"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:transitionGroup="true"
             android:overScrollMode="never" />
     </com.xapps.media.xmusic.widget.SpringOverScrollLayout>
     <LinearLayout
@@ -108,6 +111,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="right|top"
         android:translationY="0dp"
+        android:visibility="gone"
         android:layout_marginHorizontal="16dp"
         android:src="@drawable/ic_shuffle"
         style="@style/Widget.Material3.FloatingActionButton.Small.Primary" />
