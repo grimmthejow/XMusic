@@ -758,7 +758,7 @@ public class MainActivity extends AppCompatActivity implements ServiceCallback, 
 						((GradientDrawable) background2).setColor(tmpColor);
 						binding.songSeekbar.setEnabled(true);
 					} else {
-                        callback.setEnabled(false);
+                        if (!isCallbackValid) callback.setEnabled(false);
 						if (!isColorAnimated) {
 							isColorAnimated = true;
 							XUtils.animateColor(tmpColor, bottomSheetColor, animation -> {
@@ -902,13 +902,13 @@ public class MainActivity extends AppCompatActivity implements ServiceCallback, 
             @RequiresApi(api = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             @Override
             public void handleOnBackStarted(BackEventCompat backEvent) {
-                isCallbackValid = bottomSheetBehavior.getCurrentSlideOffset() == 1f;
+                isCallbackValid = bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED;
             }
 
             @RequiresApi(api = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             @Override
             public void handleOnBackProgressed(BackEventCompat backEvent) {
-                if (isCallbackValid) bottomSheetBehavior.setScrollOffset(1f - backEvent.getProgress());
+                if (isCallbackValid) bottomSheetBehavior.setScrollOffset(1f - 0.4f*backEvent.getProgress());
             }
 
             @Override
@@ -918,6 +918,7 @@ public class MainActivity extends AppCompatActivity implements ServiceCallback, 
                     if (b) binding.lyricsButton.performClick();
                     bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                     callback.setEnabled(false);
+                    isCallbackValid = false;
                 }
             }
 

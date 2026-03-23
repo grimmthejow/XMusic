@@ -1,20 +1,20 @@
 {
   "allFiles": [
     {
-      "file": "/storage/emulated/0/AndroidIDEProjects/XMusicHighlyUnstable/app/src/main/java/com/xapps/media/xmusic/widget/SpringOverScrollLayout.java",
+      "file": "/storage/emulated/0/AndroidIDEProjects/XMusicHighlyUnstable/app/src/main/java/com/xapps/media/xmusic/activity/MainActivity.java",
       "selection": {
         "end": {
-          "column": 59,
-          "index": 1155,
-          "line": 27
+          "column": 83,
+          "index": 42559,
+          "line": 910
         },
         "start": {
-          "column": 59,
-          "index": 1155,
-          "line": 27
+          "column": 83,
+          "index": 42559,
+          "line": 910
         }
       }
     }
   ],
-  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/XMusicHighlyUnstable/app/src/main/java/com/xapps/media/xmusic/widget/SpringOverScrollLayout.java"
+  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/XMusicHighlyUnstable/app/src/main/java/com/xapps/media/xmusic/activity/MainActivity.java"
 }
