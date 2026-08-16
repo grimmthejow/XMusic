@@ -53,9 +53,9 @@ public class NowPlayingEditFragment extends SubPrefsFragment {
                 new SettingsItem(
                         SettingsItem.TYPE_NAV,
                         "lyrics_customize",
-                        "Lyrics Font",
+                        "Customize Lyrics",
                         "Change the way lyrics are displayed to your liking",
-                        new LyricsEditFragment()));
+                        new LyricsCustomizeFragment()));
 
         items.add(
                 new SettingsItem(
@@ -82,15 +82,15 @@ public class NowPlayingEditFragment extends SubPrefsFragment {
                         LayoutToggleCustomizeDialogBinding.inflate(getLayoutInflater());
                 MaterialAlertDialogBuilder builder =
                         new MaterialAlertDialogBuilder(requireContext())
-                                .setTitle("Customize toggle shapes")
+                                .setTitle(getString(R.string.customize_toggle_shapes))
                                 .setView(dbinding.getRoot())
                                 .setPositiveButton(
-                                        "Save",
+                                        getString(R.string.save),
                                         (dialog, which) -> {
                                             activity.getBinding().expandedPlayer.toggleView.reloadShapes();
                                         })
                                 .setNegativeButton(
-                                        "Cancel",
+                                        getString(R.string.cancel),
                                         (dialog, which) -> {
                                             DataManager.sp
                                                     .edit()
@@ -152,15 +152,6 @@ public class NowPlayingEditFragment extends SubPrefsFragment {
             default:
                 break;
         }
-        /*try {
-        Fragment f = item.destinationFragment;
-        requireActivity()
-                .getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.settings_frag, f)
-                .addToBackStack(null)
-                .commit();
-        } catch (Exception ignored) {}*/
     }
 
     @Override
@@ -173,5 +164,10 @@ public class NowPlayingEditFragment extends SubPrefsFragment {
             case "enable_lyrics_gradient":
                 activity.loadSettings();
         }
+    }
+
+    @Override
+    public String getFragmentTitle() {
+        return "Now Playing";
     }
 }

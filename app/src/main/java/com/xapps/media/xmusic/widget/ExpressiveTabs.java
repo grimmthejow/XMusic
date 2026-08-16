@@ -5,7 +5,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
-import android.os.Trace;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -72,53 +71,43 @@ public class ExpressiveTabs extends HorizontalScrollView {
     }
 
     public void addTab(String text) {
-        Trace.beginSection("ET:addTab");
-        try {
-            ExpressiveTab tab = new ExpressiveTab(getContext());
-            tab.setText(text);
-            int position = tabs.size();
+        ExpressiveTab tab = new ExpressiveTab(getContext());
+        tab.setText(text);
+        int position = tabs.size();
 
-            tab.setOnClickListener(v -> setSelectedIndex(position));
+        tab.setOnClickListener(v -> setSelectedIndex(position));
 
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-            );
-            params.setMargins(12, 0, 12, 0);
-            container.addView(tab, params);
-            tabs.add(tab);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        params.setMargins(12, 0, 12, 0);
+        container.addView(tab, params);
+        tabs.add(tab);
 
-            if (selectedIndex == -1) {
-                selectedIndex = 0;
-                tab.updateStateInstant(true);
-            } else {
-                tab.updateStateInstant(false);
-            }
-        } finally {
-            Trace.endSection();
+        if (selectedIndex == -1) {
+            selectedIndex = 0;
+            tab.updateStateInstant(true);
+        } else {
+            tab.updateStateInstant(false);
         }
     }
 
     public void setSelectedIndex(int index) {
-        Trace.beginSection("ET:setSelectedIndex");
-        try {
-            if (index < 0 || index >= tabs.size() || index == selectedIndex) return;
+        if (index < 0 || index >= tabs.size() || index == selectedIndex) return;
 
-            if (selectedIndex != -1) {
-                tabs.get(selectedIndex).animateToInactive();
-            }
+        if (selectedIndex != -1) {
+            tabs.get(selectedIndex).animateToInactive();
+        }
 
-            selectedIndex = index;
-            ExpressiveTab selectedTab = tabs.get(selectedIndex);
-            selectedTab.animateToActive();
+        selectedIndex = index;
+        ExpressiveTab selectedTab = tabs.get(selectedIndex);
+        selectedTab.animateToActive();
 
-            scrollToTab(selectedTab);
+        scrollToTab(selectedTab);
 
-            if (listener != null) {
-                listener.onTabSelected(selectedIndex, selectedTab.getText().toString());
-            }
-        } finally {
-            Trace.endSection();
+        if (listener != null) {
+            listener.onTabSelected(selectedIndex, selectedTab.getText().toString());
         }
     }
 

@@ -3,7 +3,6 @@ package com.xapps.media.xmusic.widget;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Trace;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -99,36 +98,31 @@ public class SmallToggleView extends FrameLayout {
 
     @Override
 	public boolean onTouchEvent(MotionEvent e) {
-        Trace.beginSection("STV:onTouchEvent");
-        try {
-            switch (e.getActionMasked()) {
-                case MotionEvent.ACTION_DOWN:
-                    pressedInside = true;
-                    animate().scaleX(0.9f).scaleY(0.9f).setDuration(80).start();
-                    if (holdListener != null) {
-                        currentDelay = 500;
-                        holdHandler.postDelayed(holdRunnable, currentDelay);
-                    }
-                    return true;
-            
-                case MotionEvent.ACTION_UP:
-                    boolean wasHolding = isHolding;
-                    handleRelease();
-                    if (pressedInside && isInside(e) && isEnabled && !wasHolding) {
-                        performClick();
-                    }
-                    pressedInside = false;
-                    return true;
+        switch (e.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                pressedInside = true;
+                animate().scaleX(0.9f).scaleY(0.9f).setDuration(80).start();
+                if (holdListener != null) {
+                    currentDelay = 500;
+                    holdHandler.postDelayed(holdRunnable, currentDelay);
+                }
+                return true;
+        
+            case MotionEvent.ACTION_UP:
+                boolean wasHolding = isHolding;
+                handleRelease();
+                if (pressedInside && isInside(e) && isEnabled && !wasHolding) {
+                    performClick();
+                }
+                pressedInside = false;
+                return true;
 
-                case MotionEvent.ACTION_CANCEL:
-                    handleRelease();
-                    pressedInside = false;
-                    return true;
-            }
-            return super.onTouchEvent(e);
-        } finally {
-            Trace.endSection();
+            case MotionEvent.ACTION_CANCEL:
+                handleRelease();
+                pressedInside = false;
+                return true;
         }
+        return super.onTouchEvent(e);
 	}
 
 	private void handleRelease() {

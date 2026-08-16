@@ -10,7 +10,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Trace;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -87,38 +86,33 @@ public class SongCover extends FrameLayout {
 
                     @Override
                     protected void onDraw(Canvas canvas) {
-                        Trace.beginSection("SC:onDraw");
-                        try {
-                            if (transitionProgress < 1f && previousDrawable != null) {
-                                canvas.save();
-                                float previousAlpha = Math.max(0f, 1f - transitionProgress * 2f);
-                                float previousScale = 1f + 0.1f * transitionProgress;
-                                previousDrawable.setAlpha((int) (255 * previousAlpha));
-                                canvas.scale(previousScale, previousScale, getWidth() / 2f, getHeight() / 2f);
-                                previousDrawable.draw(canvas);
-                                canvas.restore();
+                        if (transitionProgress < 1f && previousDrawable != null) {
+                            canvas.save();
+                            float previousAlpha = Math.max(0f, 1f - transitionProgress * 2f);
+                            float previousScale = 1f + 0.1f * transitionProgress;
+                            previousDrawable.setAlpha((int) (255 * previousAlpha));
+                            canvas.scale(previousScale, previousScale, getWidth() / 2f, getHeight() / 2f);
+                            previousDrawable.draw(canvas);
+                            canvas.restore();
 
-                                canvas.save();
-                                float currentAlpha = Math.max(0f, (transitionProgress - 0.5f) * 2f);
-                                float currentScale = 0.9f + 0.1f * transitionProgress;
+                            canvas.save();
+                            float currentAlpha = Math.max(0f, (transitionProgress - 0.5f) * 2f);
+                            float currentScale = 0.9f + 0.1f * transitionProgress;
 
-                                Drawable currentDrawable = getDrawable();
-                                if (currentDrawable != null) {
-                                    currentDrawable.setAlpha((int) (255 * currentAlpha));
-                                }
-
-                                canvas.scale(currentScale, currentScale, getWidth() / 2f, getHeight() / 2f);
-                                super.onDraw(canvas);
-                                canvas.restore();
-                            } else {
-                                Drawable currentDrawable = getDrawable();
-                                if (currentDrawable != null) {
-                                    currentDrawable.setAlpha(255);
-                                }
-                                super.onDraw(canvas);
+                            Drawable currentDrawable = getDrawable();
+                            if (currentDrawable != null) {
+                                currentDrawable.setAlpha((int) (255 * currentAlpha));
                             }
-                        } finally {
-                            Trace.endSection();
+
+                            canvas.scale(currentScale, currentScale, getWidth() / 2f, getHeight() / 2f);
+                            super.onDraw(canvas);
+                            canvas.restore();
+                        } else {
+                            Drawable currentDrawable = getDrawable();
+                            if (currentDrawable != null) {
+                                currentDrawable.setAlpha(255);
+                            }
+                            super.onDraw(canvas);
                         }
                     }
                 };
@@ -141,33 +135,23 @@ public class SongCover extends FrameLayout {
         animator.setInterpolator(new PathInterpolator(0.4f, 0f, 0.2f, 1f));
 
         animator.addUpdateListener(animation -> {
-            Trace.beginSection("SC:animatorUpdate");
-            try {
-                transitionProgress = (float) animation.getAnimatedValue();
-                innerImageView.invalidate();
-            } finally {
-                Trace.endSection();
-            }
+            transitionProgress = (float) animation.getAnimatedValue();
+            innerImageView.invalidate();
         });
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        Trace.beginSection("SC:onLayout");
-        try {
-            if (isManualGeometry && !currentChildBounds.isEmpty()) {
-                if (innerImageView != null) {
-                    innerImageView.layout(
-                            currentChildBounds.left,
-                            currentChildBounds.top,
-                            currentChildBounds.right,
-                            currentChildBounds.bottom);
-                }
-            } else {
-                super.onLayout(changed, left, top, right, bottom);
+        if (isManualGeometry && !currentChildBounds.isEmpty()) {
+            if (innerImageView != null) {
+                innerImageView.layout(
+                        currentChildBounds.left,
+                        currentChildBounds.top,
+                        currentChildBounds.right,
+                        currentChildBounds.bottom);
             }
-        } finally {
-            Trace.endSection();
+        } else {
+            super.onLayout(changed, left, top, right, bottom);
         }
     }
 
@@ -198,37 +182,32 @@ public class SongCover extends FrameLayout {
     }
 
     public void setExpansionProgress(float progress) {
-        Trace.beginSection("SC:setExpansionProgress");
-        try {
-            isManualGeometry = true;
+        isManualGeometry = true;
 
-            int centerX = lerp(collapsedCenterX, expandedCenterX, progress);
-            int centerY = lerp(collapsedCenterY, expandedCenterY, progress);
-            int size = lerp(collapsedSize, expandedSize, progress);
+        int centerX = lerp(collapsedCenterX, expandedCenterX, progress);
+        int centerY = lerp(collapsedCenterY, expandedCenterY, progress);
+        int size = lerp(collapsedSize, expandedSize, progress);
 
-            int half = size / 2;
-            int left = centerX - half;
-            int top = centerY - half;
+        int half = size / 2;
+        int left = centerX - half;
+        int top = centerY - half;
 
-            int marginOffset = Math.round(collapsedMargin * progress);
+        int marginOffset = Math.round(collapsedMargin * progress);
 
-            currentChildBounds.set(
-                    left - marginOffset,
-                    top - marginOffset,
-                    left + size,
-                    top + size
+        currentChildBounds.set(
+                left - marginOffset,
+                top - marginOffset,
+                left + size,
+                top + size
+        );
+
+        if (innerImageView != null) {
+            innerImageView.layout(
+                    currentChildBounds.left,
+                    currentChildBounds.top,
+                    currentChildBounds.right,
+                    currentChildBounds.bottom
             );
-
-            if (innerImageView != null) {
-                innerImageView.layout(
-                        currentChildBounds.left,
-                        currentChildBounds.top,
-                        currentChildBounds.right,
-                        currentChildBounds.bottom
-                );
-            }
-        } finally {
-            Trace.endSection();
         }
     }
 
@@ -258,67 +237,57 @@ public class SongCover extends FrameLayout {
     }
 
     private void executeGlideLoad(Object model) {
-        Trace.beginSection("SC:executeGlideLoad");
-        try {
-            if (glideTarget != null) {
-                Glide.with(getContext()).clear(glideTarget);
+        if (glideTarget != null) {
+            Glide.with(getContext()).clear(glideTarget);
+        }
+
+        glideTarget = new CustomTarget<Drawable>() {
+            @Override
+            public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                setImage(resource);
             }
 
-            glideTarget = new CustomTarget<Drawable>() {
-                @Override
-                public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-                    setImage(resource);
+            @Override
+            public void onLoadCleared(@Nullable Drawable placeholder) {
+                if (placeholder != null) {
+                    setImageWithoutAnimation(placeholder);
                 }
+            }
+        };
 
-                @Override
-                public void onLoadCleared(@Nullable Drawable placeholder) {
-                    if (placeholder != null) {
-                        setImageWithoutAnimation(placeholder);
-                    }
-                }
-            };
-
-            Glide.with(getContext())
-                    .load(model == null ? R.drawable.placeholder : model)
-                    .error(R.drawable.placeholder)
-                    .override(expandedSize)
-                    .centerCrop()
-                    .into(glideTarget);
-        } finally {
-            Trace.endSection();
-        }
+        Glide.with(getContext())
+                .load(model == null ? R.drawable.placeholder : model)
+                .error(R.drawable.placeholder)
+                .override(expandedSize)
+                .centerCrop()
+                .into(glideTarget);
     }
 
     public void setImage(Drawable drawable) {
-        Trace.beginSection("SC:setImage");
-        try {
-            Drawable current = innerImageView.getDrawable();
-            if (current != null && drawable != null && current != drawable && innerImageView.getWidth() >= expandedSize / 2) {
-                if (current.getConstantState() != null) {
-                    previousDrawable = current.getConstantState().newDrawable().mutate();
-                    previousDrawable.setBounds(0, 0, innerImageView.getWidth(), innerImageView.getHeight());
-                } else {
-                    previousDrawable = current;
-                }
-
-                drawable = drawable.mutate();
-
-                transitionProgress = 0f;
-                animator.cancel();
-                animator.start();
+        Drawable current = innerImageView.getDrawable();
+        if (current != null && drawable != null && current != drawable && innerImageView.getWidth() >= expandedSize / 2) {
+            if (current.getConstantState() != null) {
+                previousDrawable = current.getConstantState().newDrawable().mutate();
+                previousDrawable.setBounds(0, 0, innerImageView.getWidth(), innerImageView.getHeight());
             } else {
-                transitionProgress = 1f;
-                previousDrawable = null;
-                animator.cancel();
-                if (drawable != null) {
-                    drawable = drawable.mutate();
-                }
+                previousDrawable = current;
             }
 
-            innerImageView.setImageDrawable(drawable);
-        } finally {
-            Trace.endSection();
+            drawable = drawable.mutate();
+
+            transitionProgress = 0f;
+            animator.cancel();
+            animator.start();
+        } else {
+            transitionProgress = 1f;
+            previousDrawable = null;
+            animator.cancel();
+            if (drawable != null) {
+                drawable = drawable.mutate();
+            }
         }
+
+        innerImageView.setImageDrawable(drawable);
     }
 
     public void setImage(Bitmap bitmap) {

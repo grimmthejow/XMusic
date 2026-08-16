@@ -51,7 +51,7 @@
                     android:textColor="?colorOnSurfaceVariant"
                     android:gravity="center"
                     android:layout_gravity="center"
-                    android:text="Works on my device" />
+                    android:text="@string/about_tagline" />
             </LinearLayout>
 
             <com.google.android.material.appbar.MaterialToolbar
@@ -73,7 +73,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:layout_marginBottom="8.0dp"
-                    android:text="About XMusic"
+                    android:text="@string/about_title"
                     android:layout_marginHorizontal="10.0dp" />
 
             </com.google.android.material.appbar.MaterialToolbar>
@@ -113,7 +113,7 @@
                     android:layout_marginTop="12dp"
                     android:layout_marginBottom="8.0dp"
                     android:textStyle="bold"
-                    android:text="App Informations"
+                    android:text="@string/about_app_info"
                     android:layout_marginHorizontal="16.0dp" />
 
                 <LinearLayout
@@ -130,7 +130,7 @@
                         android:textColor="?colorOnSurface"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Package name" />
+                        android:text="@string/about_package_name" />
                     <TextView
                         android:textSize="14.0sp"
                         android:textColor="?colorOutline"
@@ -154,7 +154,7 @@
                         android:textColor="?colorOnSurface"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Version" />
+                        android:text="@string/about_version" />
                     <TextView
                         android:id="@+id/version_text"
                         android:textSize="14.0sp"
@@ -178,7 +178,7 @@
                         android:textColor="?colorOnSurface"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Build Type" />
+                        android:text="@string/about_build_type" />
                     <TextView
                         android:id="@+id/build_text"
                         android:textSize="14.0sp"
@@ -202,13 +202,13 @@
                         android:textColor="?colorOnSurface"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Open Source Licenses" />
+                        android:text="@string/about_licenses" />
                     <TextView
                         android:textSize="14.0sp"
                         android:textColor="?colorOutline"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Find out more about libraries that were used in this app" />
+                        android:text="@string/about_licenses_desc" />
                 </LinearLayout>
 
             </LinearLayout>

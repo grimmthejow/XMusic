@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/coordinator"
-	android:background="?colorSurface"
+	android:background="?colorSurfaceContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -30,7 +30,7 @@
             <com.google.android.material.appbar.MaterialToolbar
                 android:layout_height="?attr/actionBarSize"
                 android:layout_width="match_parent"
-                app:title="Now Playing"
+                app:title="Customize Lyrics"
                 app:navigationIcon="@drawable/ic_arrow_back"
                 android:theme="@style/ThemeOverlay.Material3.Toolbar.CircleNavigationButton"
                 app:layout_collapseMode="pin"
@@ -62,6 +62,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="8dp"
+                    android:visibility="gone"
                     android:layout_marginTop="12dp"
                     android:layout_marginHorizontal="16dp"
                     android:background="@drawable/checkable_background_single">
@@ -89,6 +90,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="8dp"
+                    android:visibility="gone"
                     android:layout_marginTop="12dp"
                     android:layout_marginHorizontal="16dp"
                     android:background="@drawable/checkable_background_single">

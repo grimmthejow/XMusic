@@ -112,7 +112,7 @@
                     android:textColor="?colorOnSurface"
                     android:layout_marginLeft="12dp"
                     android:layout_weight="1"
-                    android:text="Add to playing queue" />
+                    android:text="@string/details_add_to_queue" />
 
             </LinearLayout>
 
@@ -139,7 +139,7 @@
                     android:textColor="?colorOnSurface"
                     android:layout_marginLeft="12dp"
                     android:layout_weight="1"
-                    android:text="Add to playlist" />
+                    android:text="@string/details_add_to_playlist" />
 
             </LinearLayout>
 
@@ -166,7 +166,7 @@
                     android:textColor="?colorOnSurface"
                     android:layout_marginLeft="12dp"
                     android:layout_weight="1"
-                    android:text="Edit song tags" />
+                    android:text="@string/details_edit_tags" />
 
             </LinearLayout>
 
@@ -193,7 +193,7 @@
                     android:textColor="?colorOnSurface"
                     android:layout_marginLeft="12dp"
                     android:layout_weight="1"
-                    android:text="Blacklist song" />
+                    android:text="@string/details_blacklist" />
 
             </LinearLayout>
 
@@ -220,7 +220,7 @@
                     android:textColor="?colorError"
                     android:layout_marginLeft="12dp"
                     android:layout_weight="1"
-                    android:text="Delete song" />
+                    android:text="@string/details_delete" />
 
             </LinearLayout>
 

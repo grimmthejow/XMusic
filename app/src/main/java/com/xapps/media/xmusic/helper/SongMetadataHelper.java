@@ -29,98 +29,100 @@ public class SongMetadataHelper {
     private static ArrayList<Song> songs = new ArrayList<>();
 
     public static void getAllSongs(Context context, SongLoadListener listener) {
-
         if (!songs.isEmpty()) {
             if (listener != null) listener.onComplete(songs);
             return;
         }
 
         ArrayList<Song> songsList = new ArrayList<>();
+        Cursor cursor = null;
 
-        String selection = MediaStore.Audio.Media.IS_MUSIC + " != 0";
+        try {
+            String selection = MediaStore.Audio.Media.IS_MUSIC + " != 0";
 
-        String[] projection = {
-                MediaStore.Audio.Media._ID,
-                MediaStore.Audio.Media.DATA,
-                MediaStore.Audio.Media.TITLE,
-                MediaStore.Audio.Media.ARTIST,
-                MediaStore.Audio.Media.ALBUM,
-                MediaStore.Audio.Media.ALBUM_ID,
-                MediaStore.Audio.Media.ALBUM_ARTIST,
-                MediaStore.Audio.Media.YEAR,
-                MediaStore.Audio.Media.TRACK,
-                MediaStore.Audio.Media.DURATION,
-                MediaStore.Audio.Media.DATE_ADDED,
-                MediaStore.Audio.Media.DATE_MODIFIED,
-                MediaStore.Audio.Media.MIME_TYPE,
-                MediaStore.Audio.Media.SIZE
-        };
+            String[] projection = {
+                    MediaStore.Audio.Media._ID,
+                    MediaStore.Audio.Media.DATA,
+                    MediaStore.Audio.Media.TITLE,
+                    MediaStore.Audio.Media.ARTIST,
+                    MediaStore.Audio.Media.ALBUM,
+                    MediaStore.Audio.Media.ALBUM_ID,
+                    MediaStore.Audio.Media.ALBUM_ARTIST,
+                    MediaStore.Audio.Media.YEAR,
+                    MediaStore.Audio.Media.TRACK,
+                    MediaStore.Audio.Media.DURATION,
+                    MediaStore.Audio.Media.DATE_ADDED,
+                    MediaStore.Audio.Media.DATE_MODIFIED,
+                    MediaStore.Audio.Media.MIME_TYPE,
+                    MediaStore.Audio.Media.SIZE
+            };
 
-        Cursor cursor = context.getContentResolver().query(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                projection,
-                selection,
-                null,
-                MediaStore.Audio.Media.DATE_ADDED + " DESC"
-        );
+            cursor = context.getContentResolver().query(
+                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                    projection,
+                    selection,
+                    null,
+                    MediaStore.Audio.Media.DATE_ADDED + " DESC"
+            );
 
-        if (cursor == null) {
-            if (listener != null) listener.onComplete(songsList);
-            return;
-        }
-        
-        int totalSongs = cursor.getCount();
-        if (listener != null) {
-            listener.onStarted(totalSongs);
-        }
+            if (cursor == null) {
+                if (listener != null) listener.onComplete(songsList);
+                return;
+            }
+            
+            int totalSongs = cursor.getCount();
+            if (listener != null) {
+                listener.onStarted(totalSongs);
+            }
 
-        int idIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID);
-        int pathIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);
-        int titleIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE);
-        int artistIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST);
-        int albumIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM);
-        int albumIdIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID);
-        int albumArtistIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ARTIST);
-        int yearIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.YEAR);
-        int trackIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TRACK);
-        int durationIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION);
-        int dateAddedIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED);
-        int dateModifiedIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_MODIFIED);
-        int mimeIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE);
-        int sizeIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE);
+            int idIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID);
+            int pathIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);
+            int titleIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE);
+            int artistIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST);
+            int albumIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM);
+            int albumIdIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID);
+            int albumArtistIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ARTIST);
+            int yearIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.YEAR);
+            int trackIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TRACK);
+            int durationIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION);
+            int dateAddedIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED);
+            int dateModifiedIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_MODIFIED);
+            int mimeIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE);
+            int sizeIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE);
 
-        while (cursor.moveToNext()) {
+            while (cursor.moveToNext()) {
+                long songId = cursor.getLong(idIndex);
+                String path = cursor.getString(pathIndex);
+                String title = cursor.getString(titleIndex);
+                String artist = cursor.getString(artistIndex);
+                String album = cursor.getString(albumIndex);
+                long albumId = cursor.getLong(albumIdIndex);
+                String albumArtist = cursor.getString(albumArtistIndex);
+                int year = cursor.getInt(yearIndex);
+                int track = cursor.getInt(trackIndex);
+                long duration = cursor.getLong(durationIndex);
+                long dateAdded = cursor.getLong(dateAddedIndex);
+                long dateModified = cursor.getLong(dateModifiedIndex);
+                String mimeType = cursor.getString(mimeIndex);
+                long size = cursor.getLong(sizeIndex);
 
-            long songId = cursor.getLong(idIndex);
-            String path = cursor.getString(pathIndex);
-            String title = cursor.getString(titleIndex);
-            String artist = cursor.getString(artistIndex);
-            String album = cursor.getString(albumIndex);
-            long albumId = cursor.getLong(albumIdIndex);
-            String albumArtist = cursor.getString(albumArtistIndex);
-            int year = cursor.getInt(yearIndex);
-            int track = cursor.getInt(trackIndex);
-            long duration = cursor.getLong(durationIndex);
-            long dateAdded = cursor.getLong(dateAddedIndex);
-            long dateModified = cursor.getLong(dateModifiedIndex);
-            String mimeType = cursor.getString(mimeIndex);
-            long size = cursor.getLong(sizeIndex);
+                Song song = new Song(songId, path, title, artist, album, albumId, albumArtist, year, track, duration, dateAdded, dateModified, mimeType, size);
+                songsList.add(song);
 
-            Song song = new Song(songId, path, title, artist, album, albumId, albumArtist, year, track, duration, dateAdded, dateModified, mimeType, size);
-			
-            songsList.add(song);
+                if (listener != null) {
+                    listener.onProgress(songsList, songsList.size());
+                }
+            }
+
+            songs = songsList;
 
             if (listener != null) {
-                listener.onProgress(songsList, songsList.size());
+                listener.onComplete(songsList);
             }
-        }
-
-        cursor.close();
-
-        songs = songsList;
-
-        if (listener != null) {
-            listener.onComplete(songsList);
+        } catch (Exception e) {
+            if (listener != null) listener.onError(e);
+        } finally {
+            if (cursor != null) cursor.close();
         }
     }
 

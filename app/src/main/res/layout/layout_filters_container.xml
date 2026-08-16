@@ -22,7 +22,7 @@
         android:layout_marginBottom="24dp"
         android:gravity="left"
         android:textStyle="bold"
-        android:text="Sort By" />
+        android:text="@string/sort_by" />
 
     <com.xapps.media.xmusic.widget.SpringOverScrollRelativeLayout
         android:layout_width="match_parent"
@@ -54,7 +54,7 @@
                         android:textColor="?colorOnSurface"
                         android:layout_marginLeft="8dp"
                         android:layout_weight="1"
-                        android:text="Name" />
+                        android:text="@string/sort_name" />
 
                     <com.google.android.material.radiobutton.MaterialRadioButton
                         android:id="@+id/firstRadio"
@@ -81,7 +81,7 @@
                         android:textColor="?colorOnSurface"
                         android:layout_marginLeft="8dp"
                         android:layout_weight="1"
-                        android:text="Artist" />
+                        android:text="@string/sort_artist" />
 
                     <com.google.android.material.radiobutton.MaterialRadioButton
                         android:id="@+id/second_radio"
@@ -108,7 +108,7 @@
                         android:textColor="?colorOnSurface"
                         android:layout_marginLeft="8dp"
                         android:layout_weight="1"
-                        android:text="Album" />
+                        android:text="@string/sort_album" />
 
                     <com.google.android.material.radiobutton.MaterialRadioButton
                         android:id="@+id/third_radio"
@@ -135,7 +135,7 @@
                         android:textColor="?colorOnSurface"
                         android:layout_marginLeft="8dp"
                         android:layout_weight="1"
-                        android:text="Album artist" />
+                        android:text="@string/sort_album_artist" />
 
                     <com.google.android.material.radiobutton.MaterialRadioButton
                         android:id="@+id/fourth_radio"
@@ -162,7 +162,7 @@
                         android:textColor="?colorOnSurface"
                         android:layout_marginLeft="8dp"
                         android:layout_weight="1"
-                        android:text="Year" />
+                        android:text="@string/sort_year" />
 
                     <com.google.android.material.radiobutton.MaterialRadioButton
                         android:id="@+id/fifth_radio"
@@ -189,7 +189,7 @@
                         android:textColor="?colorOnSurface"
                         android:layout_marginLeft="8dp"
                         android:layout_weight="1"
-                        android:text="Track" />
+                        android:text="@string/sort_track" />
 
                     <com.google.android.material.radiobutton.MaterialRadioButton
                         android:id="@+id/sixth_radio"
@@ -216,7 +216,7 @@
                         android:textColor="?colorOnSurface"
                         android:layout_marginLeft="8dp"
                         android:layout_weight="1"
-                        android:text="Song Duration" />
+                        android:text="@string/sort_duration" />
 
                     <com.google.android.material.radiobutton.MaterialRadioButton
                         android:id="@+id/seventh_radio"
@@ -243,7 +243,7 @@
                         android:textColor="?colorOnSurface"
                         android:layout_marginLeft="8dp"
                         android:layout_weight="1"
-                        android:text="Date added" />
+                        android:text="@string/sort_date_added" />
 
                     <com.google.android.material.radiobutton.MaterialRadioButton
                         android:id="@+id/eighth_radio"
@@ -270,7 +270,7 @@
                         android:textColor="?colorOnSurface"
                         android:layout_marginLeft="8dp"
                         android:layout_weight="1"
-                        android:text="Date modified" />
+                        android:text="@string/sort_date_modified" />
 
                     <com.google.android.material.radiobutton.MaterialRadioButton
                         android:id="@+id/nineth_radio"
@@ -297,7 +297,7 @@
                         android:textColor="?colorOnSurface"
                         android:layout_marginLeft="8dp"
                         android:layout_weight="1"
-                        android:text="Size" />
+                        android:text="@string/sort_size" />
 
                     <com.google.android.material.radiobutton.MaterialRadioButton
                         android:id="@+id/tenth_radio"

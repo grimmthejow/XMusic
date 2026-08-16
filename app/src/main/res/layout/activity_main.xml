@@ -90,7 +90,7 @@
                             android:id="@+id/currentSongTitle"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="No song is being played"
+                            android:text="@string/player_no_song"
                             android:textSize="16sp"
                             android:textStyle="bold"
                             android:textColor="?colorOnSurface" />
@@ -98,7 +98,7 @@
                             android:id="@+id/currentSongArtist"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Artist"
+                            android:text="@string/artist"
                             android:textSize="12sp"
                             android:textColor="?colorOutline" />
                     </LinearLayout>
@@ -284,7 +284,7 @@
                             android:textStyle="bold"
                             android:paddingVertical="5dp"
                             android:paddingHorizontal="12dp"
-                            android:text="Unknown" />
+                            android:text="@string/unknown" />
                     </LinearLayout>
                     <FrameLayout
                         android:id="@+id/frame"
@@ -310,7 +310,7 @@
                                     android:layout_height="wrap_content"
                                     android:gravity="center"
                                     android:layout_gravity="center"
-                                    android:text="Hmm, No lyrics found\n¯⁠\⁠\\_⁠(⁠ツ⁠)⁠_⁠/⁠¯"
+                                    android:text="@string/lyrics_not_found"
                                     android:textColor="?colorOnSurface"
                                     android:alpha="0.85"
                                     android:textSize="24dp" />

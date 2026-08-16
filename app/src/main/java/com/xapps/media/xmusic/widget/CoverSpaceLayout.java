@@ -1,7 +1,6 @@
 package com.xapps.media.xmusic.widget;
 
 import android.content.Context;
-import android.os.Trace;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -30,28 +29,23 @@ public class CoverSpaceLayout extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        Trace.beginSection("CSL:onMeasure");
-        try {
-            int availableWidth = Math.max(
-                    0,
-                    MeasureSpec.getSize(widthMeasureSpec)
-                            - getPaddingLeft()
-                            - getPaddingRight()
-            );
+        int availableWidth = Math.max(
+                0,
+                MeasureSpec.getSize(widthMeasureSpec)
+                        - getPaddingLeft()
+                        - getPaddingRight()
+        );
 
-            int availableHeight = MeasureSpec.getSize(heightMeasureSpec);
+        int availableHeight = MeasureSpec.getSize(heightMeasureSpec);
 
-            maximumSize = Math.min(
-                    availableWidth,
-                    availableHeight
-            );
+        maximumSize = Math.min(
+                availableWidth,
+                availableHeight
+        );
 
-            setMeasuredDimension(
-                    MeasureSpec.getSize(widthMeasureSpec),
-                    maximumSize
-            );
-        } finally {
-            Trace.endSection();
-        }
+        setMeasuredDimension(
+                MeasureSpec.getSize(widthMeasureSpec),
+                maximumSize
+        );
     }
 }

@@ -13,7 +13,6 @@ import android.graphics.RectF;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Looper;
-import android.os.Trace;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -269,36 +268,31 @@ public class NewPlayerToggle extends LinearLayout {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        Trace.beginSection("NPT:onDraw");
-        try {
-            super.onDraw(canvas);
-            if (!shapesReady) {
-                postInvalidateOnAnimation();
-                return;
-            }
-            if (activeMorph == null) updateActiveMorph();
-            if (activeMorph == null) return;
-            
-            canvas.save();
-            canvas.translate(centerX, centerY);
-            canvas.rotate(shapeRotation);
-
-            if (scaleToFit) {
-                canvas.scale(cachedScale, cachedScale);
-            }
-
-            path.rewind();
-            Shapes_androidKt.toPath(activeMorph, progress, path);
-
-            matrix.setScale(indicatorSize / 2f, indicatorSize / 2f);
-            path.transform(matrix);
-            paint.setColor(indicatorColor);
-            canvas.drawPath(path, paint);
-
-            canvas.restore();
-        } finally {
-            Trace.endSection();
+        super.onDraw(canvas);
+        if (!shapesReady) {
+            postInvalidateOnAnimation();
+            return;
         }
+        if (activeMorph == null) updateActiveMorph();
+        if (activeMorph == null) return;
+        
+        canvas.save();
+        canvas.translate(centerX, centerY);
+        canvas.rotate(shapeRotation);
+
+        if (scaleToFit) {
+            canvas.scale(cachedScale, cachedScale);
+        }
+
+        path.rewind();
+        Shapes_androidKt.toPath(activeMorph, progress, path);
+
+        matrix.setScale(indicatorSize / 2f, indicatorSize / 2f);
+        path.transform(matrix);
+        paint.setColor(indicatorColor);
+        canvas.drawPath(path, paint);
+
+        canvas.restore();
     }
 
     private void animateScale(float target) {
@@ -322,51 +316,46 @@ public class NewPlayerToggle extends LinearLayout {
     }
 
     public void morphTo(int shape, boolean force) {
-        Trace.beginSection("NPT:morphTo");
-        try {
-            if (!force && isMorphing) return;
-            if (shape < 0 || shape >= SHAPES.length) return;
+        if (!force && isMorphing) return;
+        if (shape < 0 || shape >= SHAPES.length) return;
 
-            targetShape = shape;
-            updateActiveMorph();
-            progress = 0f;
-            isMorphing = true;
+        targetShape = shape;
+        updateActiveMorph();
+        progress = 0f;
+        isMorphing = true;
 
-            if (animator != null) animator.cancel();
+        if (animator != null) animator.cancel();
 
-            animator = ValueAnimator.ofFloat(0f, 1f);
-            animator.setDuration(morphDuration);
-            animator.addUpdateListener(v -> {
-                progress = (float) v.getAnimatedValue();
+        animator = ValueAnimator.ofFloat(0f, 1f);
+        animator.setDuration(morphDuration);
+        animator.addUpdateListener(v -> {
+            progress = (float) v.getAnimatedValue();
+            invalidate();
+        });
+
+        animator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationEnd(Animator a) {
+                currentShape = targetShape;
+                updateActiveMorph();
+                progress = 1f;
+                isMorphing = false;
                 invalidate();
-            });
+            }
 
-            animator.addListener(new Animator.AnimatorListener() {
-                @Override
-                public void onAnimationEnd(Animator a) {
-                    currentShape = targetShape;
-                    updateActiveMorph();
-                    progress = 1f;
-                    isMorphing = false;
-                    invalidate();
-                }
+            @Override
+            public void onAnimationStart(Animator a) {}
 
-                @Override
-                public void onAnimationStart(Animator a) {}
+            @Override
+            public void onAnimationCancel(Animator a) {
+                isMorphing = false;
+            }
 
-                @Override
-                public void onAnimationCancel(Animator a) {
-                    isMorphing = false;
-                }
+            @Override
+            public void onAnimationRepeat(Animator a) {}
+        });
 
-                @Override
-                public void onAnimationRepeat(Animator a) {}
-            });
-
-            animator.start();
-        } finally {
-            Trace.endSection();
-        }
+        animator.start();
     }
 
     public void forcePlayState() {

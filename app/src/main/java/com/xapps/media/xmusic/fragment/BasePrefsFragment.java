@@ -46,10 +46,15 @@ public abstract class BasePrefsFragment extends BaseFragment {
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         adapter = new ItemsListAdapter(this, getActivity(), provideItems());
         binding.recyclerView.setAdapter(adapter);
+        binding.toolbar.setTitle(getFragmentTitle());
 		binding.toolbar.setNavigationOnClickListener(v -> {
             getActivity().getOnBackPressedDispatcher().onBackPressed();
             activity.getUIManager().hideBnv(false);
         });
+    }
+
+    protected String getFragmentTitle() {
+        return "Unknown";
     }
 
     @Nullable
@@ -212,7 +217,9 @@ public abstract class BasePrefsFragment extends BaseFragment {
         }
     }
     
-    protected void onItemSelected(SettingsItem item) {}
+    protected void onItemSelected(SettingsItem item) {
+       
+    }
     
     protected void onSwitchChanged(SettingsItem item, boolean value) {
         switch (item.id) {

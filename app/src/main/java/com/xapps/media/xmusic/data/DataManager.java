@@ -1,13 +1,36 @@
 package com.xapps.media.xmusic.data;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Handler;
+import android.os.Looper;
 import com.xapps.media.xmusic.helper.SongSorter;
+import java.util.concurrent.Executors;
 
 public class DataManager {
     public static SharedPreferences sp;
+    private static boolean isInitialized = false;
+
+    public interface OnDataInitListener {
+        void onInitComplete();
+    }
 
     public static void init(Context c) {
         sp = c.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        isInitialized = true;
+    }
+
+    public static void init(Context c, OnDataInitListener listener) {
+        Executors.newSingleThreadExecutor().execute(() -> {
+            sp = c.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+            isInitialized = true;
+            new Handler(Looper.getMainLooper()).post(() -> {
+                if (listener != null) listener.onInitComplete();
+            });
+        });
+    }
+
+    public static boolean isInitialized() {
+        return isInitialized;
     }
 
     public static void setDataInitialized() {
@@ -149,4 +172,17 @@ public class DataManager {
     public static void setFontConfig(String config) {
 		sp.edit().putString("font_config", config).apply();
 	}
+
+    public static boolean getStaticScrollState() {
+        return !sp.getBoolean("lyrics_elastic_scroll", false);
+    }
+
+    public static boolean getUserStaticScrollState() {
+        return !sp.getBoolean("lyrics_elastic_manual_scroll", false);
+    }
+
+    public static boolean getUseSparklesState() {
+        return sp.getBoolean("lyrics_sparkles", false);
+    }
+
 }

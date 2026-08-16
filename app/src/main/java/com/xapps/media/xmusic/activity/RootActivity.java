@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.*;
-import android.os.Trace;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.SystemBarStyle;
@@ -21,6 +20,7 @@ import com.xapps.media.xmusic.callback.ActivityCallback;
 import com.xapps.media.xmusic.callback.CallbackInterface;
 import com.xapps.media.xmusic.common.SongLoadListener;
 import com.xapps.media.xmusic.data.DataManager;
+import com.xapps.media.xmusic.data.RuntimeData;
 import com.xapps.media.xmusic.databinding.ActivityRootBinding;
 import com.xapps.media.xmusic.helper.SongMetadataHelper;
 import com.xapps.media.xmusic.models.Song;
@@ -36,25 +36,30 @@ public class RootActivity extends BaseActivity implements ActivityCallback {
     private LogicManager logicManager;
     private MediaController mediaController;
 
+    private boolean isReady = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Trace.beginSection("RA:onCreate");
-        try {
-            EdgeToEdge.enable(this, 
-                SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT),
-                SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT)
-            );
-            XUtils.applyDynamicColors(this, DataManager.isOledThemeEnabled());
-            if (XUtils.isDarkMode(this) && DataManager.isOledThemeEnabled())getTheme().applyStyle(R.style.ThemeOverlay_XMusic_OLED, true);
-            MaterialColorUtils.initColors(this);
-            super.onCreate(savedInstanceState);
-            binding = ActivityRootBinding.inflate(getLayoutInflater());
-            passData();
-            setContentView(binding.getRoot());
-            init();
-        } finally {
-            Trace.endSection();
-        }
+        SplashScreen.installSplashScreen(this).setKeepOnScreenCondition(() -> isReady);
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            if (!XUtils.areAllPermsGranted(this)) {
+                startActivity(new Intent(this, WelcomeActivity.class));
+                finish();
+            }
+            isReady = false;
+        }, savedInstanceState == null? 800 : 1);
+        EdgeToEdge.enable(this, 
+            SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT),
+            SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT)
+        );
+        XUtils.applyDynamicColors(this, DataManager.isOledThemeEnabled());
+        if (XUtils.isDarkMode(this) && DataManager.isOledThemeEnabled())getTheme().applyStyle(R.style.ThemeOverlay_XMusic_OLED, true);
+        MaterialColorUtils.initColors(this);
+        super.onCreate(savedInstanceState);
+        binding = ActivityRootBinding.inflate(getLayoutInflater());
+        passData();
+        setContentView(binding.getRoot());
+        init();
     }
 
     @Override
@@ -73,13 +78,8 @@ public class RootActivity extends BaseActivity implements ActivityCallback {
     
     @Override
     public void onResume() {
-        Trace.beginSection("RA:onResume");
-        try {
-            super.onResume();
-            uiManager.updateContent(-1, true);
-        } finally {
-            Trace.endSection();
-        }
+        super.onResume();
+        if (!RuntimeData.songs.isEmpty()) uiManager.updateContent(-1, true);
     }
     
     @Override
@@ -98,7 +98,7 @@ public class RootActivity extends BaseActivity implements ActivityCallback {
     public void onDestroy() {
         super.onDestroy();
         CallbackInterface.clearActivityCallback(this);
-        mediaController.release();
+        if (mediaController != null) mediaController.release();
         mediaController = null;
     }
 
@@ -142,12 +142,7 @@ public class RootActivity extends BaseActivity implements ActivityCallback {
     }
 
     public void restoreStateIfPossible() {
-        Trace.beginSection("RA:restoreStateIfPossible");
-        try {
-            uiManager.maybeRestoreUIState();
-        } finally {
-            Trace.endSection();
-        }
+        uiManager.maybeRestoreUIState();
     }
 
     public void loadSettings() {
@@ -161,12 +156,11 @@ public class RootActivity extends BaseActivity implements ActivityCallback {
 
     @Override
     public void onSongChanged(int position) {
-        runOnUiThread(
-                () -> {
-                    uiManager.updateContent(position, false);
-                });
-                if (CallbackInterface.mlFrag() != null) CallbackInterface.mlFrag().updateActiveItem(position);
-                if (CallbackInterface.srFrag() != null) CallbackInterface.srFrag().updateActiveItem(position);
+        runOnUiThread(() -> {
+            uiManager.updateContent(position, false);
+        });
+        if (CallbackInterface.mlFrag() != null) CallbackInterface.mlFrag().updateActiveItem(position);
+        if (CallbackInterface.srFrag() != null) CallbackInterface.srFrag().updateActiveItem(position);
     }
 
     @Override
@@ -176,11 +170,17 @@ public class RootActivity extends BaseActivity implements ActivityCallback {
 
     @Override
     public void updateState() {
-        uiManager.saveState();
+        runOnUiThread(() -> {
+            uiManager.saveState();
+        });
     }
 
     @Override
     public void passData() {
         if (CallbackInterface.subFrag() != null) CallbackInterface.subFrag().onBindingReady(binding);
+    }
+
+    public void updateLyrics() {
+        uiManager.updateLyrics();
     }
 }

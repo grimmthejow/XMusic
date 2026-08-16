@@ -1,11 +1,12 @@
 package com.xapps.media.xmusic.fragment;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import androidx.activity.BackEventCompat;
-import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import com.xapps.media.xmusic.activity.MainActivity;
+
 import com.xapps.media.xmusic.activity.RootActivity;
 import com.xapps.media.xmusic.callback.CallbackInterface;
 import com.xapps.media.xmusic.callback.FragmentCallback;
@@ -47,14 +48,14 @@ public class SubPrefsFragment extends BasePrefsFragment implements FragmentCallb
         
         boolean b1 = ra.getBinding().miniPlayer.getState() == ExpressiveSliderLayout.STATE_COLLAPSED;
         XUtils.animateMarginsTo(ra.getBinding().settingsCard, 0, 0, 0, b1? ra.getUIManager().playerDockedNeededMargin : 0, 200, null);
-		getParentFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+		    getParentFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
 			@Override
 			public void onBackStackChanged() {
             }
 			
             @Override
-            public void onBackStackChangeCommitted(Fragment fragment, boolean b) {
-                if (isRemoving() && valid) { 
+            public void onBackStackChangeCommitted(@NonNull Fragment fragment, boolean b) {
+                if (isRemoving() && valid || Build.VERSION.SDK_INT <= 34) {
                     if (ra.getUIManager().bnvHidden) ra.getUIManager().hideComponents(ra.getUIManager().playerHidden, false, ra.getUIManager().tabsHidden, "SubFragment");
                     ra.getUIManager().saveState();
                 }

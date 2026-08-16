@@ -124,6 +124,7 @@ public class LyricsEditFragment extends BaseFragment {
             .append("'slnt' ").append(slant)
         .toString();
 		DataManager.setFontConfig(fontConfig);
+        if (activity.getUIManager() != null) activity.getUIManager().updateFontConfig();
         binding.mainLine.setFontVariationSettings(fontConfig);
         binding.romajiLine.setFontVariationSettings(fontConfig);
 	}

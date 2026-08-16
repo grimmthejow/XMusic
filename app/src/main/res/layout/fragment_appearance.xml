@@ -68,7 +68,7 @@
                     android:textSize="14sp"
                     android:textStyle="bold"
                     android:textColor="?colorPrimary"
-                    android:text="Theme and Colors" />
+                    android:text="@string/appearance_title" />
 
                 <LinearLayout
                     android:id="@+id/top_pref"
@@ -88,7 +88,7 @@
                         <TextView
                             android:layout_height="wrap_content"
                             android:layout_width="wrap_content"
-                            android:text="Theme"
+                            android:text="@string/appearance_theme"
                             android:textSize="16sp"
                             android:layout_marginBottom="2dp"
                             android:textColor="?colorOnSurface" />
@@ -111,7 +111,7 @@
                             android:paddingHorizontal="4dp"
                             app:iconPadding="8dp"
                             android:textSize="16dp"
-                            android:text="System"
+                            android:text="@string/appearance_theme_system"
                             android:layout_width="wrap_content"
                             style="@style/Widget.Material3Expressive.Button.TonalButton"
                             app:icon="@drawable/ic_theme_light_dark"
@@ -123,7 +123,7 @@
                             android:paddingVertical="12dp"
                             app:iconPadding="8dp"
                             android:textSize="16dp"
-                            android:text="Dark"
+                            android:text="@string/appearance_theme_dark"
                             android:layout_width="wrap_content"
                             style="@style/Widget.Material3Expressive.Button.TonalButton"
                             app:icon="@drawable/ic_dark_mode"
@@ -136,7 +136,7 @@
                             android:paddingVertical="12dp"
                             app:iconPadding="8dp"
                             android:textSize="16dp"
-                            android:text="Light"
+                            android:text="@string/appearance_theme_light"
                             style="@style/Widget.Material3Expressive.Button.TonalButton"
                             app:icon="@drawable/ic_light_mode"
                         />
@@ -165,7 +165,7 @@
                         <TextView
                             android:layout_height="wrap_content"
                             android:layout_width="wrap_content"
-                            android:text="Dynamic Theme"
+                            android:text="@string/appearance_dynamic_theme"
                             android:textSize="16sp"
                             android:layout_marginBottom="2dp"
                             android:textColor="?colorOnSurface" />
@@ -173,7 +173,7 @@
                         <TextView
                             android:layout_height="wrap_content"
                             android:layout_width="wrap_content"
-                            android:text="Use Material you colors for app theme"
+                            android:text="@string/appearance_dynamic_theme_desc"
                             android:textSize="14sp"
                             android:textColor="?colorOutline" />
 
@@ -207,7 +207,7 @@
                         <TextView
                             android:layout_height="wrap_content"
                             android:layout_width="wrap_content"
-                            android:text="Pure black theme"
+                            android:text="@string/appearance_black_theme"
                             android:textSize="16sp"
                             android:layout_marginBottom="2dp"
                             android:textColor="?colorOnSurface" />
@@ -215,7 +215,7 @@
                         <TextView
                             android:layout_height="wrap_content"
                             android:layout_width="wrap_content"
-                            android:text="Use a pure black background color to save energy on Amoled devices"
+                            android:text="@string/appearance_black_theme_desc"
                             android:textSize="14sp"
                             android:textColor="?colorOutline" />
 
@@ -260,7 +260,7 @@
                                 <TextView
                                     android:layout_height="wrap_content"
                                     android:layout_width="wrap_content"
-                                    android:text="Custom Dynamic Color"
+                                    android:text="@string/appearance_custom_color"
                                     android:textSize="16sp"
                                     android:layout_marginBottom="2dp"
                                     android:textColor="?colorOnSurface" />
@@ -278,7 +278,7 @@
                             <TextView
                                 android:layout_height="wrap_content"
                                 android:layout_width="wrap_content"
-                                android:text="Need a color to set different from your Device's? Luckily you have this!"
+                                android:text="@string/appearance_custom_color_desc"
                                 android:textSize="14sp"
                                 android:textColor="?colorOutline" />
 
@@ -307,7 +307,7 @@
                         android:layout_weight="1"
                         android:layout_width="match_parent"
                         android:layout_margin="16dp"
-                        android:text="Apply" />
+                        android:text="@string/apply" />
 
                 </LinearLayout>
 
@@ -320,7 +320,7 @@
                     android:textSize="14sp"
                     android:textStyle="bold"
                     android:textColor="?colorPrimary"
-                    android:text="App icon" />
+                    android:text="@string/appearance_icon" />
 
                 <LinearLayout
                     android:id="@+id/icon_pref"
@@ -341,7 +341,7 @@
                         <TextView
                             android:layout_height="wrap_content"
                             android:layout_width="wrap_content"
-                            android:text="Use redesigned icon style"
+                            android:text="@string/appearance_icon_redesigned"
                             android:textSize="16sp"
                             android:layout_marginBottom="2dp"
                             android:textColor="?colorOnSurface" />
@@ -349,7 +349,7 @@
                         <TextView
                             android:layout_height="wrap_content"
                             android:layout_width="wrap_content"
-                            android:text="Try this if the default icon is boring"
+                            android:text="@string/appearance_icon_redesigned_desc"
                             android:textSize="14sp"
                             android:textColor="?colorOutline" />
 
@@ -373,7 +373,7 @@
                     android:textSize="14sp"
                     android:textStyle="bold"
                     android:textColor="?colorPrimary"
-                    android:text="Interface" />
+                    android:text="@string/appearance_interface" />
 
                 <LinearLayout
                     android:id="@+id/blur_pref"
@@ -394,7 +394,7 @@
                         <TextView
                             android:layout_height="wrap_content"
                             android:layout_width="wrap_content"
-                            android:text="Enable Blur"
+                            android:text="@string/appearance_blur"
                             android:textSize="16sp"
                             android:layout_marginBottom="2dp"
                             android:textColor="?colorOnSurface" />
@@ -402,7 +402,7 @@
                         <TextView
                             android:layout_height="wrap_content"
                             android:layout_width="wrap_content"
-                            android:text="Enable Blur effects across the app, still WIP"
+                            android:text="@string/appearance_blur_desc"
                             android:textSize="14sp"
                             android:textColor="?colorOutline" />
 

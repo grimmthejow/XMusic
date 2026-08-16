@@ -93,14 +93,14 @@
                             android:layout_width="wrap_content"
                             android:textSize="18sp"
                             android:textColor="?colorOnSurface"
-                            android:text="Appearance" />
+                            android:text="@string/settings_appearance" />
 
                         <TextView
                             android:layout_height="wrap_content"
                             android:layout_width="wrap_content"
                             android:textSize="14sp"
                             android:textColor="?colorOutline"
-                            android:text="Theme, Dynamic Colors, OLED theme" />
+                            android:text="@string/settings_appearance_desc" />
 
                     </LinearLayout>
 
@@ -141,14 +141,14 @@
                             android:layout_width="wrap_content"
                             android:textSize="18sp"
                             android:textColor="?colorOnSurface"
-                            android:text="Now Playing" />
+                            android:text="@string/settings_now_playing" />
 
                         <TextView
                             android:layout_height="wrap_content"
                             android:layout_width="wrap_content"
                             android:textSize="14sp"
                             android:textColor="?colorOutline"
-                            android:text="Components, controls and behavior" />
+                            android:text="@string/settings_now_playing_desc" />
 
                     </LinearLayout>
 
@@ -173,10 +173,10 @@
                         android:padding="6dp"
                         android:background="@drawable/circle_shape"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/ic_build_outline"
+                        android:src="@drawable/ic_construction"
                         android:layout_marginRight="16dp"
                         android:layout_marginLeft="8dp"
-                        android:tint="?colorOnTertiary"
+                        app:tint="?colorOnTertiary"
                         android:backgroundTint="?colorTertiary" />
 
                     <LinearLayout
@@ -189,14 +189,14 @@
                             android:layout_width="wrap_content"
                             android:textSize="18sp"
                             android:textColor="?colorOnSurface"
-                            android:text="Advanced" />
+                            android:text="@string/settings_advanced" />
 
                         <TextView
                             android:layout_height="wrap_content"
                             android:layout_width="wrap_content"
                             android:textSize="14sp"
                             android:textColor="?colorOutline"
-                            android:text="Experimental features, testing options" />
+                            android:text="@string/settings_advanced_desc" />
 
                     </LinearLayout>
 
@@ -221,7 +221,7 @@
                         android:padding="6dp"
                         android:background="@drawable/circle_shape"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/ic_info_outline"
+                        android:src="@drawable/ic_info_round"
                         android:layout_marginRight="16dp"
                         android:layout_marginLeft="8dp"
                         android:tint="?colorOnPrimary"
@@ -237,14 +237,14 @@
                             android:layout_width="wrap_content"
                             android:textSize="18sp"
                             android:textColor="?colorOnSurface"
-                            android:text="About XMusic" />
+                            android:text="@string/about_title" />
 
                         <TextView
                             android:layout_height="wrap_content"
                             android:layout_width="wrap_content"
                             android:textSize="14sp"
                             android:textColor="?colorOutline"
-                            android:text="More information about XMusic" />
+                            android:text="@string/settings_about_desc" />
 
                     </LinearLayout>
 

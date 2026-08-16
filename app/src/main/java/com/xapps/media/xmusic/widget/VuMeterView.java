@@ -23,7 +23,6 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.os.Trace;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -126,40 +125,35 @@ public class VuMeterView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        Trace.beginSection("VMV:onDraw");
-        try {
-            int base = getHeight() - getPaddingBottom();
-            int left = getPaddingLeft();
+        int base = getHeight() - getPaddingBottom();
+        int left = getPaddingLeft();
 
-            frame++;
+        frame++;
 
-            if (state == STATE_PLAYING && frame % TARGET_UPDATE_FRAMES == 0) {
-                for (int i = 0; i < blockCount; i++) {
-                    target[i] = contentHeight *
-                            (MIN_HEIGHT_RATIO + random.nextFloat() * (1f - MIN_HEIGHT_RATIO));
-                }
-            }
-
+        if (state == STATE_PLAYING && frame % TARGET_UPDATE_FRAMES == 0) {
             for (int i = 0; i < blockCount; i++) {
-                current[i] += (target[i] - current[i]) * SMOOTHING;
-
-                float top = base - current[i];
-
-                canvas.drawRect(
-                        left,
-                        top,
-                        left + blockWidth,
-                        base,
-                        paint
-                );
-
-                left += blockWidth + blockSpacing;
+                target[i] = contentHeight *
+                        (MIN_HEIGHT_RATIO + random.nextFloat() * (1f - MIN_HEIGHT_RATIO));
             }
-
-            postInvalidateOnAnimation();
-        } finally {
-            Trace.endSection();
         }
+
+        for (int i = 0; i < blockCount; i++) {
+            current[i] += (target[i] - current[i]) * SMOOTHING;
+
+            float top = base - current[i];
+
+            canvas.drawRect(
+                    left,
+                    top,
+                    left + blockWidth,
+                    base,
+                    paint
+            );
+
+            left += blockWidth + blockSpacing;
+        }
+
+        postInvalidateOnAnimation();
     }
 
     public void pause() {

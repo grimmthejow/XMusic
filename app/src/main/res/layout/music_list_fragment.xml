@@ -140,7 +140,7 @@
         android:translationY="0dp"
         android:layout_marginHorizontal="16dp"
         app:icon="@drawable/ic_shuffle"
-        android:text="Shuffle"
+        android:text="@string/shuffle"
         android:theme="@style/Widget.Material3.ExtendedFloatingActionButton.Small" />
     <FrameLayout
         android:id="@+id/blocking_overlay"

@@ -27,9 +27,9 @@ android {
     defaultConfig {
         applicationId "com.xapps.media.xmusic"
         minSdk 26
-        targetSdk 36
-        versionCode 35
-        versionName "0.35 Alpha"
+        targetSdk 37
+        versionCode 40
+        versionName '0.40 Alpha'
     }
 
     buildFeatures {
@@ -120,6 +120,7 @@ dependencies {
     implementation libs.transition
     implementation libs.fragment
     implementation libs.palette
+    implementation libs.coordinatorlayout
 
     implementation libs.media3.exoplayer
     implementation libs.media3.session

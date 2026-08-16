@@ -1,118 +1,72 @@
 package com.xapps.media.xmusic.activity;
 
 import android.Manifest;
-import android.content.ActivityNotFoundException;
-import android.content.Context;
+import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.*;
-import android.os.Trace;
 import android.provider.Settings;
-import com.xapps.media.xmusic.utils.Log;
 import android.view.*;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.FrameLayout;
-import android.widget.TextSwitcher;
-import android.widget.TextView;
-import androidx.activity.BackEventCompat;
 import androidx.activity.EdgeToEdge;
 import androidx.activity.SystemBarStyle;
-import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.*;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.ContextCompat;
-import androidx.core.view.WindowCompat;
 import androidx.transition.TransitionManager;
-import androidx.transition.TransitionSeekController;
 import com.airbnb.lottie.LottieProperty;
 import com.airbnb.lottie.model.KeyPath;
-import com.airbnb.lottie.value.LottieValueCallback;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.android.material.transition.MaterialFadeThrough;
 import com.google.android.material.transition.MaterialSharedAxis;
-import com.xapps.media.xmusic.activity.RootActivity;
 import com.xapps.media.xmusic.R;
-import com.xapps.media.xmusic.helper.SongMetadataHelper;
-import com.xapps.media.xmusic.models.Song;
 import com.xapps.media.xmusic.utils.XUtils;
-import com.xapps.media.xmusic.common.SongLoadListener;
-import com.xapps.media.xmusic.data.DataManager;
 import com.xapps.media.xmusic.databinding.ActivityWelcomeBinding;
 import com.xapps.media.xmusic.utils.MaterialColorUtils;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 public class WelcomeActivity extends AppCompatActivity {
     
     private ActivityWelcomeBinding binding;
-    private OnBackPressedCallback callback1, callback2, callback3, callback4, nullcallback;
     private boolean notificationsAllowed, audiAccessAllowed, storageReadAllowed;
-    private TransitionSeekController seekController;
-    private TextView tv;
     private ActivityResultLauncher<String> requestPermissionLauncher;
             
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Trace.beginSection("WA:onCreate");
-        try {
-            super.onCreate(savedInstanceState);
-            EdgeToEdge.enable(this, 
-                SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT),
-                SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT)
-            );
-            binding = ActivityWelcomeBinding.inflate(getLayoutInflater());
-            setContentView(binding.getRoot());
-            MaterialColorUtils.initColors(this);
-            setupLottie();
-            checkSDK();
-            setupInsets();
-            setupClickListeners();
-            setupPermsLaunchers();
-            GradientDrawable bg = new GradientDrawable();
-            bg.setShape(GradientDrawable.RECTANGLE);
-            bg.setColor(MaterialColorUtils.colorPrimaryContainer);
-            bg.setCornerRadius(Float.MAX_VALUE);
-            binding.progressBar.setBackground(bg);
-        } finally {
-            Trace.endSection();
-        }
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this, 
+            SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT),
+            SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT)
+        );
+        binding = ActivityWelcomeBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+        MaterialColorUtils.initColors(this);
+        setupLottie();
+        checkSDK();
+        setupInsets();
+        setupClickListeners();
+        setupPermsLaunchers();
+        GradientDrawable bg = new GradientDrawable();
+        bg.setShape(GradientDrawable.RECTANGLE);
+        bg.setColor(MaterialColorUtils.colorPrimaryContainer);
+        bg.setCornerRadius(Float.MAX_VALUE);
+        binding.progressBar.setBackground(bg);
     }
     
     public void setupLottie() {
-        Trace.beginSection("WA:setupLottie");
-        try {
-            binding.lottie.addLottieOnCompositionLoadedListener(composition -> {
-                binding.lottie.addValueCallback(new KeyPath(".primaryContainer", "**"), LottieProperty.COLOR, frameInfo -> MaterialColorUtils.colorPrimaryContainer);
-                binding.lottie.addValueCallback(new KeyPath(".onSecondary", "**"), LottieProperty.COLOR, frameInfo -> MaterialColorUtils.colorOnSecondary);
-                binding.lottie.addValueCallback(new KeyPath(".surfaceContainer", "**"), LottieProperty.COLOR, frameInfo -> MaterialColorUtils.colorSurfaceContainer);
-            });
-        } finally {
-            Trace.endSection();
-        }
+        binding.lottie.addLottieOnCompositionLoadedListener(composition -> {
+            binding.lottie.addValueCallback(new KeyPath(".primaryContainer", "**"), LottieProperty.COLOR, frameInfo -> MaterialColorUtils.colorPrimaryContainer);
+            binding.lottie.addValueCallback(new KeyPath(".onSecondary", "**"), LottieProperty.COLOR, frameInfo -> MaterialColorUtils.colorOnSecondary);
+            binding.lottie.addValueCallback(new KeyPath(".surfaceContainer", "**"), LottieProperty.COLOR, frameInfo -> MaterialColorUtils.colorSurfaceContainer);
+        });
     }
     
     @Override
     public void onResume() {
-        Trace.beginSection("WA:onResume");
-        try {
-            super.onResume();
-            checkPerms();
-            binding.screen2Button.setEnabled(XUtils.areAllPermsGranted(this));
-        } finally {
-            Trace.endSection();
-        }
+        super.onResume();
+        checkPerms();
+        binding.screen2Button.setEnabled(XUtils.areAllPermsGranted(this));
     }
 
     private void setupInsets() {
@@ -124,46 +78,13 @@ public class WelcomeActivity extends AppCompatActivity {
 
     private void setupClickListeners() {
         binding.startButton.setOnClickListener(v -> {
-            if ( true) {
-                binding.topWindow.animate().translationYBy(-binding.topWindow.getHeight()).setDuration(200).start();
-                MaterialSharedAxis msa = new MaterialSharedAxis(MaterialSharedAxis.Z, true);
-                msa.setDuration(800);
-                TransitionManager.beginDelayedTransition(binding.coordinator, msa);
-                binding.finalScreen.setVisibility(View.GONE);
-                binding.part2View.setVisibility(View.VISIBLE);
-                
-                ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-                executor.execute(() -> {
-                    Trace.beginSection("WA:loadSongsInBackground");
-                    try {
-                        SongMetadataHelper.getAllSongs(this, new SongLoadListener(){
-                            @Override
-                            public void onStarted(int i) {
-                                binding.progressBar.setMax(i);
-                            }
-                            
-                            @Override
-                            public void onProgress(java.util.ArrayList<Song> songs, int count) {
-                                binding.progressBar.setProgressCompat(count, true);
-                            }
-                    
-                            @Override
-                            public void onComplete(java.util.ArrayList<Song> songs) {
-                                new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                                    DataManager.setDataInitialized();
-                                    Intent i = new Intent();
-                                    i.setClass(WelcomeActivity.this, RootActivity.class);
-                                    startActivity(i);
-                                    finish();
-                                }, 1000);
-                            }
-                        });
-                    } finally {
-                        Trace.endSection();
-                    }
-                });
+            if (allPermsAllowed()) {
+                Intent i = new Intent();
+                i.setClass(WelcomeActivity.this, RootActivity.class);
+                startActivity(i);
+                finish();
             } else {
-                Snackbar.make(WelcomeActivity.this, binding.coordinator, "Please allow all necessary permissions first", Snackbar.LENGTH_SHORT).show(); 
+                Snackbar.make(WelcomeActivity.this, binding.coordinator, getString(R.string.welcome_permissions_error), Snackbar.LENGTH_SHORT).show(); 
             }
         });
             
@@ -182,7 +103,7 @@ public class WelcomeActivity extends AppCompatActivity {
         binding.firstGrantButton.setOnClickListener(v -> {
             if (Build.VERSION.SDK_INT >= 33) { 
                 requestPermissionLauncher.launch(Manifest.permission.READ_MEDIA_AUDIO);
-            } else if (Build.VERSION.SDK_INT >= 30 && Build.VERSION.SDK_INT < 33) {
+            } else if (Build.VERSION.SDK_INT >= 30) {
                 try {
                     Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
                     intent.addCategory("android.intent.category.DEFAULT");
@@ -234,12 +155,19 @@ public class WelcomeActivity extends AppCompatActivity {
         });
     }
 
-    public void setupPermsLaunchers() {
-        requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-            checkPerms();
-        });
+    private boolean allPermsAllowed() {
+        if (Build.VERSION.SDK_INT >= 33) {
+            return audiAccessAllowed && notificationsAllowed;
+        } else if (30 <= Build.VERSION.SDK_INT) {
+            return Environment.isExternalStorageManager();
+        } else {
+            return storageReadAllowed;
+        }
     }
 
+    public void setupPermsLaunchers() {
+        requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> checkPerms());
+    }
 
     public void checkPerms() {
         if (Build.VERSION.SDK_INT >= 33) {
@@ -247,42 +175,42 @@ public class WelcomeActivity extends AppCompatActivity {
             boolean b2 = XUtils.checkPermissionAllowed(this, Manifest.permission.POST_NOTIFICATIONS);
             audiAccessAllowed = b1;
             binding.firstGrantButton.setEnabled(!b1);
-            binding.firstGrantButton.setText(b1? "Granted" : "Grant");
+            binding.firstGrantButton.setText(b1? getString(R.string.granted) : getString(R.string.grant));
             notificationsAllowed = b2;
             binding.secondGrantButton.setEnabled(!b2);
-            binding.secondGrantButton.setText(b2? "Granted" : "Grant");
-        } else if (30 <= Build.VERSION.SDK_INT && Build.VERSION.SDK_INT <= 32) {
+            binding.secondGrantButton.setText(b2? getString(R.string.granted) : getString(R.string.grant));
+        } else if (30 <= Build.VERSION.SDK_INT) {
             boolean b3 = Environment.isExternalStorageManager();
             binding.firstGrantButton.setEnabled(!b3);
-            binding.firstGrantButton.setText(b3? "Granted" : "Grant");
+            binding.firstGrantButton.setText(b3? getString(R.string.granted) : getString(R.string.grant));
         } else {
             boolean b3 = XUtils.checkPermissionAllowed(this, Manifest.permission.READ_EXTERNAL_STORAGE);
-            storageReadAllowed = b3;
             binding.firstGrantButton.setEnabled(!b3);
-            binding.firstGrantButton.setText(b3? "Granted" : "Grant");
+            binding.firstGrantButton.setText(b3? getString(R.string.granted) : getString(R.string.grant));
             boolean b4 = XUtils.checkPermissionAllowed(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
             binding.secondGrantButton.setEnabled(!b4);
-            binding.secondGrantButton.setText(b4? "Granted" : "Grant");
-            
+            binding.secondGrantButton.setText(b4? getString(R.string.granted) : getString(R.string.grant));
+            storageReadAllowed = b3 && b4;
         }
     }
 
+    @SuppressLint("SetTextI18n")
     public void checkSDK() {
         if (Build.VERSION.SDK_INT <= 29) {
-            binding.firstTitle.setText("Allow reading storage");
-            binding.firstDesc.setText("Needed to find songs on your device");
-            binding.firstTitle.setText("Allow writing to storage");
-            binding.firstDesc.setText("Needed to edit songs metadata on your device");
-        } else if (30 <= Build.VERSION.SDK_INT && Build.VERSION.SDK_INT <= 32) {
-            binding.firstTitle.setText("allow all files access");
-            binding.firstDesc.setText("Needed to read and manage your songs");
+            binding.firstTitle.setText(getString(R.string.welcome_permission_read_storage_title));
+            binding.firstDesc.setText(getString(R.string.welcome_permission_read_storage_desc));
+            binding.secondTitle.setText(getString(R.string.welcome_permission_write_storage_title));
+            binding.secondDesc.setText(getString(R.string.welcome_permission_write_storage_desc));
+        } else if (Build.VERSION.SDK_INT <= 32) {
+            binding.firstTitle.setText(getString(R.string.welcome_permission_all_files_title));
+            binding.firstDesc.setText(getString(R.string.welcome_permission_all_files_desc));
             binding.firstItem.setBackground(ContextCompat.getDrawable(this, R.drawable.checkable_background_round));
             binding.secondItem.setVisibility(View.GONE);
         } else {
-            binding.firstTitle.setText("Allow media access");
-            binding.firstDesc.setText("Needed to find media on your device");
-            binding.secondTitle.setText("Allow notification permission");
-            binding.secondDesc.setText("Needed to make Playback notification accessible via lock screen");
+            binding.firstTitle.setText(getString(R.string.welcome_permission_media_access_title));
+            binding.firstDesc.setText(getString(R.string.welcome_permission_media_access_desc));
+            binding.secondTitle.setText(getString(R.string.welcome_permission_notification_title));
+            binding.secondDesc.setText(getString(R.string.welcome_permission_notification_desc));
         }
     }
 }

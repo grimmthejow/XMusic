@@ -228,7 +228,7 @@ public class MusicListFragment extends BaseFragment {
             .override(imageSize, imageSize)
 		    .into(binding.songCover);
 		    if (Title == null || Title.equals("")) {
-			    binding.SongTitle.setText("Unknown");
+			    binding.SongTitle.setText(getString(R.string.unknown));
 		    } else {
 			    binding.SongTitle.setText(Title);
 			    binding.SongArtist.setText(Artitst);
@@ -345,7 +345,7 @@ public class MusicListFragment extends BaseFragment {
             });
 			View view = holder.itemView;
 			TextView sg = (TextView) view.findViewById(R.id.songs_count);
-			sg.setText("0 Songs".replace("0",String.valueOf(size)));
+			sg.setText(getString(R.string.songs_count_format, size));
             MaterialButton orderButton = (MaterialButton) view.findViewById(R.id.order_type_button);
             orderButton.setChecked(!DataManager.isDescendingOrder());
             MaterialButton filterButton = (MaterialButton) view.findViewById(R.id.sort_filter_button);
@@ -495,7 +495,7 @@ public class MusicListFragment extends BaseFragment {
                     });
                     bs.dismiss();
                 });
-                bs.setTitle("Sort By");
+                bs.setTitle(getString(R.string.sort_by));
                 bs.show();
                 if (DataManager.isBlurOn() && XUtils.areBlursOrDynamicColorsSupported()) XUtils.animateBlur(activity.Coordinator, true, 300);
                 bs.setOnDismissListener(dialog -> {

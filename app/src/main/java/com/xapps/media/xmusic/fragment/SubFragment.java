@@ -1,12 +1,13 @@
 package com.xapps.media.xmusic.fragment;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 
 import androidx.activity.BackEventCompat;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import com.xapps.media.xmusic.activity.RootActivity;
-import com.xapps.media.xmusic.activity.manager.UIManager;
 import com.xapps.media.xmusic.callback.CallbackInterface;
 import com.xapps.media.xmusic.callback.FragmentCallback;
 import com.xapps.media.xmusic.databinding.ActivityRootBinding;
@@ -53,8 +54,8 @@ public class SubFragment extends BaseFragment implements FragmentCallback {
             }
 			
             @Override
-            public void onBackStackChangeCommitted(Fragment fragment, boolean b) {
-                if (isRemoving() && valid) { 
+            public void onBackStackChangeCommitted(@NonNull Fragment fragment, boolean b) {
+                if (isRemoving() && valid || Build.VERSION.SDK_INT <= 34) {
                     if (ra.getUIManager().bnvHidden) ra.getUIManager().hideComponents(ra.getUIManager().playerHidden, false, ra.getUIManager().tabsHidden, "SubFragment");
                     ra.getUIManager().saveState();
                 }

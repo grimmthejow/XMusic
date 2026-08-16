@@ -1,6 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">XMusic</string>
+    <string name="unknown">Unknown</string>
+    <string name="artist">Artist</string>
+    <string name="action">Action</string>
+    <string name="apply">Apply</string>
+    <string name="next">Next</string>
+    <string name="skip">Skip</string>
+    <string name="grant">Grant</string>
+    <string name="sort_by">Sort by</string>
+    <string name="shuffle">Shuffle</string>
+
+    <string name="crash_oops">Oops, XMusic crashed!</string>
+    <string name="crash_description">Something went wrong while playing your songs, report this bug?</string>
+    <string name="crash_send_report">Send crash report</string>
+    <string name="crash_export_logs">Export logs</string>
+    <string name="crash_restart">Restart</string>
+
+    <string name="player_no_song">No song is being played</string>
+    <string name="lyrics_not_found">Hmm, No lyrics found\n¯⁠\\_⁠(⁠ツ⁠)⁠_⁠/⁠¯</string>
+
+    <string name="welcome_tagline">Materialize your playback</string>
+    <string name="welcome_start">Start</string>
+    <string name="welcome_grant_permissions">Grant permissions</string>
+    <string name="welcome_permissions_desc">We only use these to manage your songs</string>
+    <string name="welcome_media_access">Grant media access</string>
+    <string name="welcome_media_access_desc">Needed to find media on your device</string>
+    <string name="welcome_community_desc">Join our telegram group for support, community chat, sneak peaks and more!</string>
+    <string name="welcome_join_community">Join community</string>
+    <string name="welcome_ready">All set! Everything is ready to go</string>
+    <string name="welcome_lets_go">Let\'s go!</string>
+    <string name="welcome_permissions_error">Please allow all necessary permissions first</string>
+
+    <string name="welcome_permission_read_storage_title">Allow reading storage</string>
+    <string name="welcome_permission_read_storage_desc">Needed to find songs on your device</string>
+    <string name="welcome_permission_write_storage_title">Allow writing to storage</string>
+    <string name="welcome_permission_write_storage_desc">Needed to edit songs metadata on your device</string>
+    <string name="welcome_permission_all_files_title">allow all files access</string>
+    <string name="welcome_permission_all_files_desc">Needed to read and manage your songs</string>
+    <string name="welcome_permission_media_access_title">Allow media access</string>
+    <string name="welcome_permission_media_access_desc">Needed to find media on your device</string>
+    <string name="welcome_permission_notification_title">Allow notification permission</string>
+    <string name="welcome_permission_notification_desc">Needed to make Playback notification accessible via lock screen</string>
+
+    <string name="about_tagline">Works on my device</string>
+    <string name="about_title">About XMusic</string>
+    <string name="about_app_info">App Informations</string>
+    <string name="about_package_name">Package name</string>
+    <string name="about_version">Version</string>
+    <string name="about_build_type">Build Type</string>
+    <string name="about_licenses">Open Source Licenses</string>
+    <string name="about_licenses_desc">Find out more about libraries that were used in this app</string>
+
+    <string name="appearance_title">Theme and Colors</string>
+    <string name="appearance_theme">Theme</string>
+    <string name="appearance_theme_system">System</string>
+    <string name="appearance_theme_dark">Dark</string>
+    <string name="appearance_theme_light">Light</string>
+    <string name="appearance_dynamic_theme">Dynamic Theme</string>
+    <string name="appearance_dynamic_theme_desc">Use Material you colors for app theme</string>
+    <string name="appearance_black_theme">Pure black theme</string>
+    <string name="appearance_black_theme_desc">Use a pure black background color to save energy on Amoled devices</string>
+    <string name="appearance_custom_color">Custom Dynamic Color</string>
+    <string name="appearance_custom_color_desc">Need a color to set different from your Device\'s? Luckily you have this!</string>
+    <string name="appearance_icon">App icon</string>
+    <string name="appearance_icon_redesigned">Use redesigned icon style</string>
+    <string name="appearance_icon_redesigned_desc">Try this if the default icon is boring</string>
+    <string name="appearance_interface">Interface</string>
+    <string name="appearance_blur">Enable Blur</string>
+    <string name="appearance_blur_desc">Enable Blur effects across the app, still WIP</string>
+
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_appearance_desc">Theme, Dynamic Colors, OLED theme</string>
+    <string name="settings_now_playing">Now Playing</string>
+    <string name="settings_now_playing_desc">Components, controls and behavior</string>
+    <string name="settings_advanced">Advanced</string>
+    <string name="settings_advanced_desc">Experimental features, testing options</string>
+    <string name="settings_about_desc">More information about XMusic</string>
+
+    <string name="sort_name">Name</string>
+    <string name="sort_artist">Artist</string>
+    <string name="sort_album">Album</string>
+    <string name="sort_album_artist">Album artist</string>
+    <string name="sort_year">Year</string>
+    <string name="sort_track">Track</string>
+    <string name="sort_duration">Song Duration</string>
+    <string name="sort_date_added">Date added</string>
+    <string name="sort_date_modified">Date modified</string>
+    <string name="sort_size">Size</string>
+
+    <string name="details_add_to_queue">Add to playing queue</string>
+    <string name="details_add_to_playlist">Add to playlist</string>
+    <string name="details_edit_tags">Edit song tags</string>
+    <string name="details_blacklist">Blacklist song</string>
+    <string name="details_delete">Delete song</string>
+
+    <string name="customize_toggle_shapes">Customize toggle shapes</string>
+    <string name="granted">Granted</string>
+    <string name="songs_count_format">%1$d Songs</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+
     <string name="play_icon_upper_path_data">M 44 32 L 44 64 L 100 64 L 100 64 Z</string>
     <string name="play_icon_bottom_path_data">M 44 96 L 44 63 L 100 63 L 100 63 Z</string>
     <string name="pause_icon_upper_path_data">M 32 40 L 32 56  L 96 56 L 96 40 Z</string>

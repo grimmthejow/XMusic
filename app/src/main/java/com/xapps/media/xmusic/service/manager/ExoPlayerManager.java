@@ -14,10 +14,10 @@ import androidx.media3.common.AudioAttributes;
 import androidx.media3.common.C;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.MediaMetadata;
+import androidx.media3.common.util.ExperimentalApi;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.exoplayer.DefaultRenderersFactory;
 import androidx.media3.exoplayer.ExoPlayer;
-import androidx.media3.exoplayer.audio.DefaultAudioSink;
 import com.xapps.media.xmusic.data.RuntimeData;
 import com.xapps.media.xmusic.models.Song;
 import com.xapps.media.xmusic.R;
@@ -29,21 +29,22 @@ import java.util.concurrent.Executors;
 
 public final class ExoPlayerManager {
 
-    private final HandlerThread playerThread = new HandlerThread("ExoPlayerThread");
-	private final Handler playerHandler;
+    private final Handler playerHandler;
     private ExoPlayer player;
     private List<MediaItem> mediaItems;
-    private ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final Context context;
     private final Uri fallbackUri;
 
     @OptIn(markerClass = UnstableApi.class)
+    @ExperimentalApi
     public ExoPlayerManager(Context context) {
         fallbackUri = Uri.parse("android.resource://" + context.getPackageName() + "/" + R.drawable.placeholder);
         
         this.context = context;
+        HandlerThread playerThread = new HandlerThread("ExoPlayerThread");
         playerThread.start();
-        playerHandler = new Handler(/*playerThread.getLooper()*/Looper.getMainLooper());
+        playerHandler = new Handler(Looper.getMainLooper());
         
         DefaultRenderersFactory renderers = new DefaultRenderersFactory(context)
                                                 .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
@@ -55,7 +56,7 @@ public final class ExoPlayerManager {
             .build();
 
         player = new ExoPlayer.Builder(context, renderers)
-                .setLooper(/*playerThread.getLooper()*/Looper.getMainLooper())
+                .setLooper(Looper.getMainLooper())
                 .experimentalSetDynamicSchedulingEnabled(false)
                 .setAudioAttributes(attrs, true)
                 .build();

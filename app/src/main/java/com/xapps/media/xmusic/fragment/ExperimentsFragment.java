@@ -27,10 +27,8 @@ import com.xapps.media.xmusic.R;
 public class ExperimentsFragment extends SubPrefsFragment {
 
     private RootActivity activity;
-    private ActivityMainBinding activityBinding;
-    private FragmentExperimentBinding binding;
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
-    
+
     @Override
     protected List<SettingsItem> provideItems() {
         activity = (RootActivity) getActivity();
@@ -74,7 +72,8 @@ public class ExperimentsFragment extends SubPrefsFragment {
                 dir.mkdirs();
 
                 File out = new File(dir, "xmusic_log.txt");
-				if (out.exists()) out.delete();
+				if (out.exists())
+                    out.delete();
 
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
                      FileWriter writer = new FileWriter(out)) {
@@ -119,5 +118,10 @@ public class ExperimentsFragment extends SubPrefsFragment {
         .replace(R.id.settings_frag, f)
         .addToBackStack(null)
         .commit();
+    }
+
+    @Override
+    public String getFragmentTitle() {
+        return "Advanced";
     }
 }

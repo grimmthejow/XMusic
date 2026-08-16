@@ -91,7 +91,10 @@
             android:id="@+id/container_root"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:clickable="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false">
 
             <include
                 android:id="@+id/collapsed_player"
@@ -112,10 +115,12 @@
                 layout="@layout/layout_player_expanded" />
 
         </com.xapps.media.xmusic.widget.RemainingHeightLinearLayout>
-        
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/lyrics_container"
             android:layout_height="match_parent"
+            android:alpha="0"
+            android:translationY="50px"
             android:layout_width="match_parent"
             android:visibility="gone">
             <com.xapps.media.xmusic.widget.GradientView
@@ -133,15 +138,23 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:layout_gravity="center"
-                    android:text="Hmm, No lyrics found\n¯⁠\⁠\\_⁠(⁠ツ⁠)⁠_⁠/⁠¯"
+                    android:text="@string/lyrics_not_found"
                     android:textColor="?colorOnSurface"
                     android:alpha="0.85"
-                    android:textSize="24dp" />
+                    android:textSize="24sp" />
             </FrameLayout>
             <com.xapps.media.xmusic.widget.XLyricsView
                 android:id="@+id/xlyrics_view"
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
+                android:visibility="gone"
+                android:clipChildren="false"
+                android:clipToPadding="false" />
+
+            <com.xapps.media.xmusic.widget.XLyricsContainerView
+                android:id="@+id/lyrics_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:clipChildren="false"
                 android:clipToPadding="false" />
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -153,7 +166,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:translationY="15px"
+        android:translationY="5dp"
         android:alpha="0"
         android:scaleX="0.85"
         android:scaleY="0.85"
@@ -163,7 +176,6 @@
         android:elevation="0dp"
         app:menu="@menu/bnv_menu"
         app:labelVisibilityMode="selected"
-        app:paddingBottomSystemWindowInsets="false"
-        android:clipToPadding="false" />
+        app:paddingBottomSystemWindowInsets="false" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

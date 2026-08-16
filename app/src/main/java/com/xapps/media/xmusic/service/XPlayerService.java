@@ -1,16 +1,21 @@
 package com.xapps.media.xmusic.service;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.OptIn;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
+import androidx.media3.common.util.ExperimentalApi;
+import androidx.media3.common.util.UnstableApi;
 import androidx.media3.session.DefaultMediaNotificationProvider;
 import androidx.media3.session.MediaLibraryService;
 import androidx.media3.session.MediaSession;
@@ -30,6 +35,7 @@ import com.xapps.media.xmusic.stats.StatsAudioAnalyzer;
 import com.xapps.media.xmusic.utils.ColorPaletteUtils;
 import com.xapps.media.xmusic.utils.Log;
 import com.xapps.media.xmusic.utils.MaterialColorUtils;
+import com.xapps.media.xmusic.utils.XUtils;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -53,11 +59,14 @@ public class XPlayerService extends MediaLibraryService implements ServiceCallba
     private volatile int currentPosition;
     private List<MediaItem> mediaItems;
 
+    private final Context playerContext = this;
+
     public Map<String, Integer> lightColors;
     public Map<String, Integer> darkColors;
 
     private volatile boolean isPlaying, isIdle;
 
+    @OptIn(markerClass = {ExperimentalApi.class, UnstableApi.class})
     @Override
     public void onCreate() {
         super.onCreate();
@@ -81,6 +90,7 @@ public class XPlayerService extends MediaLibraryService implements ServiceCallba
         return sessionManager.getSession();
     }
 
+    @OptIn(markerClass = UnstableApi.class)
     @Override
     public void onTaskRemoved(Intent i) {
         if (isIdle) pauseAllPlayersAndStopSelf();
@@ -133,16 +143,12 @@ public class XPlayerService extends MediaLibraryService implements ServiceCallba
                                     if (mediaItem == null || mediaItem.localConfiguration == null) {
                                         statsAnalyzer.stopAnalysis();
                                     } else {
-                                        if (!RuntimeData.songs.isEmpty()
-                                                && player.getCurrentMediaItemIndex()
-                                                        < RuntimeData.songs.size()) {
-                                            statsAnalyzer.startAnalysis(
-                                                    RuntimeData.songs.get(
-                                                            player.getCurrentMediaItemIndex()));
+                                        if (!RuntimeData.songs.isEmpty() && player.getCurrentMediaItemIndex() < RuntimeData.songs.size()) {
+                                            statsAnalyzer.startAnalysis(RuntimeData.songs.get(player.getCurrentMediaItemIndex()));
                                         }
                                     }
-                                    if (CallbackInterface.activity() != null) CallbackInterface.activity().onSongChanged(player.getCurrentMediaItemIndex());
-                                    if (player.getPlaybackState() != Player.STATE_IDLE) {
+                                    if (CallbackInterface.activity() != null) CallbackInterface.activity().onSongChanged(mediaItem == null? -1 :player.getCurrentMediaItemIndex());
+                                    if (player.getPlaybackState() != Player.STATE_IDLE || mediaItem != null) {
                                         genColors(player.getCurrentMediaItemIndex());
                                     }
                                     if (player.getMediaItemCount() > 0) saveResumeState();
@@ -190,8 +196,7 @@ public class XPlayerService extends MediaLibraryService implements ServiceCallba
                     } else {
                         Uri thumb = RuntimeData.songs.get(index).getArtworkUri();
                         boolean exists = false;
-                        try (ParcelFileDescriptor pfd =
-                                getContentResolver().openFileDescriptor(thumb, "r")) {
+                        try (ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(thumb, "r")) {
                             exists = pfd != null;
                         } catch (Exception ignored) {
                         }
@@ -199,23 +204,16 @@ public class XPlayerService extends MediaLibraryService implements ServiceCallba
                     }
 
                     if (DataManager.areStableColors()) {
-                        ColorPaletteUtils.generateFromColor(
-                                MaterialColorUtils.colorPrimary,
-                                (light, dark) -> {
-                                    ActivityCallback activityCallback =
-                                            CallbackInterface.activity();
-                                    if (activityCallback != null)
-                                        activityCallback.onColorsChanged();
-                                });
+                        ColorPaletteUtils.generateFromColor(MaterialColorUtils.colorPrimary, (light, dark) -> {
+                            ActivityCallback activityCallback = CallbackInterface.activity();
+                            if (activityCallback != null)
+                                activityCallback.onColorsChanged();
+                        });
                     } else {
-                        ColorPaletteUtils.generateFromBitmap(
-                                bmp,
-                                (light, dark) -> {
-                                    ActivityCallback activityCallback =
-                                            CallbackInterface.activity();
-                                    if (activityCallback != null)
-                                        activityCallback.onColorsChanged();
-                                });
+                        ColorPaletteUtils.generateFromBitmap(bmp, (light, dark) -> {
+                            ActivityCallback activityCallback = CallbackInterface.activity();
+                            if (activityCallback != null) activityCallback.onColorsChanged();
+                        });
                     }
                 });
     }
@@ -240,23 +238,18 @@ public class XPlayerService extends MediaLibraryService implements ServiceCallba
 
     private void saveResumeState() {
         if (RuntimeData.songs == null || RuntimeData.songs.isEmpty()) return;
-        if (player == null
-                || player.getPlaybackState() == Player.STATE_IDLE
-                || player.getMediaItemCount() == 0) return;
-        playerHandler.post(
-                () -> {
-                    ResumeState state = buildResumeState();
-                    executor.execute(
-                            () -> {
-                                try (FileOutputStream fos =
-                                                openFileOutput("resume_state.dat", MODE_PRIVATE);
-                                        ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-                                    oos.writeObject(state);
-                                } catch (Exception e) {
-                                    Log.e("RESUME_TEST", "SAVE FAILED", e);
-                                }
-                            });
-                });
+        if (player == null || player.getPlaybackState() == Player.STATE_IDLE || player.getMediaItemCount() == 0) return;
+        playerHandler.post(() -> {
+            ResumeState state = buildResumeState();
+            executor.execute(() -> {
+                try (FileOutputStream fos = openFileOutput("resume_state.dat", MODE_PRIVATE);
+                     ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+                     oos.writeObject(state);
+                } catch (Exception e) {
+                    Log.e("RESUME_STATE-SAVE", "SAVE FAILED", e);
+                }
+            });
+        });
     }
 
     private ResumeState buildResumeState() {
@@ -268,12 +261,7 @@ public class XPlayerService extends MediaLibraryService implements ServiceCallba
         state.speed = player.getPlaybackParameters().speed;
 
         for (Song song : RuntimeData.songs) {
-            state.songs.add(
-                    new ResumeSong(
-                            song.title,
-                            song.artist,
-                            song.path,
-                            song.getArtworkUri() != null ? song.getArtworkUri().toString() : null));
+            state.songs.add(new ResumeSong(song.title, song.artist, song.path, song.getArtworkUri() != null ? song.getArtworkUri().toString() : null));
         }
         return state;
     }
@@ -300,7 +288,7 @@ public class XPlayerService extends MediaLibraryService implements ServiceCallba
 
     @Override
     public boolean isAnythingPlaying() {
-        return player.getMediaItemCount() > 0 && player.getCurrentMediaItemIndex() != -1 && !isIdle;
+        return player.getMediaItemCount() > 0 && player.getCurrentMediaItemIndex() != -1;
     }
 
     @Override
@@ -310,7 +298,8 @@ public class XPlayerService extends MediaLibraryService implements ServiceCallba
 
     @Override
     public void regenColors(int position) {
-        genColors(position == -1 ? currentPosition : position);
+        if (position < 0 || position >= player.getMediaItemCount()) return;
+        genColors(position);
     }
 
     @Override

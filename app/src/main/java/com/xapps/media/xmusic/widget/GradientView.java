@@ -8,7 +8,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RadialGradient;
 import android.graphics.Shader;
-import android.os.Trace;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -43,31 +42,26 @@ public class GradientView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        Trace.beginSection("GV:onDraw");
-        try {
-            float time = (System.currentTimeMillis() - startTime) / 2500f;
-            int w = getWidth();
-            int h = getHeight();
+        float time = (System.currentTimeMillis() - startTime) / 2500f;
+        int w = getWidth();
+        int h = getHeight();
 
-            drawBlob(canvas, 
-                w * 0.5f + (float) Math.sin(time * 0.3f) * (w * 0.1f), 
-                h * 0.5f + (float) Math.cos(time * 0.3f) * (h * 0.1f), 
-                w * 2.5f, dominantColor, 200);
+        drawBlob(canvas, 
+            w * 0.5f + (float) Math.sin(time * 0.3f) * (w * 0.1f), 
+            h * 0.5f + (float) Math.cos(time * 0.3f) * (h * 0.1f), 
+            w * 2.5f, dominantColor, 200);
 
-            drawBlob(canvas, 
-                w * 0.2f + (float) Math.cos(time * 0.8f) * (w * 0.4f), 
-                h * 0.8f + (float) Math.sin(time * 0.6f) * (h * 0.3f), 
-                w * 1.1f, accentColor1, 200);
+        drawBlob(canvas, 
+            w * 0.2f + (float) Math.cos(time * 0.8f) * (w * 0.4f), 
+            h * 0.8f + (float) Math.sin(time * 0.6f) * (h * 0.3f), 
+            w * 1.1f, accentColor1, 200);
 
-            drawBlob(canvas, 
-                w * 0.8f + (float) Math.sin(time * 0.5f) * (w * 0.3f), 
-                h * 0.2f + (float) Math.cos(time * 0.9f) * (h * 0.4f), 
-                w * 1.0f, accentColor2, 200);
+        drawBlob(canvas, 
+            w * 0.8f + (float) Math.sin(time * 0.5f) * (w * 0.3f), 
+            h * 0.2f + (float) Math.cos(time * 0.9f) * (h * 0.4f), 
+            w * 1.0f, accentColor2, 200);
 
-            postInvalidateOnAnimation();
-        } finally {
-            Trace.endSection();
-        }
+        postInvalidateOnAnimation();
     }
 
     private void drawBlob(Canvas canvas, float x, float y, float radius, int color, int alpha) {

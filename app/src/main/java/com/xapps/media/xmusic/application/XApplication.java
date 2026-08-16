@@ -31,14 +31,14 @@ public class XApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        DataManager.init(this);
-        XUtils.updateTheme();
+        DataManager.init(this, () -> {
+            XUtils.updateTheme();
 
-        // Pre-warm variable font in background to avoid main-thread lag during first usage
-        Executors.newSingleThreadExecutor().execute(() -> {
-            try {
-                ResourcesCompat.getFont(this, R.font.gsans_flex_full);
-            } catch (Exception ignored) {}
+            Executors.newSingleThreadExecutor().execute(() -> {
+                try {
+                    ResourcesCompat.getFont(this, R.font.gsans_flex_full);
+                } catch (Exception ignored) {}
+            });
         });
 
         if (BuildConfig.BUILD_TYPE.equals("debug")) {

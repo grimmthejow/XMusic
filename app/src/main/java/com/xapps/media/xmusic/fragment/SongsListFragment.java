@@ -5,6 +5,7 @@ import android.graphics.*;
 import android.graphics.drawable.*;
 import android.net.Uri;
 import android.os.*;
+import android.util.Log;
 import android.view.*;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -223,7 +224,7 @@ public class SongsListFragment extends BaseFragment implements FragmentCallback 
             .override(imageSize, imageSize)
 		    .into(binding.songCover);
 		    if (Title == null || Title.equals("")) {
-			    binding.SongTitle.setText("Unknown");
+			    binding.SongTitle.setText(getString(R.string.unknown));
 		    } else {
 			    binding.SongTitle.setText(Title);
 			    binding.SongArtist.setText(Artitst);
@@ -326,7 +327,7 @@ public class SongsListFragment extends BaseFragment implements FragmentCallback 
             });
 			View view = holder.itemView;
 			TextView sg = (TextView) view.findViewById(R.id.songs_count);
-			sg.setText("0 Songs".replace("0",String.valueOf(size)));
+			sg.setText(getString(R.string.songs_count_format, size));
             MaterialButton orderButton = (MaterialButton) view.findViewById(R.id.order_type_button);
             orderButton.setChecked(!DataManager.isDescendingOrder());
             MaterialButton filterButton = (MaterialButton) view.findViewById(R.id.sort_filter_button);
@@ -476,7 +477,7 @@ public class SongsListFragment extends BaseFragment implements FragmentCallback 
                     });
                     bs.dismiss();
                 });
-                bs.setTitle("Sort By");
+                bs.setTitle(getString(R.string.sort_by));
                 bs.show();
                 if (DataManager.isBlurOn() && XUtils.areBlursOrDynamicColorsSupported()) XUtils.animateBlur(activity.Coordinator, true, 300);
                 bs.setOnDismissListener(dialog -> {
@@ -567,35 +568,28 @@ public class SongsListFragment extends BaseFragment implements FragmentCallback 
     
     private void loadSongs() {
         executor.execute(() -> {
-            SongMetadataHelper.getAllSongs(getActivity(), new SongLoadListener() {
-                @Override
-                public void onComplete(ArrayList<Song> list) {
-                    if (getActivity() == null) return;
-                    SongSorter.sort(list, DataManager.getSongFilterType(), DataManager.isDescendingOrder(), sortedList -> {
-                        RuntimeData.songs = sortedList;
-                        a.updateSongsQueue(sortedList);
-                        size = RuntimeData.songs.size();
-                        songsAdapter = new SongsListAdapter(getActivity(), RuntimeData.songs);
-                        HeaderAdapter headerAdapter = new HeaderAdapter();
-                        concatAdapter = new ConcatAdapter(headerAdapter, songsAdapter);
-                        mainHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                binding.songsList.setAdapter(concatAdapter);
-                                binding.swipeRefreshLayout.setRefreshing(false);
-                                if (scroller != null) scroller.setForceHidden(false);
-                                binding.songsList.setItemAnimator(null);
-                                MaterialSharedAxis msa = new MaterialSharedAxis(MaterialSharedAxis.Y, true);
-                                msa.setDuration(500);
-                                if (binding.emptyLayout.getVisibility() == View.VISIBLE) TransitionManager.beginDelayedTransition(binding.coordinator, msa);
-                                binding.emptyLayout.setVisibility(View.GONE);
-                                binding.swipeRefreshLayout.setVisibility(View.VISIBLE);
-                            }
-                        });
+            SongMetadataHelper.getAllSongs(getActivity(), SongLoadListener.on(list -> {
+                if (getActivity() == null) return;
+                SongSorter.sort(list, DataManager.getSongFilterType(), DataManager.isDescendingOrder(), sortedList -> {
+                    RuntimeData.songs = sortedList;
+                    a.updateSongsQueue(sortedList);
+                    size = RuntimeData.songs.size();
+                    songsAdapter = new SongsListAdapter(getActivity(), RuntimeData.songs);
+                    HeaderAdapter headerAdapter = new HeaderAdapter();
+                    concatAdapter = new ConcatAdapter(headerAdapter, songsAdapter);
+                    mainHandler.post(() -> {
+                        binding.songsList.setAdapter(concatAdapter);
+                        binding.swipeRefreshLayout.setRefreshing(false);
+                        if (scroller != null) scroller.setForceHidden(false);
+                        binding.songsList.setItemAnimator(null);
+                        MaterialSharedAxis msa = new MaterialSharedAxis(MaterialSharedAxis.Y, true);
+                        msa.setDuration(500);
+                        if (binding.emptyLayout.getVisibility() == View.VISIBLE) TransitionManager.beginDelayedTransition(binding.coordinator, msa);
+                        binding.emptyLayout.setVisibility(View.GONE);
+                        binding.swipeRefreshLayout.setVisibility(View.VISIBLE);
                     });
-                    
-                }
-            });
+                });
+            }, e -> Log.e("SongsListFragment", "Failed to load songs", e)));
         });
     }
     

@@ -53,4 +53,10 @@
 		<item name="android:popupTheme">@style/AppPopupTheme</item>
         <item name="android:windowBackground">?attr/colorSurfaceContainer</item>
     </style>
+
+    <style name="Theme.XMusic.SplashScreen" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/md_theme_surface</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/avd_anim</item>
+        <item name="postSplashScreenTheme">@style/AppTheme</item>
+    </style>
 </resources>

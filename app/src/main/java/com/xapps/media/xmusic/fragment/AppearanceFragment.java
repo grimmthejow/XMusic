@@ -17,8 +17,6 @@ import androidx.transition.Fade;
 import androidx.transition.TransitionManager;
 import androidx.transition.TransitionSet;
 import com.rtugeek.android.colorseekbar.thumb.DefaultThumbDrawer;
-import com.xapps.media.xmusic.LauncherAlt;
-import com.xapps.media.xmusic.LauncherDefault;
 import com.xapps.media.xmusic.activity.RootActivity;
 import com.xapps.media.xmusic.data.DataManager;
 import com.xapps.media.xmusic.databinding.FragmentAppearanceBinding;
@@ -169,17 +167,16 @@ public class AppearanceFragment extends SubFragment {
     
     private void setNewIconEnabled(boolean b) {
         PackageManager pm = getActivity().getPackageManager();
-        Class<?> enable = b? LauncherAlt.class : LauncherDefault.class;
-        Class<?> disable = b? LauncherDefault.class : LauncherAlt.class;
+
 
         pm.setComponentEnabledSetting(
-            new ComponentName(getActivity(), enable),
+            new ComponentName(getActivity(), b? "com.xapps.media.xmusic.LauncherAlt" : "com.xapps.media.xmusic.LauncherDefault"),
             PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
             PackageManager.DONT_KILL_APP
         );
 
         pm.setComponentEnabledSetting(
-            new ComponentName(getActivity(), disable),
+            new ComponentName(getActivity(), b? "com.xapps.media.xmusic.LauncherDefault" : "com.xapps.media.xmusic.LauncherAlt"),
             PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
             PackageManager.DONT_KILL_APP
         );
