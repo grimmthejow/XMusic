@@ -1,11 +1,11 @@
 package com.xapps.media.xmusic.utils;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 
 import com.google.android.material.color.utilities.Hct;
 import com.google.android.material.color.utilities.QuantizerCelebi;
 import com.google.android.material.color.utilities.Score;
-import com.google.android.material.color.utilities.Scheme;
 
 import java.util.HashMap;
 import java.util.List;
@@ -52,14 +52,14 @@ public class ColorPaletteUtils {
                         0, 0, scaled.getWidth(), scaled.getHeight()
                 );
 
-                Map<Integer, Integer> colorMap =
+                @SuppressLint("RestrictedApi") Map<Integer, Integer> colorMap =
                         QuantizerCelebi.quantize(pixels, 16);
 
-                List<Integer> ranked =
+                @SuppressLint("RestrictedApi") List<Integer> ranked =
                         Score.score(colorMap, 0, 1, false);
 
                 int seedColor = ranked.isEmpty() ? 0xFF6750A4 : ranked.get(0);
-                Hct seed = Hct.fromInt(seedColor);
+                @SuppressLint("RestrictedApi") Hct seed = Hct.fromInt(seedColor);
 
                 Map<String, Integer> newLight =
                         generateMaterialTones(seed, false);
@@ -95,12 +95,11 @@ public class ColorPaletteUtils {
     }
 
     public static void generateFromColor(int color, ResultCallback callback) {
-    
-        int hash = color;
-        if (hash == lastBitmapHash && lightColors != null && darkColors != null) {
+
+        if (color == lastBitmapHash && lightColors != null && darkColors != null) {
             return;
         }
-        Hct seed = Hct.fromInt(color);
+        @SuppressLint("RestrictedApi") Hct seed = Hct.fromInt(color);
 
         Map<String, Integer> newLight =
                 generateMaterialTones(seed, false);
@@ -117,7 +116,7 @@ public class ColorPaletteUtils {
 
         lightColors = newLight;
         darkColors = newDark;
-        
+
         lastBitmapHash = color;
 
         if (callback != null) {
@@ -140,16 +139,13 @@ public class ColorPaletteUtils {
         }
         return hash;
     }
-    
-    public static long getCurrentHash() {
-        return lastBitmapHash;
-    }
 
+    @SuppressLint("RestrictedApi")
     private static Map<String, Integer> generateMaterialTones(Hct hct, boolean isDark) {
         Map<String, Integer> tones = new HashMap<>();
 
-        double hue = hct.getHue() % 360;
-        double chroma = hct.getChroma();
+        @SuppressLint("RestrictedApi") double hue = hct.getHue() % 360;
+        @SuppressLint("RestrictedApi") double chroma = hct.getChroma();
         boolean lowChroma = chroma < 10;
 
         tones.put("primary", Hct.from(hue, lowChroma ? chroma : 40, isDark ? 80 : 30).toInt());
@@ -171,9 +167,5 @@ public class ColorPaletteUtils {
         tones.put("outline", Hct.from(hue, lowChroma ? chroma : 25, isDark ? 60 : 70).toInt());
 
         return tones;
-    }
-
-    public static Scheme generateCustomScheme(int seedColor, boolean isDarkMode) {
-        return isDarkMode ? Scheme.dark(seedColor) : Scheme.light(seedColor);
     }
 }

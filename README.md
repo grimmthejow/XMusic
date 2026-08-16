@@ -127,13 +127,13 @@ A: Make sure storage permissions are granted and your audio files are in support
 **Q: Does XMusic collect any personal data?**  
 A: No. There is no tracking, analytics abuse, or data harvesting.
 
-**Q: Why did playback stop in the background?** 
+**Q: Why did playback stop in the background?**  
 A: Your system’s battery optimization or OEM “power saving” probably killed it. Disable optimizations for XMusic.
 
 **Q: Can I request features or report bugs?**  
 A: Yes. Use GitHub Issues for bugs and feature requests, or join the Telegram community for discussion.
 
-**Q: Why is feature X not available?**
+**Q: Why is feature X not available?**  
 A: If you think this feature will be useful for a lot of people, feel free to suggest it via reaching to our [Telegram Community](https://t.me/xmusiccommunity)
 
 **Q: Is XMusic open source?**  

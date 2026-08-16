@@ -8,7 +8,6 @@ import android.graphics.drawable.*;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.*;
-import android.util.*;
 import android.view.*;
 import android.view.animation.*;
 import android.widget.*;
@@ -16,7 +15,6 @@ import androidx.activity.*;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.*;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.core.view.*;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -34,7 +32,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.search.SearchView;
 import com.google.android.material.transition.MaterialFadeThrough;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.xapps.media.xmusic.R;
 import com.xapps.media.xmusic.activity.controller.ActivityMediaController;
 import com.xapps.media.xmusic.activity.manager.BottomSheetBehaviorManager;
@@ -1255,7 +1252,7 @@ public void floatBnv(boolean show) {
             if (lyrics != null && !lyrics.isEmpty()) {
                 LyricsParser.parse(lyrics, result -> {
                     binding.xlyricsView.post(() -> {
-                        binding.xlyricsView.setLyrics(result.lines);
+                        binding.xlyricsView.setLyrics(result.lines());
                         binding.xlyricsView.setListener(MainActivity.this);
 						
 						MaterialFadeThrough mft = new MaterialFadeThrough();

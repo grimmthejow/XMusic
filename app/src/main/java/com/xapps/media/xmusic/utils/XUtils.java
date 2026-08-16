@@ -470,6 +470,10 @@ public class XUtils {
         Rect hitRect = new Rect();
         return view.getGlobalVisibleRect(hitRect);
     }
+
+    public static boolean predictiveBackSupported() {
+        return Build.VERSION.SDK_INT >= 34;
+    }
     
 
 }
