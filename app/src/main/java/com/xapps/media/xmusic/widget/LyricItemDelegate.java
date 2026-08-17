@@ -26,6 +26,7 @@ public class LyricItemDelegate {
     private int rawBgHeight = 0;
     private int rawRomajiHeight = 0;
 
+    private int preppedWidth = -1;
     private boolean isPrepped = false;
     public boolean isActive = false;
     private float activeProgress = 0f;
@@ -96,7 +97,6 @@ public class LyricItemDelegate {
     }
 
     public void measureStaticBounds(int availableWidth, int parentPaddingLeft, int parentPaddingRight) {
-        isPrepped = false;
         int contentWidth = availableWidth - parentPaddingLeft - parentPaddingRight;
 
         paddingLeft = (int) (contentWidth * 0.05f);
@@ -108,6 +108,11 @@ public class LyricItemDelegate {
         }
 
         int textWidth = contentWidth - paddingLeft - paddingRight;
+
+        if (textWidth != preppedWidth) {
+            isPrepped = false;
+            preppedWidth = textWidth;
+        }
 
         if (dotsView != null) {
             dotsView.setTimes(item.mainLine.time, item.mainLine.endTime);

@@ -27,10 +27,15 @@ import java.util.Random;
 
 public class XLyricsLineView extends View {
 
+    private static Typeface sharedTypeface;
+    private static final AccelerateDecelerateInterpolator sharedInterpolator = new AccelerateDecelerateInterpolator();
+    private static final Random sharedRandom = new Random();
+    private static LinearGradient sharedBrushShader;
+    private static int lastActiveColor = -1;
+    private static int lastFutureColor = -1;
+
     public final TextPaint textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
     private final Paint sparklePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final AccelerateDecelerateInterpolator interpolator = new AccelerateDecelerateInterpolator();
-    private final Random random = new Random();
 
     protected StaticLayout staticLayout;
     private LyricLine lyricLine;
@@ -125,8 +130,11 @@ public class XLyricsLineView extends View {
     }
 
     private void init() {
-        Typeface customFont = ResourcesCompat.getFont(getContext(), R.font.gsans_flex_full);
-        textPaint.setTypeface(Typeface.create(customFont, Typeface.BOLD));
+        if (sharedTypeface == null) {
+            Typeface customFont = ResourcesCompat.getFont(getContext(), R.font.gsans_flex_full);
+            sharedTypeface = Typeface.create(customFont, Typeface.BOLD);
+        }
+        textPaint.setTypeface(sharedTypeface);
         textPaint.setFontFeatureSettings("'liga' 0, 'clig' 0");
         setClipToOutline(false);
         setClickable(false);
@@ -185,7 +193,11 @@ public class XLyricsLineView extends View {
     }
 
     public int getDesiredHeight(String text, int width) {
-        if (width <= 0) return 0;
+        if (width <= 0 || text == null || text.isEmpty()) return 0;
+        LayoutCache cache = this.layoutCache;
+        if (cache != null && text.equals(cache.text) && width == cache.width && this.alignment == cache.alignment) {
+            return cache.staticLayout.getHeight() + (int)(getExtraPadding() * 2);
+        }
         StaticLayout temp = StaticLayout.Builder.obtain(text, 0, text.length(), textPaint, width)
                 .setAlignment(alignment)
                 .setIncludePad(true)
@@ -527,10 +539,15 @@ public class XLyricsLineView extends View {
     }
 
     private void updateShader() {
-        brushShader = new LinearGradient(0, 0, GRADIENT_WIDTH, 0,
-                new int[]{activeColor, activeColor, futureColor, futureColor},
-                new float[]{0f, 0.1f, 0.9f, 1f},
-                Shader.TileMode.CLAMP);
+        if (sharedBrushShader == null || activeColor != lastActiveColor || futureColor != lastFutureColor) {
+            lastActiveColor = activeColor;
+            lastFutureColor = futureColor;
+            sharedBrushShader = new LinearGradient(0, 0, GRADIENT_WIDTH, 0,
+                    new int[]{activeColor, activeColor, futureColor, futureColor},
+                    new float[]{0f, 0.1f, 0.9f, 1f},
+                    Shader.TileMode.CLAMP);
+        }
+        brushShader = sharedBrushShader;
     }
 
     private float getGlobalXForOffset(int offset) {
@@ -592,7 +609,7 @@ public class XLyricsLineView extends View {
                         float gap = syl.startTime - lastEndTime;
                         if (gap > 0) {
                             float ratio = (float) (progressMs - lastEndTime) / gap;
-                            globalX = lastLineEndGlobal + (sylGlobalStart - lastLineEndGlobal) * interpolator.getInterpolation(ratio);
+                            globalX = lastLineEndGlobal + (sylGlobalStart - lastLineEndGlobal) * sharedInterpolator.getInterpolation(ratio);
                         } else {
                             globalX = lastLineEndGlobal;
                         }
@@ -600,7 +617,7 @@ public class XLyricsLineView extends View {
                         break;
                     } else if (progressMs >= syl.startTime && progressMs <= syl.endTime) {
                         float ratio = (float) (progressMs - syl.startTime) / Math.max(1, syl.endTime - syl.startTime);
-                        globalX = sylGlobalStart + ((sylGlobalEnd - sylGlobalStart) * interpolator.getInterpolation(ratio));
+                        globalX = sylGlobalStart + ((sylGlobalEnd - sylGlobalStart) * sharedInterpolator.getInterpolation(ratio));
                         found = true;
                         break;
                     }
@@ -641,19 +658,19 @@ public class XLyricsLineView extends View {
     private void spawnSparkle(float headX, float topY, float bottomY) {
         if (sparkles.size() > 45) return;
         Sparkle s = new Sparkle();
-        s.baseX = headX - (random.nextFloat() * spToPx(4f));
+        s.baseX = headX - (sharedRandom.nextFloat() * spToPx(4f));
         float h = bottomY - topY;
-        s.baseY = topY + (h * 0.125f) + (random.nextFloat() * (h * 0.75f));
-        s.vx = (random.nextFloat() - 0.5f) * spToPx(8f);
-        s.vy = -(random.nextFloat() * spToPx(10f) + spToPx(4f));
-        s.maxLife = 0.4f + random.nextFloat() * 0.6f;
+        s.baseY = topY + (h * 0.125f) + (sharedRandom.nextFloat() * (h * 0.75f));
+        s.vx = (sharedRandom.nextFloat() - 0.5f) * spToPx(8f);
+        s.vy = -(sharedRandom.nextFloat() * spToPx(10f) + spToPx(4f));
+        s.maxLife = 0.4f + sharedRandom.nextFloat() * 0.6f;
         s.life = s.maxLife;
-        s.maxAlpha = 0.6f + random.nextFloat() * 0.4f;
+        s.maxAlpha = 0.6f + sharedRandom.nextFloat() * 0.4f;
         s.alpha = s.maxAlpha;
-        s.size = spToPx(0.8f + random.nextFloat() * 1.4f);
-        s.phase = random.nextFloat() * (float) Math.PI * 2f;
-        s.amplitude = spToPx(1.5f + random.nextFloat() * 1.5f);
-        s.frequency = 6f + random.nextFloat() * 8f;
+        s.size = spToPx(0.8f + sharedRandom.nextFloat() * 1.4f);
+        s.phase = sharedRandom.nextFloat() * (float) Math.PI * 2f;
+        s.amplitude = spToPx(1.5f + sharedRandom.nextFloat() * 1.5f);
+        s.frequency = 6f + sharedRandom.nextFloat() * 8f;
         sparkles.add(s);
     }
 
@@ -824,8 +841,8 @@ public class XLyricsLineView extends View {
             float lineBottom = staticLayout.getLineBottom(currentLineIdx);
 
             if (clampedLocalX > 0 && clampedLocalX < lineWidth) {
-                if (random.nextFloat() < 0.7f) {
-                    int spawnCount = random.nextInt(2) + 1;
+                if (sharedRandom.nextFloat() < 0.7f) {
+                    int spawnCount = sharedRandom.nextInt(2) + 1;
                     for(int k=0; k<spawnCount; k++) {
                         spawnSparkle(headX, lineTop + getExtraPadding(), lineBottom + getExtraPadding());
                     }

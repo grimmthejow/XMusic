@@ -165,37 +165,33 @@ public class XLyricsContainerView extends ScrollingView2 {
                 tempItems.add(item);
             }
 
-            mainHandler.post(() -> {
-                List<LyricItemDelegate> tempDelegates = new ArrayList<>();
-                for (LyricItem item : tempItems) {
-                    LyricItemDelegate delegate = new LyricItemDelegate(getContext(), item);
-                    if (currentColor != 0) delegate.setLyricColor(currentColor);
-                    if (currentFontConfig != null) delegate.setFontConfig(currentFontConfig);
-                    delegate.setEnableSparkles(enableSparkles);
-                    tempDelegates.add(delegate);
+            List<LyricItemDelegate> tempDelegates = new ArrayList<>();
+            int contentWidth = finalAvailableWidth - parentPaddingLeft - parentPaddingRight;
+            
+            for (LyricItem item : tempItems) {
+                LyricItemDelegate delegate = new LyricItemDelegate(getContext(), item);
+                if (currentColor != 0) delegate.setLyricColor(currentColor);
+                if (currentFontConfig != null) delegate.setFontConfig(currentFontConfig);
+                delegate.setEnableSparkles(enableSparkles);
+
+                int pLeft = (int) (contentWidth * 0.05f);
+                int pRight = (int) (contentWidth * 0.2f);
+                if (delegate.getItem().mainLine != null && delegate.getItem().mainLine.vocalType != 1 && !delegate.getItem().mainLine.isWaitingDots && !delegate.getItem().mainLine.isBackground) {
+                    pLeft = (int) (contentWidth * 0.2f);
+                    pRight = (int) (contentWidth * 0.05f);
                 }
+                int textWidth = contentWidth - pLeft - pRight;
+                delegate.precomputeLayouts(textWidth);
+                
+                tempDelegates.add(delegate);
+            }
 
-                bgExecutor.execute(() -> {
-                    int contentWidth = finalAvailableWidth - parentPaddingLeft - parentPaddingRight;
-                    for (LyricItemDelegate delegate : tempDelegates) {
-                        int pLeft = (int) (contentWidth * 0.05f);
-                        int pRight = (int) (contentWidth * 0.2f);
-                        if (delegate.getItem().mainLine != null && delegate.getItem().mainLine.vocalType != 1 && !delegate.getItem().mainLine.isWaitingDots && !delegate.getItem().mainLine.isBackground) {
-                            pLeft = (int) (contentWidth * 0.2f);
-                            pRight = (int) (contentWidth * 0.05f);
-                        }
-                        int textWidth = contentWidth - pLeft - pRight;
-                        delegate.precomputeLayouts(textWidth);
-                    }
-
-                    mainHandler.post(() -> {
-                        lineDelegates.clear();
-                        lineDelegates.addAll(tempDelegates);
-                        scrollTo(0, 0);
-                        requestLayout();
-                        invalidate();
-                    });
-                });
+            mainHandler.post(() -> {
+                lineDelegates.clear();
+                lineDelegates.addAll(tempDelegates);
+                scrollTo(0, 0);
+                requestLayout();
+                invalidate();
             });
         });
     }
