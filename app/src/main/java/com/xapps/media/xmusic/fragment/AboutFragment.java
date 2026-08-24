@@ -1,6 +1,7 @@
 package com.xapps.media.xmusic.fragment;
 
-import android.graphics.Color;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,13 +9,10 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import com.google.android.material.transition.MaterialContainerTransform;
 import com.xapps.media.xmusic.R;
 import com.xapps.media.xmusic.BuildConfig;
 import com.xapps.media.xmusic.activity.RootActivity;
 import com.xapps.media.xmusic.databinding.FragmentAboutBinding;
-import com.xapps.media.xmusic.utils.MaterialColorUtils;
-import com.xapps.media.xmusic.utils.XUtils;
 import java.util.Random;
 
 public class AboutFragment extends SubFragment {
@@ -42,8 +40,11 @@ public class AboutFragment extends SubFragment {
         "Thanks for using the app. Seriously.",
         "Curiosity killed the cat",
         "HELP IM BEING ABUSED (/jk)",
-        "Fun fact, fully built on a mobile IDE so far :>"
+        "Fun fact, fully built on a mobile IDE so far :>\nUPDATE: not anymore I got anew PC :DD"
     };
+
+    private final String TELEGRAM_LINk = "https://t.me/xmusiccommunity";
+    private final String GITHUB_LINk = "https://github.com/foedusprogramme/xmusic";
     
     @Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -74,6 +75,7 @@ public class AboutFragment extends SubFragment {
         });
 		
 		binding.toolbar.setNavigationOnClickListener(v -> {
+            assert getActivity() != null;
             getActivity().getOnBackPressedDispatcher().onBackPressed();
 			activity.getUIManager().hideComponents(activity.getUIManager().playerHidden, false, activity.getUIManager().tabsHidden, "AboutFragment");
         });
@@ -83,15 +85,17 @@ public class AboutFragment extends SubFragment {
     }
 
     private void setupListeners() {
-        binding.thirdItem.setOnClickListener(v -> {
-            activity.showInfoDialog("Build Flavors", R.drawable.ic_info_outline, "XMusic has 3 different Build Flavors : release, debug, and preview.\n\n• Debug builds are the biggest in size and usually full of logging and debug stuff, that's why it's noticeably slower and dosen't reflect real app performance.\n\n• Preview builds are significantly smaller in size than debug builds, they are stripped from most of debug logic but not obfuscated, they should be much smoother and performant.\n\n• Release builds are the smallest in size and they're highly optimized and obfuscated, you'll usually be able to get this only from GitHub releases (when I make one :P).", "Got it", binding.coordinator);
-        });
-        binding.secondItem.setOnClickListener(v -> {
-            activity.showInfoDialog("Release types", R.drawable.ic_info_outline, "XMusic has 3 different Build Flavors : Alpha, Beta, and Stable.\n\n• Alpha : Experimental builds with unfinished features.\nExpect bugs, crashes, and frequent changes.\n\n• Beta : Mostly stable with new features still being tested.\nMinor bugs and performance issues may occur.\n\n• Stable : Almost fully tested and optimized for daily use.\nBest performance and reliability.", "Got it", binding.coordinator);
-        });
-		binding.fourthItem.setOnClickListener(v -> {
-			openFragment(new UsedLibsFragment());
-		});
+        binding.thirdItem.setOnClickListener(v -> activity.showInfoDialog("Build Flavors", R.drawable.ic_info_outline, "XMusic has 3 different Build Flavors : release, debug, and preview.\n\n• Debug builds are the biggest in size and usually full of logging and debug stuff, that's why it's noticeably slower and doesn't reflect real app performance.\n\n• Preview builds are significantly smaller in size than debug builds, they are stripped from most of debug logic but not obfuscated, they should be much smoother and performant.\n\n• Release builds are the smallest in size and they're highly optimized and obfuscated, you'll usually be able to get this only from GitHub releases (when I make one :P).", "Got it", binding.coordinator));
+        binding.secondItem.setOnClickListener(v -> activity.showInfoDialog("Release types", R.drawable.ic_info_outline, "XMusic has 3 different Build Flavors : Alpha, Beta, and Stable.\n\n• Alpha : Experimental builds with unfinished features.\nExpect bugs, crashes, and frequent changes.\n\n• Beta : Mostly stable with new features still being tested.\nMinor bugs and performance issues may occur.\n\n• Stable : Almost fully tested and optimized for daily use.\nBest performance and reliability.", "Got it", binding.coordinator));
+		binding.fourthItem.setOnClickListener(v -> openFragment(new UsedLibsFragment()));
+        binding.fifthItem.setOnClickListener(v -> openLink(GITHUB_LINk));
+        binding.sixthItem.setOnClickListener(v -> openLink(TELEGRAM_LINk));
+    }
+
+    private void openLink(String link) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse(link));
+        startActivity(intent);
     }
 
     private void openFragment(Fragment f) {

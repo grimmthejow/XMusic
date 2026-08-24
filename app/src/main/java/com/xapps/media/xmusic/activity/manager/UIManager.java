@@ -215,6 +215,7 @@ public class UIManager implements PlaybackControlListener {
         binding.collapsedPlayer.motionRoot.setClipChildren(false);
 
         loadSettings();
+        updateLyrics();
     }
 
     // [ -------------- Layout State management methods ----------
@@ -1045,7 +1046,6 @@ public class UIManager implements PlaybackControlListener {
         isBlurOn = DataManager.isBlurOn();
         if (XUtils.areBlursOrDynamicColorsSupported() && !isBlurOn) binding.Coordinator.setRenderEffect(null);
         binding.xlyricsView.updateActiveStates();
-        binding.gradientView.setVisibility((DataManager.sp.getBoolean("enable_lyrics_gradient", false) && !isOledTheme )? View.VISIBLE : View.GONE);
         updateFontConfig();
     }
 
@@ -1053,6 +1053,9 @@ public class UIManager implements PlaybackControlListener {
         binding.lyricsView.setStaticScroll(DataManager.getStaticScrollState());
         binding.lyricsView.setUserStaticScroll(DataManager.getUserStaticScrollState());
         binding.lyricsView.setEnableSparkles(DataManager.getUseSparklesState());
+        binding.lyricsView.setLyricAnticipation(DataManager.getLyricsAnticipationState());
+        binding.gradientView.setVisibility((DataManager.sp.getBoolean("enable_lyrics_gradient", false) && !isOledTheme )? View.VISIBLE : View.GONE);
+        binding.lyricsView.setEnableBlurs(DataManager.getLyricsBlurState());
     }
 
     public void updateFontConfig() {

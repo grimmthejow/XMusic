@@ -9,6 +9,9 @@ import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.util.AttributeSet;
+
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -196,7 +199,7 @@ public class XLyricsBidiLineView extends XLyricsLineView {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
         if (staticLayout == null || bidiRuns.isEmpty()) return;
 
         long now = android.os.SystemClock.uptimeMillis();

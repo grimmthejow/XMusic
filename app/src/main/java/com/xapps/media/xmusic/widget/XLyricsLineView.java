@@ -14,6 +14,8 @@ import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
+
+import androidx.annotation.NonNull;
 import androidx.core.content.res.ResourcesCompat;
 import com.xapps.media.xmusic.R;
 import com.xapps.media.xmusic.models.LyricLine;
@@ -155,6 +157,11 @@ public class XLyricsLineView extends View {
         invalidate();
     }
 
+    public void setBlurFilter(android.graphics.BlurMaskFilter filter) {
+        textPaint.setMaskFilter(filter);
+        invalidate();
+    }
+
     public void setLineGravity(Layout.Alignment alignment) {
         this.alignment = alignment;
     }
@@ -185,7 +192,16 @@ public class XLyricsLineView extends View {
     }
 
     public float getExtraPadding() {
-        return textPaint.getTextSize() * 0.4f;
+        return textPaint.getTextSize() * 0.15f;
+    }
+
+    public float getMaxLineWidth() {
+        if (staticLayout == null) return 0;
+        float max = 0;
+        for (int i = 0; i < staticLayout.getLineCount(); i++) {
+            max = Math.max(max, staticLayout.getLineWidth(i));
+        }
+        return max;
     }
 
     public int getDesiredHeight() {
@@ -368,7 +384,6 @@ public class XLyricsLineView extends View {
                 }
             }
         }
-
         this.layoutCache = cache;
     }
 
@@ -388,10 +403,8 @@ public class XLyricsLineView extends View {
             this.lineWidths = cache.lineWidths;
             this.charXMap = cache.charXMap;
             this.totalWidth = cache.totalWidth;
-
             this.clusters.clear();
             this.clusters.addAll(cache.clusters);
-
             updateShader();
             return;
         }
@@ -513,18 +526,15 @@ public class XLyricsLineView extends View {
 
                     if (eligible) {
                         float msPerLetter = (float)(wordEndTime - wordStartTime) / wordLen;
-
                         if (msPerLetter >= minMs) {
                             float intensityRaw = (msPerLetter - minMs) / msRange;
                             float calculatedIntensity = 0.3f + 0.7f * Math.max(0f, Math.min(1f, intensityRaw));
-
                             for (int c = 0; c < clusters.size(); c++) {
                                 VisualCluster vc = clusters.get(c);
                                 if (vc.start >= wordStartOffset && vc.end <= wordEndOffset) {
                                     vc.isHeavy = true;
                                     vc.intensity = calculatedIntensity;
                                     vc.disableScale = shouldDisableScale;
-
                                     float charCenter = getGlobalXForOffset(vc.start) + (getGlobalXForOffset(vc.end) - getGlobalXForOffset(vc.start)) / 2f;
                                     vc.normX = wordWidth > 0 ? ((charCenter - wStartX) / wordWidth) * 2f - 1f : 0f;
                                 }
@@ -534,7 +544,6 @@ public class XLyricsLineView extends View {
                 }
             }
         }
-
         updateShader();
     }
 
@@ -542,10 +551,22 @@ public class XLyricsLineView extends View {
         if (sharedBrushShader == null || activeColor != lastActiveColor || futureColor != lastFutureColor) {
             lastActiveColor = activeColor;
             lastFutureColor = futureColor;
-            sharedBrushShader = new LinearGradient(0, 0, GRADIENT_WIDTH, 0,
-                    new int[]{activeColor, activeColor, futureColor, futureColor},
-                    new float[]{0f, 0.1f, 0.9f, 1f},
-                    Shader.TileMode.CLAMP);
+            sharedBrushShader = new LinearGradient(
+                    0, 0, GRADIENT_WIDTH, 0,
+                    new int[]{
+                            activeColor,
+                            activeColor,
+                            futureColor,
+                            futureColor
+                    },
+                    new float[]{
+                            0f,
+                            0.1f,
+                            0.9f,
+                            1f
+                    },
+                    Shader.TileMode.CLAMP
+            );
         }
         brushShader = sharedBrushShader;
     }
@@ -561,7 +582,6 @@ public class XLyricsLineView extends View {
 
         boolean smartSnap = Math.abs(progressMs - this.currentProgressMs) > 1500;
         this.currentProgressMs = progressMs;
-
         long finalEndTime = lyricLine.words.isEmpty() ? lyricLine.time : lyricLine.words.get(lyricLine.words.size() - 1).getEndTime();
         long effectiveEndTime = (customEndTime != -1) ? customEndTime : finalEndTime;
 
@@ -573,7 +593,6 @@ public class XLyricsLineView extends View {
             } else {
                 this.targetSimpleState = 1f;
             }
-
             if (snap || smartSnap || this.currentGlobalX == 0f) {
                 this.currentSimpleState = this.targetSimpleState;
                 this.currentGlobalX = totalWidth + GRADIENT_WIDTH * 3f;
@@ -601,10 +620,8 @@ public class XLyricsLineView extends View {
                 for (int j = 0; j < word.syllables.size(); j++) {
                     LyricSyllable syl = word.syllables.get(j);
                     int charIdx = word.startIndex + syl.relStart;
-
                     float sylGlobalStart = getGlobalXForOffset(charIdx);
                     float sylGlobalEnd = getGlobalXForOffset(charIdx + syl.text.length());
-
                     if (progressMs < syl.startTime) {
                         float gap = syl.startTime - lastEndTime;
                         if (gap > 0) {
@@ -615,7 +632,7 @@ public class XLyricsLineView extends View {
                         }
                         found = true;
                         break;
-                    } else if (progressMs >= syl.startTime && progressMs <= syl.endTime) {
+                    } else if (progressMs <= syl.endTime) {
                         float ratio = (float) (progressMs - syl.startTime) / Math.max(1, syl.endTime - syl.startTime);
                         globalX = sylGlobalStart + ((sylGlobalEnd - sylGlobalStart) * sharedInterpolator.getInterpolation(ratio));
                         found = true;
@@ -634,25 +651,27 @@ public class XLyricsLineView extends View {
             this.currentGlobalX = globalX;
             this.velocityX = 0f;
             this.colorTransitionState = newTargetColorState;
-
             for (VisualCluster vc : clusters) {
-                float targetElev = 0f;
-                if (!lyricLine.isSimpleLRC && !isForcedActive && vc.wordEndMs > vc.wordStartMs) {
-                    if (progressMs >= vc.wordEndMs) {
-                        targetElev = -ELEVATION_AMOUNT;
-                    } else if (progressMs >= vc.wordStartMs) {
-                        float p = (float)(progressMs - vc.wordStartMs) / (vc.wordEndMs - vc.wordStartMs);
-                        float organicP = p * p * (3f - 2f * p);
-                        targetElev = -(ELEVATION_AMOUNT * organicP);
-                    }
-                }
-                vc.currentElevation = targetElev;
+                vc.currentElevation = getTargetElev(progressMs, vc);
             }
         }
-
         this.targetGlobalX = globalX;
         this.targetColorState = newTargetColorState;
         invalidate();
+    }
+
+    private float getTargetElev(int progressMs, VisualCluster vc) {
+        float targetElev = 0f;
+        if (!lyricLine.isSimpleLRC && !isForcedActive && vc.wordEndMs > vc.wordStartMs) {
+            if (progressMs >= vc.wordEndMs) {
+                targetElev = -ELEVATION_AMOUNT;
+            } else if (progressMs >= vc.wordStartMs) {
+                float p = (float)(progressMs - vc.wordStartMs) / (vc.wordEndMs - vc.wordStartMs);
+                float organicP = p * p * (3f - 2f * p);
+                targetElev = -(ELEVATION_AMOUNT * organicP);
+            }
+        }
+        return targetElev;
     }
 
     private void spawnSparkle(float headX, float topY, float bottomY) {
@@ -684,98 +703,71 @@ public class XLyricsLineView extends View {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
         if (staticLayout == null || clusters.isEmpty() || lyricLine == null) return;
-
         long now = android.os.SystemClock.uptimeMillis();
         if (lastFrameTime == 0) lastFrameTime = now;
         float dt = (now - lastFrameTime) / 1000f;
         lastFrameTime = now;
         if (dt > 0.05f) dt = 0.016f;
-
         boolean animating = false;
         boolean isSimple = lyricLine.isSimpleLRC || isForcedActive;
-
         if (isSimple) {
             currentSimpleState += (targetSimpleState - currentSimpleState) * 15f * dt;
             if (Math.abs(targetSimpleState - currentSimpleState) > 0.005f) animating = true;
         } else {
             colorTransitionState += (targetColorState - colorTransitionState) * 25f * dt;
             if (Math.abs(targetColorState - colorTransitionState) > 0.005f) animating = true;
-
             float stiffness = 220f;
             float damping = 28f;
             float displacement = currentGlobalX - targetGlobalX;
             float acceleration = (-stiffness * displacement) - (damping * velocityX);
             velocityX += acceleration * dt;
             currentGlobalX += velocityX * dt;
-
             if (Math.abs(displacement) > 0.1f || Math.abs(velocityX) > 0.5f) animating = true;
         }
-
         int currentPastColor = blendColors(activeColor, pastViewColor, colorTransitionState);
         float globalAlpha = getAlpha();
-
         long finalEndTime = lyricLine.words.isEmpty() ? lyricLine.time : lyricLine.words.get(lyricLine.words.size() - 1).getEndTime();
         long effectiveEndTime = (customEndTime != -1) ? customEndTime : finalEndTime;
         float waveRadius = GRADIENT_WIDTH * 0.75f;
-
         for (int i = 0; i < clusters.size(); i++) {
             VisualCluster vc = clusters.get(i);
             float lineLeft = staticLayout.getLineLeft(vc.lineIdx);
             float lineGlobalStart = lineStarts[vc.lineIdx];
             float lineWidth = lineWidths[vc.lineIdx];
             float lineGlobalEnd = lineGlobalStart + lineWidth;
-
-            float targetElev = 0f;
-            if (!isSimple && vc.wordEndMs > vc.wordStartMs) {
-                if (currentProgressMs >= vc.wordEndMs) {
-                    targetElev = -ELEVATION_AMOUNT;
-                } else if (currentProgressMs >= vc.wordStartMs) {
-                    float p = (float)(currentProgressMs - vc.wordStartMs) / (vc.wordEndMs - vc.wordStartMs);
-                    float organicP = p * p * (3f - 2f * p);
-                    targetElev = -(ELEVATION_AMOUNT * organicP);
-                }
-            }
-
+            float targetElev = getTargetElev(isSimple, vc);
             vc.currentElevation += (targetElev - vc.currentElevation) * 16f * dt;
             if (Math.abs(targetElev - vc.currentElevation) > 0.1f) animating = true;
-
             float scale = 1.0f;
             int shadowColor = 0;
             float spacingShift = 0f;
-
             if (vc.isHeavy && currentProgressMs >= vc.wordStartMs && currentProgressMs <= vc.wordEndMs) {
                 animating = true;
                 float p = (currentProgressMs - vc.wordStartMs) / (float) Math.max(1, vc.wordEndMs - vc.wordStartMs);
-
                 if (!vc.disableScale) {
                     float baseScale = 1.0f + (0.1f * vc.intensity) * (float)Math.sin(Math.PI * p);
                     float perspective = -(0.08f * vc.intensity) * vc.normX * (float)Math.sin(2 * Math.PI * p);
                     scale = baseScale + perspective;
                     spacingShift = vc.normX * (10f * vc.intensity) * (float)Math.sin(p * Math.PI);
                 }
-
                 float distanceToCurrent = currentGlobalX - vc.liftCenterGlobalX;
                 float glowAlphaProgress = Math.max(0f, Math.min(1f, (distanceToCurrent + waveRadius) / waveRadius));
                 int shadowAlpha = (int) (255f * vc.intensity * glowAlphaProgress * (float) Math.sin(p * Math.PI));
                 shadowColor = ((shadowAlpha & 0xFF) << 24) | (activeColor & 0x00FFFFFF);
             }
-
             float drawX = vc.x + spacingShift;
             float drawY = vc.y + vc.currentElevation + getExtraPadding();
-
             if (scale != 1.0f) {
                 canvas.save();
                 canvas.scale(scale, scale, drawX + vc.width / 2f, drawY);
             }
-
             if (shadowColor != 0) {
                 textPaint.setShadowLayer(12f, 0f, 0f, shadowColor);
             } else {
                 textPaint.clearShadowLayer();
             }
-
             if (isSimple) {
                 int drawColor;
                 if (currentSimpleState < 1f) {
@@ -800,7 +792,6 @@ public class XLyricsLineView extends View {
                     float localX = currentGlobalX - lineGlobalStart;
                     float progress = Math.min(1f, Math.max(0f, localX / lineWidth));
                     float translate = (lineLeft - GRADIENT_WIDTH) + (lineWidth + GRADIENT_WIDTH) * progress;
-
                     shaderMatrix.setTranslate(translate, 0);
                     brushShader.setLocalMatrix(shaderMatrix);
                     textPaint.setShader(brushShader);
@@ -809,14 +800,11 @@ public class XLyricsLineView extends View {
                 }
                 canvas.drawText(lyricLine.line, vc.start, vc.end, drawX, drawY, textPaint);
             }
-
             if (scale != 1.0f) {
                 canvas.restore();
             }
         }
-
         textPaint.clearShadowLayer();
-
         if (isSparklesEnabled && currentProgressMs >= lyricLine.time && currentProgressMs <= effectiveEndTime && !isSimple) {
             int currentLineIdx = 0;
             for (int i = 0; i < lineStarts.length; i++) {
@@ -829,17 +817,13 @@ public class XLyricsLineView extends View {
                     currentLineIdx = i;
                 }
             }
-
             float lineLeft = staticLayout.getLineLeft(currentLineIdx);
             float lineWidth = lineWidths[currentLineIdx];
             float localX = currentGlobalX - lineStarts[currentLineIdx];
             float clampedLocalX = Math.max(0f, Math.min(localX, lineWidth));
-
             float headX = lineLeft + clampedLocalX;
-
             float lineTop = staticLayout.getLineTop(currentLineIdx);
             float lineBottom = staticLayout.getLineBottom(currentLineIdx);
-
             if (clampedLocalX > 0 && clampedLocalX < lineWidth) {
                 if (sharedRandom.nextFloat() < 0.7f) {
                     int spawnCount = sharedRandom.nextInt(2) + 1;
@@ -849,7 +833,6 @@ public class XLyricsLineView extends View {
                 }
             }
         }
-
         if (isSparklesEnabled && !sparkles.isEmpty()) {
             Iterator<Sparkle> iterator = sparkles.iterator();
             while (iterator.hasNext()) {
@@ -860,14 +843,11 @@ public class XLyricsLineView extends View {
                     continue;
                 }
                 animating = true;
-
                 s.baseX += s.vx * dt;
                 s.baseY += s.vy * dt;
                 s.phase += s.frequency * dt;
-
                 s.x = s.baseX + (float) Math.cos(s.phase) * s.amplitude;
                 s.y = s.baseY + (float) Math.sin(s.phase) * s.amplitude;
-
                 float progress = s.life / s.maxLife;
                 s.alpha = s.maxAlpha * progress;
                 int sparkleColor = (activeColor & 0x00FFFFFF) | ((int) (255 * s.alpha) << 24);
@@ -875,8 +855,21 @@ public class XLyricsLineView extends View {
                 canvas.drawCircle(s.x, s.y, s.size * progress, sparklePaint);
             }
         }
-
         if (animating) postInvalidateOnAnimation();
+    }
+
+    private float getTargetElev(boolean isSimple, VisualCluster vc) {
+        float targetElev = 0f;
+        if (!isSimple && vc.wordEndMs > vc.wordStartMs) {
+            if (currentProgressMs >= vc.wordEndMs) {
+                targetElev = -ELEVATION_AMOUNT;
+            } else if (currentProgressMs >= vc.wordStartMs) {
+                float p = (float)(currentProgressMs - vc.wordStartMs) / (vc.wordEndMs - vc.wordStartMs);
+                float organicP = p * p * (3f - 2f * p);
+                targetElev = -(ELEVATION_AMOUNT * organicP);
+            }
+        }
+        return targetElev;
     }
 
     @Override

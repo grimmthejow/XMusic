@@ -185,4 +185,15 @@ public class DataManager {
         return sp.getBoolean("lyrics_sparkles", false);
     }
 
+    public static boolean getLyricsAnticipationState() {
+        return sp.getBoolean("lyrics_anticipation", false);
+    }
+
+    public static boolean getLyricsBlurState() {
+        return sp.getBoolean("lyrics_blur", false);
+    }
+
+    public static boolean getKeepScreenAwakeState() {
+        return sp.getBoolean("lyrics_keep_screen_awake", false);
+    }
 }

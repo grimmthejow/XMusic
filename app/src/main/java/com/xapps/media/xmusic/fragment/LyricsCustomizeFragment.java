@@ -22,13 +22,15 @@ public class LyricsCustomizeFragment extends BasePrefsFragment {
         settings.add(new SettingsItem(SettingsItem.TYPE_NAV, "font_weight", "Font weight", "Choose the font weight that suits you", null));
         settings.add(new SettingsItem(SettingsItem.TYPE_SWITCH, "rounded_font", "Round lyrics letters", "Make the lyrics letters' edges round", null));
         settings.add(new SettingsItem(SettingsItem.TYPE_HEADER, "h2", "Lyrics Appearance", "", null));
-        settings.add(new SettingsItem(SettingsItem.TYPE_SWITCH, "lyrics_gradient_background", "Enable lyrics gradient", "Display a beautiful gradient background behind the lyrics, might impact performance", null));
+        settings.add(new SettingsItem(SettingsItem.TYPE_SWITCH, "enable_lyrics_gradient", "Enable lyrics gradient", "Display a beautiful gradient background behind the lyrics, might impact performance", null));
         settings.add(new SettingsItem(SettingsItem.TYPE_SWITCH, "lyrics_blur", "Blur Lyrics", "Apply a blur effect for inactive lyrics lines, might impact performance", null));
         settings.add(new SettingsItem(SettingsItem.TYPE_SWITCH, "lyrics_sparkles", "Enable Lyrics Sparkles", "Apply a Sparkling effect to the lyrics while being sung", null));
         settings.add(new SettingsItem(SettingsItem.TYPE_HEADER, "h3", "Lyrics Behavior", "", null));
         settings.add(new SettingsItem(SettingsItem.TYPE_SWITCH, "lyrics_anticipation", "Enable lyrics anticipation", "Lyrics will always go to next line before it's sung", null));
         settings.add(new SettingsItem(SettingsItem.TYPE_SWITCH, "lyrics_elastic_scroll", "Enable Staggered Scrolling", "Make the lyrics lines scroll in a delayed way for better immersion", null));
         settings.add(new SettingsItem(SettingsItem.TYPE_SWITCH, "lyrics_elastic_manual_scroll", "Staggered manual scrolling", "Apply the staggered scroll effect to user manual scrolling, might feel weird", null));
+        settings.add(new SettingsItem(SettingsItem.TYPE_HEADER, "h4", "Extra", "", null));
+        settings.add(new SettingsItem(SettingsItem.TYPE_SWITCH, "lyrics_keep_screen_awake", "Keep screen awake", "If enabled, the screen will not turn off while lyrics are visible", null));
 
         return settings;
     }
@@ -51,7 +53,7 @@ public class LyricsCustomizeFragment extends BasePrefsFragment {
     protected void onSwitchChanged(SettingsItem item, boolean value) {
         super.onSwitchChanged(item, value);
         switch (item.id) {
-            case "lyrics_elastic_scroll", "lyrics_elastic_manual_scroll", "lyrics_sparkles" -> {
+            case "lyrics_elastic_scroll", "lyrics_elastic_manual_scroll", "lyrics_sparkles", "lyrics_anticipation", "enable_lyrics_gradient", "lyrics_blur", "lyrics_keep_screen_awake" -> {
                 activity.updateLyrics();
             }
             default -> {

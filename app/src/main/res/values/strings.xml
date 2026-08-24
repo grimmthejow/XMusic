@@ -105,4 +105,11 @@
     <string name="play_icon_bottom_path_data">M 44 96 L 44 63 L 100 63 L 100 63 Z</string>
     <string name="pause_icon_upper_path_data">M 32 40 L 32 56  L 96 56 L 96 40 Z</string>
     <string name="pause_icon_bottom_path_data">M 32 88 L 32 72 L 96 72 L 96 88 Z</string>
+    <string name="app_pkg_name">com.xapps.media.xmusic</string>
+    <string name="app_logo_text">App Logo</string>
+    <string name="text_links">Links</string>
+    <string name="text_telegram">Telegram</string>
+    <string name="text_telegram_join_details">Check our community to give suggestions, view sneak peeks and more!</string>
+    <string name="text_github">GitHub</string>
+    <string name="text_open_github_details">Check out the official repository of XMusic</string>
 </resources>

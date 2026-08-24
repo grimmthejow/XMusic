@@ -1,8 +1,3 @@
-import java.util.Properties
-import java.io.FileInputStream
-import java.util.Base64
-import org.gradle.api.GradleException
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.aboutlibraries)
@@ -21,32 +16,32 @@ def getSecret = { key ->
 }
 
 android {
-    namespace "com.xapps.media.xmusic"
-    compileSdk 37
+    namespace = "com.xapps.media.xmusic"
+    compileSdk = 37
 
     defaultConfig {
-        applicationId "com.xapps.media.xmusic"
-        minSdk 26
-        targetSdk 37
-        versionCode 40
-        versionName '0.40 Alpha'
+        applicationId = "com.xapps.media.xmusic"
+        minSdk = 26
+        targetSdk = 37
+        versionCode = 40
+        versionName = '0.40 Alpha'
     }
 
     buildFeatures {
-        viewBinding true
-        buildConfig true
+        viewBinding = true
+        buildConfig = true
     }
 
     sourceSets {
         main {
-            manifest.srcFile "src/main/AndroidManifest.xml"
+            manifest.srcFile("src/main/AndroidManifest.xml")
             java.srcDirs += "src/extra/java"
         }
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     signingConfigs {
@@ -55,100 +50,100 @@ android {
             def tmpFile = file("build/tmp_keystore.jks")
             tmpFile.parentFile.mkdirs()
             tmpFile.bytes = Base64.decoder.decode(base64Key)
-            
-            storeFile tmpFile
-            storePassword getSecret("KEYSTORE_PASSWORD")
-            keyAlias getSecret("KEY_ALIAS")
-            keyPassword getSecret("ALIAS_PASSWORD")
+
+            storeFile = tmpFile
+            storePassword = getSecret("KEYSTORE_PASSWORD")
+            keyAlias = getSecret("KEY_ALIAS")
+            keyPassword = getSecret("ALIAS_PASSWORD")
         }
 
         debug {
-            initWith release
+            initWith(release)
         }
 
         preview {
-            initWith release
+            initWith(release)
         }
     }
 
     buildTypes {
         debug {
-            debuggable true
-            minifyEnabled false
-            shrinkResources false
-            signingConfig signingConfigs.debug
+            debuggable = true
+            minifyEnabled = false
+            shrinkResources = false
+            signingConfig = signingConfigs.debug
         }
 
         preview {
-            initWith release
+            initWith(release)
             matchingFallbacks = ["release", "debug"]
-            debuggable false
-            minifyEnabled false
-            shrinkResources false
-            signingConfig signingConfigs.preview
+            debuggable = false
+            minifyEnabled = false
+            shrinkResources = false
+            signingConfig = signingConfigs.preview
         }
 
         release {
-            debuggable false
-            minifyEnabled true
-            shrinkResources true
-            signingConfig signingConfigs.release
+            debuggable = false
+            minifyEnabled = true
+            shrinkResources = true
+            signingConfig = signingConfigs.release
         }
     }
 
     lint {
-        abortOnError true
-        checkReleaseBuilds false
-        explainIssues true
-        htmlReport true
+        abortOnError = true
+        checkReleaseBuilds = false
+        explainIssues = true
+        htmlReport = true
     }
 
     splits {
         abi {
-            enable true
+            enable = true
             reset()
-            include "armeabi-v7a", "arm64-v8a"
-            universalApk true
+            include("armeabi-v7a", "arm64-v8a", "x86_64")
+            universalApk = true
         }
     }
 }
 
 dependencies {
-    implementation libs.taglib
-    implementation libs.glide
-    implementation libs.material
-    implementation libs.transition
-    implementation libs.fragment
-    implementation libs.palette
-    implementation libs.coordinatorlayout
+    implementation(libs.taglib)
+    implementation(libs.glide)
+    implementation(libs.material)
+    implementation(libs.transition)
+    implementation(libs.fragment)
+    implementation(libs.palette)
+    implementation(libs.coordinatorlayout)
 
-    implementation libs.media3.exoplayer
-    implementation libs.media3.session
-    // implementation libs.media3.cast
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.session)
 
-    implementation libs.core.splashscreen
-    implementation libs.activity
+    implementation(libs.core.splashscreen)
+    implementation(libs.activity)
 
-    implementation libs.androidx.media
-    implementation libs.customview.poolingcontainer
-    implementation libs.recyclerview
-    implementation libs.lifecycle.process
+    implementation(libs.androidx.media)
+    implementation(libs.customview.poolingcontainer)
+    implementation(libs.recyclerview)
+    implementation(libs.lifecycle.process)
 
     implementation(libs.media3.ffmpeg.decoder) {
-        exclude group: "androidx.media3"
+        exclude(group: "androidx.media3")
     }
 
-    implementation libs.colorseekbar
-    implementation libs.lottie
-    implementation libs.aboutlibraries.core
+    implementation(libs.colorseekbar)
+    implementation(libs.lottie)
+    implementation(libs.aboutlibraries.core)
 
-    implementation(name: "fastscroller", ext: "aar")
-    implementation(name: "roundedimageview", ext: "aar")
+
+    implementation files("libs/fastscroller.aar")
+    implementation files("libs/roundedimageview.aar")
 }
 
 tasks.withType(JavaCompile).configureEach {
-    options.compilerArgs += [
+    options.compilerArgs.addAll([
             "-Xlint:unchecked",
             "-Xlint:deprecation"
-    ]
+    ])
 }

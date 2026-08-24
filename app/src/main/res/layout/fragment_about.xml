@@ -2,6 +2,7 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/coordinator"
 	android:background="?colorSurfaceContainer"
     android:layout_width="match_parent"
@@ -35,14 +36,16 @@
                 android:layout_width="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center_horizontal"
-                android:layout_gravity="bottom|center_horizontal">
+                android:layout_gravity="bottom|center_horizontal"
+                tools:ignore="UseCompoundDrawables">
                 <ImageView
                     android:id="@+id/app_logo"
                     android:layout_width="86dp"
                     android:layout_height="86dp"
+                    android:contentDescription="@string/app_logo_text"
                     android:transitionName="shared_app_icon"
                     android:src="@drawable/service_icon"
-                    android:tint="?colorPrimary" />
+                    app:tint="?colorPrimary" />
                 <TextView
                     android:id="@+id/random_note"
                     android:layout_width="wrap_content"
@@ -131,12 +134,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/about_package_name" />
+
                     <TextView
-                        android:textSize="14.0sp"
-                        android:textColor="?colorOutline"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="com.xapps.media.xmusic" />
+                        android:text="@string/app_pkg_name"
+                        android:textColor="?colorOutline"
+                        android:textSize="14.0sp"
+                        tools:ignore="TextContrastCheck" />
 
                 </LinearLayout>
 
@@ -194,6 +199,31 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:layout_marginBottom="2dp"
+                    android:background="@drawable/rv_ripple_inverse"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:textSize="16.0sp"
+                        android:textColor="?colorOnSurface"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/about_licenses" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/about_licenses_desc"
+                        android:textColor="?colorOutline"
+                        android:textSize="14.0sp"
+                        tools:ignore="TextContrastCheck" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/extra_item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="2dp"
                     android:background="@drawable/rv_ripple_bottom_inverse"
                     android:padding="16dp">
 
@@ -203,12 +233,76 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/about_licenses" />
+
                     <TextView
-                        android:textSize="14.0sp"
-                        android:textColor="?colorOutline"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/about_licenses_desc" />
+                        android:text="@string/about_licenses_desc"
+                        android:textColor="?colorOutline"
+                        android:textSize="14.0sp"
+                        tools:ignore="TextContrastCheck" />
+                </LinearLayout>
+
+                <TextView
+                    android:textSize="14.0sp"
+                    android:textColor="?colorPrimary"
+                    android:id="@+id/second_header"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="8.0dp"
+                    android:textStyle="bold"
+                    android:text="@string/text_links"
+                    android:layout_marginHorizontal="16.0dp" />
+
+                <LinearLayout
+                    android:id="@+id/fifth_item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="2dp"
+                    android:background="@drawable/rv_ripple_top_inverse"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:textSize="16.0sp"
+                        android:textColor="?colorOnSurface"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/text_github" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/text_open_github_details"
+                        android:textColor="?colorOutline"
+                        android:textSize="14.0sp"
+                        tools:ignore="TextContrastCheck" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/sixth_item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="2dp"
+                    android:background="@drawable/rv_ripple_bottom_inverse"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:textSize="16.0sp"
+                        android:textColor="?colorOnSurface"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/text_telegram" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/text_telegram_join_details"
+                        android:textColor="?colorOutline"
+                        android:textSize="14.0sp"
+                        tools:ignore="TextContrastCheck" />
                 </LinearLayout>
 
             </LinearLayout>

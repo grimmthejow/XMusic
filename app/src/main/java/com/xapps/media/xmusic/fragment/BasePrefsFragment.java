@@ -240,7 +240,7 @@ public abstract class BasePrefsFragment extends BaseFragment {
 
         public SpacingDecoration(Context context) {
             topSpacing = XUtils.convertToPx(context, 12f);
-            bottomSpacing = XUtils.convertToPx(context, 12f);
+            bottomSpacing = Math.round(XUtils.getNavigationBarHeight(context) * 1.5f);
             spacing = XUtils.convertToPx(context, 2f);
         }
 

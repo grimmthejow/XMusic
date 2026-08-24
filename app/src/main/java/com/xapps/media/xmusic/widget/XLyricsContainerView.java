@@ -23,9 +23,8 @@ public class XLyricsContainerView extends ScrollingView2 {
     private final List<LyricItemDelegate> lineDelegates = new ArrayList<>();
     private PlaybackControlListener listener;
 
-    private int activeIndex = -1;
     private int targetIndex = -1;
-    private int currentProgressMs = 0;
+    private int activeBlurIndex = -1;
 
     private float scrollVelocityY = 0f;
     private long lastFrameTime = 0;
@@ -35,12 +34,20 @@ public class XLyricsContainerView extends ScrollingView2 {
     private boolean isAutoScrollPaused = false;
     private boolean isPhysicsScrolling = false;
     private boolean isActuallyScrolling = false;
+    private boolean isInteractive = true;
 
     private boolean useStaticScroll = false;
     private boolean userStaticScroll = false;
     private boolean enableSparkles = false;
+    private boolean lyricAnticipation = false;
+    private boolean enableBlurs = false;
+
+    private android.graphics.BlurMaskFilter[] blurFilters;
+
     private float touchStartY = 0f;
     private int touchSlop;
+    private LyricItemDelegate pressedDelegate;
+    private int pressedPart = 0;
     private final Runnable recoveryRunnable = () -> isAutoScrollPaused = false;
 
     private int currentColor;
@@ -57,9 +64,23 @@ public class XLyricsContainerView extends ScrollingView2 {
         super(context, attrs);
         touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         setClipToOutline(false);
-        setStaticScroll(DataManager.getStaticScrollState());
-        setUserStaticScroll(DataManager.getUserStaticScrollState());
-        setFontConfig(DataManager.getFontConfig());
+        initBlurFilters();
+    }
+
+    private void initBlurFilters() {
+        blurFilters = new android.graphics.BlurMaskFilter[5];
+        for (int i = 0; i < 5; i++) {
+            blurFilters[i] = new android.graphics.BlurMaskFilter((i + 1) * 4f, android.graphics.BlurMaskFilter.Blur.NORMAL);
+        }
+    }
+
+    public void setEnableBlurs(boolean enable) {
+        this.enableBlurs = enable;
+        invalidate();
+    }
+
+    public void setLyricAnticipation(boolean anticipate) {
+        this.lyricAnticipation = anticipate;
     }
 
     public void setStaticScroll(boolean staticScroll) {
@@ -108,27 +129,33 @@ public class XLyricsContainerView extends ScrollingView2 {
     }
 
     public void setLyrics(List<LyricLine> newLyrics) {
+        if (newLyrics == null || newLyrics.isEmpty()) {
+            lineDelegates.clear();
+            targetIndex = -1;
+            activeBlurIndex = -1;
+            scrollVelocityY = 0f;
+            invalidate();
+            return;
+        }
+        isInteractive = false;
+        animate().cancel();
+        animate().alpha(0f).setDuration(200L).withEndAction(() -> performLyricsSwap(newLyrics)).start();
+    }
+
+    private void performLyricsSwap(List<LyricLine> newLyrics) {
         lineDelegates.clear();
-        activeIndex = -1;
         targetIndex = -1;
+        activeBlurIndex = -1;
         scrollVelocityY = 0f;
         invalidate();
-
-        int availableWidth = getWidth();
-        if (availableWidth == 0) {
-            availableWidth = getResources().getDisplayMetrics().widthPixels;
-        }
-        final int finalAvailableWidth = availableWidth;
+        final int finalAvailableWidth = getWidth() != 0 ? getWidth() : getResources().getDisplayMetrics().widthPixels;
         final int parentPaddingLeft = getPaddingLeft();
         final int parentPaddingRight = getPaddingRight();
-
         bgExecutor.execute(() -> {
             List<LyricItem> tempItems = new ArrayList<>();
             for (int i = 0; i < newLyrics.size(); i++) {
                 LyricLine line = newLyrics.get(i);
-
                 if (line.isLinkedBg || line.isRomaji) continue;
-
                 if (line.isWaitingDots) {
                     long nextTime = -1;
                     for (int j = i + 1; j < newLyrics.size(); j++) {
@@ -138,18 +165,10 @@ public class XLyricsContainerView extends ScrollingView2 {
                             break;
                         }
                     }
-
-                    if (nextTime != -1 && (nextTime - line.time) < 5000) {
-                        continue;
-                    }
-
-                    if (nextTime != -1) {
-                        line.endTime = (int) nextTime;
-                    }
+                    if (nextTime != -1 && (nextTime - line.time) < 5000) continue;
+                    if (nextTime != -1) line.endTime = (int) nextTime;
                 }
-
                 LyricItem item = new LyricItem(line, i);
-
                 for (int j = i + 1; j < newLyrics.size(); j++) {
                     LyricLine next = newLyrics.get(j);
                     if (next.isWaitingDots || (!next.isLinkedBg && !next.isRomaji)) break;
@@ -164,34 +183,30 @@ public class XLyricsContainerView extends ScrollingView2 {
                 }
                 tempItems.add(item);
             }
-
             List<LyricItemDelegate> tempDelegates = new ArrayList<>();
             int contentWidth = finalAvailableWidth - parentPaddingLeft - parentPaddingRight;
-            
             for (LyricItem item : tempItems) {
                 LyricItemDelegate delegate = new LyricItemDelegate(getContext(), item);
                 if (currentColor != 0) delegate.setLyricColor(currentColor);
                 if (currentFontConfig != null) delegate.setFontConfig(currentFontConfig);
                 delegate.setEnableSparkles(enableSparkles);
-
                 int pLeft = (int) (contentWidth * 0.05f);
                 int pRight = (int) (contentWidth * 0.2f);
-                if (delegate.getItem().mainLine != null && delegate.getItem().mainLine.vocalType != 1 && !delegate.getItem().mainLine.isWaitingDots && !delegate.getItem().mainLine.isBackground) {
+                if (item.mainLine != null && item.mainLine.vocalType != 1 && !item.mainLine.isWaitingDots && !item.mainLine.isBackground) {
                     pLeft = (int) (contentWidth * 0.2f);
                     pRight = (int) (contentWidth * 0.05f);
                 }
                 int textWidth = contentWidth - pLeft - pRight;
                 delegate.precomputeLayouts(textWidth);
-                
                 tempDelegates.add(delegate);
             }
-
             mainHandler.post(() -> {
                 lineDelegates.clear();
                 lineDelegates.addAll(tempDelegates);
                 scrollTo(0, 0);
                 requestLayout();
                 invalidate();
+                animate().alpha(1f).setDuration(250L).withEndAction(() -> isInteractive = true).start();
             });
         });
     }
@@ -216,15 +231,15 @@ public class XLyricsContainerView extends ScrollingView2 {
 
     public void updateLyricsProgress(int progressMs, boolean justSeeked) {
         if (lineDelegates.isEmpty()) return;
-        this.currentProgressMs = progressMs;
 
         int newActiveIndex = -1;
+        int nextUpcomingIndex = -1;
 
         for (int i = 0; i < lineDelegates.size(); i++) {
             LyricItemDelegate delegate = lineDelegates.get(i);
             LyricItem item = delegate.getItem();
-
             long mainEndTime = getEndTimeForLine(item.mainIndex);
+
             if (item.linkedBgLine != null) {
                 mainEndTime = Math.max(mainEndTime, getEndTimeForLine(item.linkedBgIndex));
             }
@@ -249,6 +264,14 @@ public class XLyricsContainerView extends ScrollingView2 {
             if (isActive && newActiveIndex == -1) {
                 newActiveIndex = i;
             }
+
+            if (!isActive && progressMs < item.mainLine.time && nextUpcomingIndex == -1) {
+                nextUpcomingIndex = i;
+            }
+        }
+
+        if (newActiveIndex == -1 && lyricAnticipation && nextUpcomingIndex != -1) {
+            newActiveIndex = nextUpcomingIndex;
         }
 
         if (newActiveIndex != -1 && newActiveIndex != targetIndex) {
@@ -261,92 +284,71 @@ public class XLyricsContainerView extends ScrollingView2 {
             } else {
                 lastTargetChangeTime = 0;
                 scrollVelocityY = 0f;
+                activeBlurIndex = targetIndex;
             }
         }
-
-        activeIndex = newActiveIndex;
         invalidate();
     }
 
     @Override
     protected void onMeasureForChild(int widthMeasureSpec, int heightMeasureSpec) {
         int availableWidth = MeasureSpec.getSize(widthMeasureSpec);
-
         for (LyricItemDelegate delegate : lineDelegates) {
             delegate.measureStaticBounds(availableWidth, getPaddingLeft(), getPaddingRight());
         }
-
         float density = getResources().getDisplayMetrics().density;
-        int screenHeight = getMeasuredHeight();
-        if (screenHeight == 0) {
-            screenHeight = getResources().getDisplayMetrics().heightPixels;
-        }
-
-        int currentY = getCurrentY(screenHeight, density);
-
-        int totalHeight = currentY + (int) (screenHeight * 0.75f);
-        setChildMeasuredDimension(availableWidth, totalHeight);
+        int hSize = MeasureSpec.getSize(heightMeasureSpec);
+        int screenHeight = hSize != 0 ? hSize : (getMeasuredHeight() != 0 ? getMeasuredHeight() : getResources().getDisplayMetrics().heightPixels);
+        float currentY = getCurrentY(screenHeight, density);
+        setChildMeasuredDimension(availableWidth, (int) (currentY + (screenHeight * 0.75f)));
     }
 
-    private int getCurrentY(int screenHeight, float density) {
-        int currentY = screenHeight / 4;
-
+    private float getCurrentY(int screenHeight, float density) {
+        float currentY = screenHeight / 4f;
         for (int i = 0; i < lineDelegates.size(); i++) {
             LyricItemDelegate delegate = lineDelegates.get(i);
-
             delegate.updateDynamicHeights(density);
             delegate.setTop(currentY);
-
-            int gap = (int) (24 * density);
+            float gap = 24 * density;
             if (i < lineDelegates.size() - 1) {
                 LyricItemDelegate next = lineDelegates.get(i + 1);
                 if (delegate.getItem().mainLine.isWaitingDots || next.getItem().mainLine.isWaitingDots) {
-                    gap = (int) (16 * density);
+                    gap = 16 * density;
                 } else if (delegate.getItem().mainLine.vocalType != next.getItem().mainLine.vocalType) {
-                    gap = (int) (40 * density);
+                    gap = 40 * density;
                 }
             }
-
             currentY += delegate.getLiveHeight() + gap;
         }
         return currentY;
     }
 
     @Override
-    protected void onLayoutForChild(int l, int t, int r, int b) {
-    }
+    protected void onLayoutForChild(int l, int t, int r, int b) {}
 
     @Override
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
         super.onScrollChanged(l, t, oldl, oldt);
         int dy = t - oldt;
         if (dy == 0) return;
-
         if (!isPhysicsScrolling) {
             isAutoScrollPaused = true;
             removeCallbacks(recoveryRunnable);
             postDelayed(recoveryRunnable, 2000);
         }
-
         if (useStaticScroll) return;
-
         if (!isPhysicsScrolling && userStaticScroll) return;
-
         int anchor = 0;
         for (int i = 0; i < lineDelegates.size(); i++) {
             if (lineDelegates.get(i).getBottom() > t) {
                 anchor = i;
                 break;
             }
-            if (i == lineDelegates.size() - 1) {
-                anchor = i;
-            }
+            if (i == lineDelegates.size() - 1) anchor = i;
         }
-
         for (int i = 0; i < lineDelegates.size(); i++) {
             LyricItemDelegate delegate = lineDelegates.get(i);
             int dist = Math.abs(i - anchor);
-
             delegate.staggerY += dy;
             delegate.stiffness = Math.max(20f, 120f - (dist * 20f));
         }
@@ -355,40 +357,30 @@ public class XLyricsContainerView extends ScrollingView2 {
     @Override
     protected void onDrawForChild(@NonNull Canvas canvas) {
         if (lineDelegates.isEmpty()) return;
-
         long now = android.os.SystemClock.uptimeMillis();
         if (lastFrameTime == 0) lastFrameTime = now;
         float dt = (now - lastFrameTime) / 1000f;
         lastFrameTime = now;
-        if (dt > 0.05f) dt = 0.016f;
-
-        for (LyricItemDelegate delegate : lineDelegates) {
-            delegate.updatePhysics(dt);
-        }
-
+        if (dt > 0.016f) dt = 0.016f;
+        for (LyricItemDelegate delegate : lineDelegates) delegate.updatePhysics(dt);
         float density = getResources().getDisplayMetrics().density;
         int screenHeight = getHeight();
         getCurrentY(screenHeight, density);
 
         if (!isAutoScrollPaused && targetIndex >= 0 && targetIndex < lineDelegates.size()) {
             if (now >= lastTargetChangeTime) {
+                activeBlurIndex = targetIndex;
                 LyricItemDelegate activeDelegate = lineDelegates.get(targetIndex);
-                int activeMainCenterY = activeDelegate.getTop() + (int)(4 * density) + (activeDelegate.rawMainHeight / 2);
+                float activeMainCenterY = activeDelegate.getTop() + (4 * density) + (activeDelegate.rawMainHeight / 2f);
                 float desiredScrollY = Math.max(0, Math.min(activeMainCenterY - (screenHeight / 4f), getScrollRange()));
-
                 float displacement = getScrollY() - desiredScrollY;
-
                 if (Math.abs(displacement) > 0.5f || Math.abs(scrollVelocityY) > 0.5f) {
                     float stiffness = 120f;
                     float damping = 22f;
-
                     float acceleration = (-stiffness * displacement) - (damping * scrollVelocityY);
                     scrollVelocityY += acceleration * dt;
-
-                    int nextY = Math.round(getScrollY() + (scrollVelocityY * dt));
-
                     isPhysicsScrolling = true;
-                    scrollTo(getScrollX(), nextY);
+                    scrollTo(getScrollX(), Math.round(getScrollY() + (scrollVelocityY * dt)));
                     isPhysicsScrolling = false;
                 } else {
                     scrollVelocityY = 0f;
@@ -400,46 +392,91 @@ public class XLyricsContainerView extends ScrollingView2 {
 
         int scrollY = getScrollY();
         int viewportBottom = scrollY + screenHeight;
-
         for (int i = 0; i < lineDelegates.size(); i++) {
             LyricItemDelegate delegate = lineDelegates.get(i);
-            if (delegate.getBottom() + delegate.staggerY < scrollY || delegate.getTop() + delegate.staggerY > viewportBottom) {
-                continue;
+            if (delegate.getBottom() + delegate.staggerY < scrollY || delegate.getTop() + delegate.staggerY > viewportBottom) continue;
+
+            if (enableBlurs && !isAutoScrollPaused && activeBlurIndex >= 0) {
+                int distance = Math.abs(i - activeBlurIndex);
+                if (distance == 0 || delegate.isActive || delegate.getActiveProgress() > 0.001f) {
+                    delegate.setBlurFilter(null);
+                } else {
+                    int level = Math.min(distance, 5) - 1;
+                    delegate.setBlurFilter(blurFilters[level]);
+                }
+            } else {
+                delegate.setBlurFilter(null);
             }
+
             delegate.draw(canvas, getPaddingLeft(), density, getWidth());
         }
-
         postInvalidateOnAnimation();
     }
 
     @Override
     protected boolean onTouchEventForChild(@NonNull MotionEvent event) {
-        switch (event.getActionMasked()) {
+        if (!isInteractive) return false;
+        int action = event.getActionMasked();
+        float y = event.getY();
+        float density = getResources().getDisplayMetrics().density;
+
+        switch (action) {
             case MotionEvent.ACTION_DOWN:
-                touchStartY = event.getY();
+                touchStartY = y;
                 isActuallyScrolling = false;
+                pressedDelegate = null;
+                pressedPart = 0;
+                float tapY = y;
+                for (LyricItemDelegate delegate : lineDelegates) {
+                    if (tapY >= delegate.getTop() + delegate.staggerY && tapY <= delegate.getBottom() + delegate.staggerY) {
+                        int part = delegate.getPartAt(tapY, density);
+                        if (part != 0) {
+                            pressedDelegate = delegate;
+                            pressedPart = part;
+                            delegate.setPressed(part, true);
+                        }
+                        break;
+                    }
+                }
                 break;
             case MotionEvent.ACTION_MOVE:
-                if (!isActuallyScrolling && Math.abs(event.getY() - touchStartY) > touchSlop) {
+                if (!isActuallyScrolling && Math.abs(y - touchStartY) > touchSlop) {
                     isActuallyScrolling = true;
                     isPhysicsScrolling = false;
+                    if (pressedDelegate != null) {
+                        pressedDelegate.setPressed(0, false);
+                        pressedDelegate = null;
+                        pressedPart = 0;
+                    }
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                if (!isActuallyScrolling) {
-                    float tapY = event.getY() + getScrollY();
-                    for (LyricItemDelegate delegate : lineDelegates) {
-                        if (tapY >= delegate.getTop() + delegate.staggerY && tapY <= delegate.getBottom() + delegate.staggerY) {
-                            if (listener != null && !delegate.getItem().mainLine.isWaitingDots) {
-                                listener.onSeekRequested(delegate.getItem().mainLine.time);
+                if (!isActuallyScrolling && pressedDelegate != null) {
+                    float releaseY = y;
+                    int part = pressedDelegate.getPartAt(releaseY, density);
+                    if (part == pressedPart) {
+                        if (listener != null) {
+                            if (part == 1) {
+                                listener.onSeekRequested(pressedDelegate.getItem().mainLine.time);
+                            } else if (part == 2 && pressedDelegate.getItem().linkedBgLine != null) {
+                                listener.onSeekRequested(pressedDelegate.getItem().linkedBgLine.time);
                             }
-                            break;
                         }
                     }
                 }
+                if (pressedDelegate != null) {
+                    pressedDelegate.setPressed(0, false);
+                }
+                pressedDelegate = null;
+                pressedPart = 0;
                 isActuallyScrolling = false;
                 break;
             case MotionEvent.ACTION_CANCEL:
+                if (pressedDelegate != null) {
+                    pressedDelegate.setPressed(0, false);
+                }
+                pressedDelegate = null;
+                pressedPart = 0;
                 isActuallyScrolling = false;
                 break;
         }

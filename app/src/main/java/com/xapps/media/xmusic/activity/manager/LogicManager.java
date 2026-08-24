@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.SeekBar;
 
 import androidx.activity.BackEventCompat;
@@ -23,6 +24,7 @@ import com.xapps.media.xmusic.R;
 import com.xapps.media.xmusic.activity.RootActivity;
 import com.xapps.media.xmusic.activity.controller.ActivityMediaController;
 import com.xapps.media.xmusic.callback.CallbackInterface;
+import com.xapps.media.xmusic.data.DataManager;
 import com.xapps.media.xmusic.data.RuntimeData;
 import com.xapps.media.xmusic.databinding.ActivityRootBinding;
 import com.xapps.media.xmusic.service.XPlayerService;
@@ -105,8 +107,6 @@ public class LogicManager {
                 mediaController.seekTo(seekBar.getProgress());
             }
         });
-
-        // ----- THIS PREVENTS SEEKBAR FROM STEALING FOCUS IN PLAYER SHEET
 
         binding.expandedPlayer.songSeekbar.setOnClickListener(v -> {});
 
@@ -217,11 +217,13 @@ public class LogicManager {
 
             if (checked) {
                 binding.miniPlayer.setDraggable(false);
+                if (DataManager.getKeepScreenAwakeState()) activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 binding.lyricsContainer.animate().alpha(1f).translationY(0f).setDuration(300L).withStartAction(() -> {
                     if (binding.lyricsContainer.getParent() == null) binding.miniPlayer.addView(binding.lyricsContainer);
                     binding.lyricsContainer.setVisibility(View.VISIBLE);
                 }).start();
             } else {
+                if (DataManager.getKeepScreenAwakeState()) activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 binding.miniPlayer.setDraggable(true);
                 binding.lyricsContainer.animate().alpha(0f).translationY(150f).setDuration(300L).withEndAction(() -> {
                     binding.lyricsContainer.setVisibility(View.GONE);
@@ -287,6 +289,8 @@ public class LogicManager {
                 lyricsCallback.setEnabled(false);
                 binding.expandedPlayer.lyricsButton.setChecked(false);
                 binding.miniPlayer.setDraggable(true);
+
+                if (DataManager.getKeepScreenAwakeState()) activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             }
 
             @Override
