@@ -60,7 +60,7 @@
   --md-sys-color-outline: #8c9288;
 }
 
-:root, md-filled-button, md-outlined-button, md-switch {
+:root, md-filled-button, md-outlined-button, md-switch, md-icon-button {
   --md-ref-typeface-brand: 'Google Sans Flex', 'Outfit', sans-serif;
   --md-ref-typeface-plain: 'Google Sans Flex', 'Outfit', sans-serif;
   --md-sys-typescale-label-large-font: 'Google Sans Flex', 'Outfit', sans-serif;
@@ -143,6 +143,27 @@ h1, h2, h3, strong {
   margin: 1rem 0 3rem 0;
 }
 
+.carousel-container {
+  position: relative;
+}
+
+.nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  background-color: var(--md-sys-color-surface-variant);
+  border-radius: 50%;
+}
+
+.prev-btn {
+  left: 2vw;
+}
+
+.next-btn {
+  right: 2vw;
+}
+
 .carousel {
   display: flex;
   overflow-x: auto;
@@ -167,6 +188,7 @@ h1, h2, h3, strong {
   object-fit: cover;
   flex-shrink: 0;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  user-select: none;
 }
 
 .grid {
@@ -314,6 +336,12 @@ details p {
   opacity: 0.8;
 }
 
+@media (max-width: 800px) {
+  .nav-btn {
+    display: none;
+  }
+}
+
 @media (max-width: 600px) {
   .top-bar {
     padding: 1rem;
@@ -352,10 +380,18 @@ details p {
 
 <div class="carousel-wrapper">
   <h2 style="text-align: center; margin-bottom: 1rem;">Showcase</h2>
-  <div class="carousel">
-    <img src="website/assets/ss1.jpg" alt="Screenshot 1">
-    <img src="website/assets/ss2.jpg" alt="Screenshot 2">
-    <img src="website/assets/ss3.jpg" alt="Screenshot 3">
+  <div class="carousel-container">
+    <md-icon-button class="nav-btn prev-btn">
+      <span class="material-symbols-outlined">chevron_left</span>
+    </md-icon-button>
+    <div class="carousel">
+      <img src="website/assets/ss1.jpg" alt="Screenshot 1">
+      <img src="website/assets/ss2.jpg" alt="Screenshot 2">
+      <img src="website/assets/ss3.jpg" alt="Screenshot 3">
+    </div>
+    <md-icon-button class="nav-btn next-btn">
+      <span class="material-symbols-outlined">chevron_right</span>
+    </md-icon-button>
   </div>
 </div>
 
@@ -488,6 +524,50 @@ details p {
     } else {
       htmlElement.setAttribute('data-theme', 'light');
     }
+  });
+
+  const carousel = document.querySelector('.carousel');
+  const prevBtn = document.querySelector('.prev-btn');
+  const nextBtn = document.querySelector('.next-btn');
+
+  let isDown = false;
+  let startX;
+  let scrollLeft;
+
+  carousel.addEventListener('mousedown', (e) => {
+    isDown = true;
+    carousel.style.cursor = 'grabbing';
+    carousel.style.scrollSnapType = 'none'; 
+    startX = e.pageX - carousel.offsetLeft;
+    scrollLeft = carousel.scrollLeft;
+  });
+
+  carousel.addEventListener('mouseleave', () => {
+    isDown = false;
+    carousel.style.cursor = 'auto';
+    carousel.style.scrollSnapType = 'x mandatory';
+  });
+
+  carousel.addEventListener('mouseup', () => {
+    isDown = false;
+    carousel.style.cursor = 'auto';
+    carousel.style.scrollSnapType = 'x mandatory';
+  });
+
+  carousel.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - carousel.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    carousel.scrollLeft = scrollLeft - walk;
+  });
+
+  prevBtn.addEventListener('click', () => {
+    carousel.scrollBy({ left: -carousel.clientWidth * 0.8, behavior: 'smooth' });
+  });
+
+  nextBtn.addEventListener('click', () => {
+    carousel.scrollBy({ left: carousel.clientWidth * 0.8, behavior: 'smooth' });
   });
 </script>
 
