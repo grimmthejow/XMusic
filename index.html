@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>XMusic | Grimmjow</title>
 
+<script>
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme) {
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  }
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -521,11 +528,17 @@ details p {
   const themeSwitch = document.getElementById('darkModeSwitch');
   const htmlElement = document.documentElement;
 
+  if (htmlElement.getAttribute('data-theme') === 'dark') {
+    themeSwitch.selected = true;
+  }
+
   themeSwitch.addEventListener('change', (e) => {
     if (e.target.selected) {
       htmlElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme', 'dark');
     } else {
       htmlElement.setAttribute('data-theme', 'light');
+      localStorage.setItem('theme', 'light');
     }
   });
 
