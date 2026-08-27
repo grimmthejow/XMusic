@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+
+    <aapt:attr name="android:drawable">
+        <vector
+            android:width="24dp"
+            android:height="24dp"
+            android:viewportWidth="240.0"
+            android:viewportHeight="240.0">
+
+            <path
+                android:name="handle"
+                android:pathData="M136.3,136.3C136.3,136.3 204.2,204.4 204.2,204.4"
+                android:strokeColor="#ff000000"
+                android:strokeLineCap="round"
+                android:strokeLineJoin="round"
+                android:strokeWidth="20.0" />
+
+            <group
+                android:name="circle_group"
+                android:pivotX="95.25"
+                android:pivotY="94.9"
+                android:rotation="-45.0">
+                <path
+                    android:name="circle"
+                    android:pathData="M134.15,133.75C112.65,155.25 77.85,155.25 56.35,133.75C34.85,112.35 34.85,77.45 56.35,56.05C77.85,34.55 112.65,34.55 134.15,56.05C155.65,77.45 155.65,112.35 134.15,133.75"
+                    android:strokeColor="#ff000000"
+                    android:strokeLineCap="round"
+                    android:strokeLineJoin="round"
+                    android:strokeWidth="20.0" />
+            </group>
+
+        </vector>
+    </aapt:attr>
+
+    <target android:name="circle">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:duration="600"
+                    android:interpolator="@android:interpolator/fast_out_slow_in"
+                    android:propertyName="pathData"
+                    android:repeatCount="0"
+                    android:repeatMode="reverse"
+                    android:valueFrom="M134.15,133.75C112.65,155.25 77.85,155.25 56.35,133.75C34.85,112.35 34.85,77.45 56.35,56.05C77.85,34.55 112.65,34.55 134.15,56.05C155.65,77.45 155.65,112.35 134.15,133.75"
+                    android:valueTo="M56.35,133.75C77.85,155.25 112.65,155.25 134.15,133.75C155.65,112.35 155.65,77.45 134.15,56.05C112.65,34.55 77.85,34.55 56.35,56.05C34.85,77.45 34.85,112.35 56.35,133.75"
+                    android:valueType="pathType" />
+            </set>
+        </aapt:attr>
+    </target>
+
+</animated-vector>

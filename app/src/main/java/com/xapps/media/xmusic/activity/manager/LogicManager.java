@@ -1,6 +1,9 @@
 package com.xapps.media.xmusic.activity.manager;
 
 import android.content.ComponentName;
+import android.graphics.drawable.AnimatedVectorDrawable;
+import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
@@ -9,17 +12,21 @@ import android.widget.SeekBar;
 
 import androidx.activity.BackEventCompat;
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.OptIn;
 import androidx.core.view.ViewKt;
 import androidx.fragment.app.FragmentActivity;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.Player;
+import androidx.media3.common.util.UnstableApi;
 import androidx.media3.session.MediaController;
+import androidx.media3.session.SessionCommand;
 import androidx.media3.session.SessionToken;
 import androidx.transition.TransitionManager;
 import androidx.transition.TransitionSeekController;
 
 import com.google.android.material.search.SearchView;
 import com.google.android.material.transition.MaterialFadeThrough;
+import com.google.common.collect.ImmutableList;
 import com.xapps.media.xmusic.R;
 import com.xapps.media.xmusic.activity.RootActivity;
 import com.xapps.media.xmusic.activity.controller.ActivityMediaController;
@@ -27,6 +34,7 @@ import com.xapps.media.xmusic.callback.CallbackInterface;
 import com.xapps.media.xmusic.data.DataManager;
 import com.xapps.media.xmusic.data.RuntimeData;
 import com.xapps.media.xmusic.databinding.ActivityRootBinding;
+import com.xapps.media.xmusic.lyric.LyricsExtractor;
 import com.xapps.media.xmusic.service.XPlayerService;
 import com.xapps.media.xmusic.utils.XUtils;
 import com.xapps.media.xmusic.widget.ExpressiveSliderLayout;
@@ -126,6 +134,8 @@ public class LogicManager {
             mediaController.seekToNext();
         });
 
+        binding.expandedPlayer.repeatModeButton.setOnClickListener(v -> handleRepeatButtonClick());
+
         binding.expandedPlayer.toggleView.setExtraOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View _view) {
@@ -152,6 +162,7 @@ public class LogicManager {
         transition.setDuration(500);
 
         binding.bottomNavigation.setOnItemSelectedListener(item -> {
+
             uiManager.viewModel.saveBNVPosition(activity.getBinding().bottomNavigation.getSelectedItemId());
             if (CallbackInterface.srFrag() == null) return false;
             if (CallbackInterface.srFrag().getSearchViewState() == SearchView.TransitionState.SHOWING) return false;
@@ -235,6 +246,30 @@ public class LogicManager {
         });
     }
 
+    private void handleRepeatButtonClick() {
+        if (activity == null || activity.getController() == null || CallbackInterface.service() == null) return;
+        switch (activity.getController().getRepeatMode()) {
+            case Player.REPEAT_MODE_ALL -> {
+                activity.getController().setRepeatMode(Player.REPEAT_MODE_ONE);
+                binding.expandedPlayer.repeatModeButton.setIconResource(R.drawable.ic_repeat_one);
+                binding.expandedPlayer.repeatModeButton.setChecked(true);
+            }
+            case Player.REPEAT_MODE_ONE -> {
+                activity.getController().setRepeatMode(Player.REPEAT_MODE_OFF);
+                binding.expandedPlayer.repeatModeButton.setIconResource(R.drawable.ic_repeat_off);
+                binding.expandedPlayer.repeatModeButton.setChecked(false);
+            }
+            case Player.REPEAT_MODE_OFF -> {
+                activity.getController().setRepeatMode(Player.REPEAT_MODE_ALL);
+                binding.expandedPlayer.repeatModeButton.setIconResource(R.drawable.ic_repeat);
+                binding.expandedPlayer.repeatModeButton.setChecked(true);
+            }
+            default -> {
+                throw new IllegalStateException("Player repeat mode:" + activity.getController().getRepeatMode() + " not handled");
+            }
+        }
+    }
+
     private void setupCallbacks() {
         binding.miniPlayer.setupPredictiveBack(activity);
         binding.miniPlayer.addSliderCallback(new ExpressiveSliderLayout.SliderCallback() {
@@ -302,6 +337,7 @@ public class LogicManager {
         activity.getOnBackPressedDispatcher().addCallback(activity, lyricsCallback);
     }
 
+    @OptIn(markerClass = UnstableApi.class)
     public void initController(FragmentActivity activity, Consumer<MediaController> onReady, Consumer<Throwable> onError, Runnable onRestore) {
 
         if (sessionToken == null) {
@@ -314,7 +350,7 @@ public class LogicManager {
             mediaController = c;
             controller.setupListener((RootActivity) activity);
             onReady.accept(c);
-        }, e -> onError.accept(e), onRestore);
+        }, onError::accept, onRestore);
     }
 
     public void playSong(int position) {
@@ -340,7 +376,9 @@ public class LogicManager {
             MediaItem cItem = controller.getMediaItemAt(i);
             MediaItem sItem = serviceItems.get(i);
 
+            assert cItem.localConfiguration != null;
             String cPath = cItem.localConfiguration.uri.getPath();
+            assert sItem.localConfiguration != null;
             String sPath = sItem.localConfiguration.uri.getPath();
 
             if (!Objects.equals(cPath, sPath)) return false;

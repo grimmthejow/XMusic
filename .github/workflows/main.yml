@@ -128,3 +128,37 @@ jobs:
             -F message_thread_id="4" \
             -F document=@"preview-armeabi-v7a-${HASH}.apk" \
             -F caption="armeabi-v7a Build"
+
+  update_website:
+    name: Update Website Links
+    runs-on: ubuntu-latest
+    needs: build_preview_apk
+    if: github.event_name != 'pull_request'
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Update HTML placeholders
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          LATEST_TAG=$(gh release view --json tagName -q .tagName || echo "v--.--.--")
+          LATEST_APK_URL=$(gh release view --json assets -q '.assets[0].url' || echo "https://github.com/${{ github.repository }}/releases")
+          HASH=${GITHUB_SHA::8}
+          NIGHTLY_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          
+          sed -i "s|__STABLE_VERSION__|${LATEST_TAG}|g" download.html
+          sed -i "s|__STABLE_URL__|${LATEST_APK_URL}|g" download.html
+          sed -i "s|__NIGHTLY_HASH__|#${HASH}|g" download.html
+          sed -i "s|__NIGHTLY_URL__|${NIGHTLY_URL}|g" download.html
+
+      - name: Commit changes
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add download.html
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update download links [skip ci]" && git push)

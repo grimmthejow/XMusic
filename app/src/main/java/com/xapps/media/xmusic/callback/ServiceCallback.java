@@ -1,5 +1,7 @@
 package com.xapps.media.xmusic.callback;
 import androidx.media3.common.MediaItem;
+import androidx.media3.session.MediaSession;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -54,4 +56,9 @@ public interface ServiceCallback {
     default int getCurrentPosition() {
         return -1;
     }
+
+    default MediaSession getSession() {
+        return null;
+    }
+
 }

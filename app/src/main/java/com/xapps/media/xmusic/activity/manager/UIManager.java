@@ -23,9 +23,11 @@ import androidx.core.view.*;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.media3.common.Player;
 import androidx.transition.TransitionManager;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
+import com.google.android.material.shape.MaterialShapeDrawable;
 import com.google.android.material.transition.MaterialFadeThrough;
 
 import com.xapps.media.xmusic.R;
@@ -164,9 +166,6 @@ public class UIManager implements PlaybackControlListener {
                             binding.bottomNavigation.getPaddingTop(),
                             binding.bottomNavigation.getPaddingBottom()
                                     + XUtils.getNavigationBarHeight(activity));
-
-
-                    binding.expandedPlayer.actionsContainer.setPadding(0, 0, 0, XUtils.getNavigationBarHeight(activity));
 
                     return Unit.INSTANCE;
                 });
@@ -432,26 +431,6 @@ public class UIManager implements PlaybackControlListener {
         }
     }
 
-    private void resyncState() {
-        playerHidden =
-                (layoutState == LAYOUT_STATE_FULL
-                        || layoutState == LAYOUT_STATE_EXPOSE_TABS
-                        || layoutState == LAYOUT_STATE_EXPOSE_BNV
-                        || layoutState == LAYOUT_STATE_EXPOSE_TABS_BNV);
-
-        bnvHidden =
-                (layoutState == LAYOUT_STATE_FULL
-                        || layoutState == LAYOUT_STATE_EXPOSE_TABS
-                        || layoutState == LAYOUT_STATE_EXPOSE_PLAYER_ONLY
-                        || layoutState == LAYOUT_STATE_EXPOSE_PLAYER_TABS);
-
-        tabsHidden =
-                (layoutState == LAYOUT_STATE_FULL
-                        || layoutState == LAYOUT_STATE_EXPOSE_BNV
-                        || layoutState == LAYOUT_STATE_EXPOSE_PLAYER
-                        || layoutState == LAYOUT_STATE_EXPOSE_PLAYER_ONLY);
-    }
-
     private void hideBnvInternal(boolean hide, boolean animate) {
         bnvHidden = hide;
         if (animate) {
@@ -669,7 +648,7 @@ public class UIManager implements PlaybackControlListener {
         GradientDrawable d3 =
                 (GradientDrawable) binding.expandedPlayer.songInfoText.getBackground();
 
-        GradientDrawable d = (GradientDrawable) binding.expandedPlayer.actionsContainer.getBackground();
+        MaterialShapeDrawable d = (MaterialShapeDrawable) binding.expandedPlayer.floatingToolbarLayout.getBackground();
 
         XSeekbar seekbar = binding.expandedPlayer.songSeekbar;
 
@@ -685,8 +664,7 @@ public class UIManager implements PlaybackControlListener {
                     int is = XUtils.interpolateColor(oldSurface, surface, f);
                     int isc = XUtils.interpolateColor(oldSurfaceContainer, surfaceContainer, f);
                     int io = XUtils.interpolateColor(oldOutline, outline, f);
-                    int iosc =
-                            XUtils.interpolateColor(oldOnSurfaceContainer, onSurfaceContainer, f);
+                    int iosc = XUtils.interpolateColor(oldOnSurfaceContainer, onSurfaceContainer, f);
                     int ios = XUtils.interpolateColor(oldOnSurface, onSurface, f);
 
                     LiveColors.primary = ip;
@@ -728,10 +706,13 @@ public class UIManager implements PlaybackControlListener {
                     binding.collapsedPlayer.action.setBackgroundColor(ip);
                     binding.collapsedPlayer.action.setRippleColor(ColorStateList.valueOf(ColorUtils.setAlphaComponent(io, 100)));
 
-                    d.setColor(isc);
+                    d.setFillColor(ColorStateList.valueOf(isc));
 
                     binding.expandedPlayer.lyricsButton.setIconTint(ColorStateList.valueOf(isOledTheme? 0xffbdbdbd : iosc));
                     binding.expandedPlayer.lyricsButton.setRippleColor(ColorStateList.valueOf(io));
+
+                    binding.expandedPlayer.repeatModeButton.setIconTint(ColorStateList.valueOf(isOledTheme? 0xffbdbdbd : iosc));
+                    binding.expandedPlayer.repeatModeButton.setRippleColor(ColorStateList.valueOf(io));
 
                     binding.expandedPlayer.artistBigTitle.setTextColor(iosc);
                     binding.expandedPlayer.songBigTitle.setTextColor(ios);
@@ -743,22 +724,21 @@ public class UIManager implements PlaybackControlListener {
                     binding.expandedPlayer.totalDurationText.setTextColor(iosc);
                     binding.expandedPlayer.songInfoText.setTextColor(iosc);
                 });
-        va.addListener(
-                new AnimatorListenerAdapter() {
-                    private boolean canceled;
+        va.addListener(new AnimatorListenerAdapter() {
+            private boolean canceled;
 
-                    @Override
-                    public void onAnimationCancel(Animator animation) {
+            @Override
+            public void onAnimationCancel(Animator animation) {
                         canceled = true;
                     }
 
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        if (!canceled) {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (!canceled) {
                             effectiveOldColors = new HashMap<>(colors);
-                        }
-                    }
-                });
+                }
+            }
+        });
         if (colorAnimator != null) {
             colorAnimator.cancel();
         }
@@ -933,6 +913,7 @@ public class UIManager implements PlaybackControlListener {
     }
 
     public void maybeRestoreUIState() {
+        restoreRepeatButton();
         if (viewModel.isDataSaved()) {
             int savedState = viewModel.getLayoutState();
 
@@ -1000,6 +981,27 @@ public class UIManager implements PlaybackControlListener {
         }
     }
 
+    private void restoreRepeatButton() {
+        if (activity == null || activity.getController() == null) return;
+        switch (activity.getController().getRepeatMode()) {
+            case Player.REPEAT_MODE_ALL -> {
+                binding.expandedPlayer.repeatModeButton.setIconResource(R.drawable.ic_repeat);
+                binding.expandedPlayer.repeatModeButton.setChecked(true);
+            }
+            case Player.REPEAT_MODE_ONE -> {
+                binding.expandedPlayer.repeatModeButton.setIconResource(R.drawable.ic_repeat_one);
+                binding.expandedPlayer.repeatModeButton.setChecked(true);
+            }
+            case Player.REPEAT_MODE_OFF -> {
+                binding.expandedPlayer.repeatModeButton.setIconResource(R.drawable.ic_repeat_off);
+                binding.expandedPlayer.repeatModeButton.setChecked(false);
+            }
+            default -> {
+                throw new IllegalStateException("Player repeat mode:" + String.valueOf(activity.getController().getRepeatMode()) + " not handled");
+            }
+        }
+    }
+
     public void saveState() {
         viewModel.setLastPosition(activity.getController().getCurrentMediaItemIndex());
         computeState();
@@ -1012,7 +1014,7 @@ public class UIManager implements PlaybackControlListener {
         LyricsExtractor.extract(path, lyrics -> {
             if (lyrics != null && !lyrics.isEmpty()) {
                 LyricsParser.parse(lyrics, result -> {
-                    binding.xlyricsView.post(() -> {
+                    binding.lyricsView.post(() -> {
                         binding.lyricsView.setLyrics(result.lines());
                         binding.lyricsView.setListener(UIManager.this);
 
@@ -1045,7 +1047,6 @@ public class UIManager implements PlaybackControlListener {
         if (isOledTheme) binding.gradientView.setVisibility(View.GONE);
         isBlurOn = DataManager.isBlurOn();
         if (XUtils.areBlursOrDynamicColorsSupported() && !isBlurOn) binding.Coordinator.setRenderEffect(null);
-        binding.xlyricsView.updateActiveStates();
         updateFontConfig();
     }
 

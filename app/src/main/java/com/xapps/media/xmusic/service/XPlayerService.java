@@ -46,6 +46,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@UnstableApi
 public class XPlayerService extends MediaLibraryService implements ServiceCallback {
     private ExoPlayerManager playerManager;
     private Player player;
@@ -113,76 +114,79 @@ public class XPlayerService extends MediaLibraryService implements ServiceCallba
     }
 
     private void setupPlayerListeners() {
-        playerHandler.post(
-                () -> {
-                    player.addListener(
-                            new Player.Listener() {
-                                @Override
-                                public void onPlaybackStateChanged(int state) {
-                                    ActivityCallback activityCallback =
-                                            CallbackInterface.activity();
-                                    if (activityCallback != null)
-                                        activityCallback.onPlaybackStateChanged(player.isPlaying());
+        playerHandler.post(() -> {
+            player.addListener(new Player.Listener() {
+                @Override
+                public void onPlaybackStateChanged(int state) {
+                    ActivityCallback activityCallback = CallbackInterface.activity();
+                    if (activityCallback != null) activityCallback.onPlaybackStateChanged(player.isPlaying());
 
-                                    if (state == Player.STATE_READY) {
-                                        // genColors(player.getCurrentMediaItemIndex());
-                                        startUpdates();
-                                    }
+                    if (state == Player.STATE_READY) {
+                        startUpdates();
+                    }
 
-                                    if (state == Player.STATE_IDLE || state == Player.STATE_ENDED) {
-                                        isIdle = (state == Player.STATE_IDLE);
-                                        saveResumeState();
-                                        stopPeriodicSave();
-                                    }
+                    if (state == Player.STATE_IDLE || state == Player.STATE_ENDED) {
+                        isIdle = (state == Player.STATE_IDLE);
+                        saveResumeState();
+                        stopPeriodicSave();
+                    }
                                     
-                                    if (activityCallback != null) CallbackInterface.activity().updateState();
-                                }
+                    if (activityCallback != null) CallbackInterface.activity().updateState();
+                }
 
-                                @Override
-                                public void onMediaItemTransition(@Nullable MediaItem mediaItem, int reason) {
-                                    if (mediaItem == null || mediaItem.localConfiguration == null) {
-                                        statsAnalyzer.stopAnalysis();
-                                    } else {
-                                        if (!RuntimeData.songs.isEmpty() && player.getCurrentMediaItemIndex() < RuntimeData.songs.size()) {
-                                            statsAnalyzer.startAnalysis(RuntimeData.songs.get(player.getCurrentMediaItemIndex()));
-                                        }
-                                    }
-                                    if (CallbackInterface.activity() != null) CallbackInterface.activity().onSongChanged(mediaItem == null? -1 :player.getCurrentMediaItemIndex());
-                                    if (player.getPlaybackState() != Player.STATE_IDLE || mediaItem != null) {
-                                        genColors(player.getCurrentMediaItemIndex());
-                                    }
-                                    if (player.getMediaItemCount() > 0) saveResumeState();
-                                }
+                @Override
+                public void onMediaItemTransition(@Nullable MediaItem mediaItem, int reason) {
+                    if (mediaItem == null || mediaItem.localConfiguration == null) {
+                        statsAnalyzer.stopAnalysis();
+                    } else {
+                        if (!RuntimeData.songs.isEmpty() && player.getCurrentMediaItemIndex() < RuntimeData.songs.size()) {
+                            statsAnalyzer.startAnalysis(RuntimeData.songs.get(player.getCurrentMediaItemIndex()));
+                        }
+                    }
+                    if (CallbackInterface.activity() != null) CallbackInterface.activity().onSongChanged(mediaItem == null? -1 :player.getCurrentMediaItemIndex());
+                    if (player.getPlaybackState() != Player.STATE_IDLE || mediaItem != null) {
+                        genColors(player.getCurrentMediaItemIndex());
+                    }
+                    if (player.getMediaItemCount() > 0) saveResumeState();
+                }
 
-                                @Override
-                                public void onIsPlayingChanged(boolean playing) {
-                                    currentPosition = player.getCurrentMediaItemIndex();
-                                    isPlaying = playing;
-                                    ActivityCallback activityCallback =
-                                            CallbackInterface.activity();
-                                    if (activityCallback != null)
-                                        activityCallback.onPlaybackStateChanged(player.isPlaying());
+                @Override
+                public void onIsPlayingChanged(boolean playing) {
+                    currentPosition = player.getCurrentMediaItemIndex();
+                    isPlaying = playing;
+                    ActivityCallback activityCallback = CallbackInterface.activity();
+                    if (activityCallback != null) activityCallback.onPlaybackStateChanged(player.isPlaying());
 
-                                    if (playing) {
-                                        statsAnalyzer.resumeAnalysis();
-                                        startPeriodicSave();
-                                    } else {
-                                        statsAnalyzer.pauseAnalysis();
-                                        stopPeriodicSave();
-                                        saveResumeState();
-                                    }
-                                }
-                                
-                                @Override
-                                public void onPlayerError(PlaybackException error) {
-                                    android.util.Log.e("XMusicError", "Player Exception Caught", error);
-                                    Throwable cause = error.getCause();
-                                    if (cause != null) {
-                                        android.util.Log.e("XMusicError", "Underlying Cause", cause);
-                                    }
-                                }
-                            });
-                });
+                    if (playing) {
+                        statsAnalyzer.resumeAnalysis();
+                        startPeriodicSave();
+                    } else {
+                        statsAnalyzer.pauseAnalysis();
+                        stopPeriodicSave();
+                        saveResumeState();
+                    }
+                }
+
+                @Override
+                public void onPlayerError(PlaybackException error) {
+                    android.util.Log.e("XMusicError", "Player Exception Caught", error);
+                    Throwable cause = error.getCause();
+                    if (cause != null) {
+                        android.util.Log.e("XMusicError", "Underlying Cause", cause);
+                    }
+                }
+
+                @Override
+                public void onRepeatModeChanged(int repeatMode) {
+
+                }
+
+                @Override
+                public void onShuffleModeEnabledChanged(boolean shuffleEnabled) {
+
+                }
+            });
+        });
     }
 
     private void genColors(int index) {
@@ -310,6 +314,11 @@ public class XPlayerService extends MediaLibraryService implements ServiceCallba
     @Override
     public int getCurrentPosition() {
         return currentPosition;
+    }
+
+    @Override
+    public MediaSession getSession() {
+        return sessionManager.getSession();
     }
 
     private final Runnable progressUpdater =

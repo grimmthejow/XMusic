@@ -145,13 +145,6 @@
                     android:alpha="0.85"
                     android:textSize="24sp" />
             </FrameLayout>
-            <com.xapps.media.xmusic.widget.XLyricsView
-                android:id="@+id/xlyrics_view"
-                android:layout_height="match_parent"
-                android:layout_width="match_parent"
-                android:visibility="gone"
-                android:clipChildren="false"
-                android:clipToPadding="false" />
 
             <com.xapps.media.xmusic.widget.XLyricsContainerView
                 android:id="@+id/lyrics_view"

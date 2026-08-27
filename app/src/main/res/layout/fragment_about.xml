@@ -232,12 +232,12 @@
                         android:textColor="?colorOnSurface"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/about_licenses" />
+                        android:text="@string/about_contributions" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/about_licenses_desc"
+                        android:text="@string/about_contributions_desc"
                         android:textColor="?colorOutline"
                         android:textSize="14.0sp"
                         tools:ignore="TextContrastCheck" />

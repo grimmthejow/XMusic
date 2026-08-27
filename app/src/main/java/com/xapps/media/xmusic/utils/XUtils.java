@@ -285,7 +285,7 @@ public class XUtils {
     public static boolean areAllPermsGranted(Context c) {
         if (Build.VERSION.SDK_INT <= 29) {
             return checkPermissionAllowed(c, Manifest.permission.READ_EXTERNAL_STORAGE) && checkPermissionAllowed(c, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        } else if (30 <= Build.VERSION.SDK_INT && Build.VERSION.SDK_INT <= 32) {
+        } else if (Build.VERSION.SDK_INT <= 32) {
             return Environment.isExternalStorageManager();
         } else {
             return checkPermissionAllowed(c, Manifest.permission.READ_MEDIA_AUDIO) && checkPermissionAllowed(c, Manifest.permission.POST_NOTIFICATIONS);

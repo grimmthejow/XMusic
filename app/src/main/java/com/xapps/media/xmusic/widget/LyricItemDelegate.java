@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.text.Layout;
-import androidx.core.graphics.ColorUtils;
 import android.view.View;
 import com.xapps.media.xmusic.models.LyricLine;
 import com.xapps.media.xmusic.models.LyricItem;
@@ -116,18 +115,21 @@ public class LyricItemDelegate {
             preppedWidth = textWidth;
         }
         if (dotsView != null) {
+            assert item.mainLine != null;
             dotsView.setTimes(item.mainLine.time, item.mainLine.endTime);
             dotsView.measure(View.MeasureSpec.makeMeasureSpec(textWidth, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
             rawDotsHeight = dotsView.getMeasuredHeight();
             dotsView.layout(0, 0, textWidth, rawDotsHeight);
         }
         if (mainLineView != null) {
+            assert item.mainLine != null;
             boolean isOpposite = item.mainLine.vocalType != 1;
             mainLineView.setLineGravity(isOpposite ? Layout.Alignment.ALIGN_OPPOSITE : Layout.Alignment.ALIGN_NORMAL);
             rawMainHeight = mainLineView.getDesiredHeight(item.mainLine.line.toString(), textWidth);
         }
         if (bgLineView != null) {
             LyricLine bgSource = item.linkedBgLine != null ? item.linkedBgLine : item.mainLine;
+            assert item.mainLine != null;
             boolean isOpposite = item.mainLine.vocalType != 1;
             bgLineView.setLineGravity(isOpposite ? Layout.Alignment.ALIGN_OPPOSITE : Layout.Alignment.ALIGN_NORMAL);
             rawBgHeight = bgLineView.getDesiredHeight(bgSource.line.toString(), textWidth);
@@ -256,14 +258,12 @@ public class LyricItemDelegate {
         if (mainRippleAlpha > 0.001f) {
             ripplePaint.setColor(currentColor);
             ripplePaint.setAlpha((int) (32 * mainRippleAlpha));
-            float rTop = mainY;
             float rBot = (romajiView != null && currentRomajiH > 0) ? (romajiY + rawRomajiHeight) : (mainY + rawMainHeight);
-            canvas.drawRoundRect(globalPaddingLeft + (paddingLeft / 2f), rTop, availableWidth - (paddingRight / 2f), rBot, 12 * density, 12 * density, ripplePaint);
+            canvas.drawRoundRect(globalPaddingLeft + (paddingLeft / 2f), mainY, availableWidth - (paddingRight / 2f), rBot, 12 * density, 12 * density, ripplePaint);
         }
         if (bgRippleAlpha > 0.001f && bgLineView != null) {
             ripplePaint.setColor(currentColor);
             ripplePaint.setAlpha((int) (18 * bgRippleAlpha));
-            float rTop = bgY;
             float rBot = bgY + rawBgHeight;
             float maxW = bgLineView.getMaxLineWidth();
             float rW = maxW + 24 * density;
@@ -275,7 +275,7 @@ public class LyricItemDelegate {
                 rLeft = globalPaddingLeft + (paddingLeft / 2f);
                 rRight = rLeft + rW;
             }
-            canvas.drawRoundRect(rLeft, rTop, rRight, rBot, 12 * density, 12 * density, ripplePaint);
+            canvas.drawRoundRect(rLeft, bgY, rRight, rBot, 12 * density, 12 * density, ripplePaint);
         }
 
         if (mainLineView != null) {
@@ -294,8 +294,7 @@ public class LyricItemDelegate {
             canvas.translate(globalPaddingLeft + paddingLeft, slideY);
             float scale = 0.7f + 0.3f * romajiP;
             canvas.scale(scale, scale, pivotX, 0f);
-            float alphaP = Math.max(0f, (romajiP - 0.4f) / 0.6f);
-            float romajiAlpha = 0.35f + 0.65f * alphaP;
+            float romajiAlpha = Math.max(0f, (romajiP - 0.4f) / 0.6f);
             if (romajiAlpha > 0.01f) {
                 romajiView.setAlpha(romajiAlpha);
                 romajiView.draw(canvas);

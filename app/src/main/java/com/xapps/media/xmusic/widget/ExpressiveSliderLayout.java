@@ -8,7 +8,6 @@ import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -75,7 +74,6 @@ public class ExpressiveSliderLayout extends FrameLayout {
 
     private float rawHorizontalDrag = 0f;
     private float rawVerticalOverdrag = 0f;
-    private int capturedTop;
 
     private int collapsedTop;
     private int expandedTop;
@@ -294,7 +292,7 @@ public class ExpressiveSliderLayout extends FrameLayout {
     }
 
     public void setSlideOffset(float offset) {
-        if (sheetView == null || !ViewCompat.isLaidOut(this)) return;
+        if (sheetView == null || isLaidOut()) return;
         float safeOffset = Math.max(0f, Math.min(1f, offset));
         int range = collapsedTop - expandedTop;
         int targetTop = collapsedTop - (int) (range * safeOffset);
@@ -309,14 +307,14 @@ public class ExpressiveSliderLayout extends FrameLayout {
     }
 
     public float getSlideOffset() {
-        if (sheetView == null || !ViewCompat.isLaidOut(this)) return 0f;
+        if (sheetView == null || isLaidOut()) return 0f;
         return calculateSlideOffset(sheetView.getTop());
     }
 
     public void setState(int state) {
         if (this.currentState == state) return;
         this.targetState = state;
-        if (sheetView == null || !ViewCompat.isLaidOut(this) || getHeight() == 0) {
+        if (sheetView == null || isLaidOut() || getHeight() == 0) {
             this.currentState = state;
             if (state == STATE_HIDDEN) {
                 sheetAlpha = 0f;
@@ -687,7 +685,7 @@ public class ExpressiveSliderLayout extends FrameLayout {
 
         @Override
         public void onViewCaptured(@NonNull View capturedChild, int activePointerId) {
-            capturedTop = capturedChild.getTop();
+            int capturedTop = capturedChild.getTop();
             float max = MAX_SWIPE_DISTANCE;
             float tension = max * 0.5f;
             float safeCurrent = Math.min(Math.abs(currentXOffset), max * 0.999f);

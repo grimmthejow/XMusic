@@ -4,9 +4,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.Player;
+import androidx.media3.common.util.UnstableApi;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.session.CommandButton;
 import androidx.media3.session.MediaLibraryService;
@@ -32,6 +35,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@UnstableApi
 public class SessionManager {
     private MediaLibraryService.MediaLibrarySession session;
     private final ExoPlayerManager manager;
@@ -80,23 +84,22 @@ public class SessionManager {
                                             .add(new SessionCommand("SHUFFLE_OFF", Bundle.EMPTY))
                                             .build();
                                             
+        @NonNull
         @Override
-        public MediaSession.ConnectionResult onConnect(MediaSession mediaSession, MediaSession.ControllerInfo controllerInfo) {
+        public MediaSession.ConnectionResult onConnect(@NonNull MediaSession mediaSession, @NonNull MediaSession.ControllerInfo controllerInfo) {
             manager.getPlayerHandler().post(() -> {
-                if (loopMode.equals("LOOP_OFF")) {
-                    player.setRepeatMode(Player.REPEAT_MODE_OFF);
-                    player.setPauseAtEndOfMediaItems(true);
-                } else if (loopMode.equals("LOOP_SINGLE")) {
-                    player.setRepeatMode(Player.REPEAT_MODE_ONE);
-                } else if (loopMode.equals("LOOP_ALL")) {
-                    player.setPauseAtEndOfMediaItems(false);
-                    player.setRepeatMode(Player.REPEAT_MODE_ALL);
+                switch (loopMode) {
+                    case "LOOP_OFF" -> {
+                        player.setRepeatMode(Player.REPEAT_MODE_OFF);
+                        player.setPauseAtEndOfMediaItems(true);
+                    }
+                    case "LOOP_SINGLE" -> player.setRepeatMode(Player.REPEAT_MODE_ONE);
+                    case "LOOP_ALL" -> {
+                        player.setPauseAtEndOfMediaItems(false);
+                        player.setRepeatMode(Player.REPEAT_MODE_ALL);
+                    }
                 }
-                if (shuffleMode.equals("SHUFFLE_ON")) {
-                    player.setShuffleModeEnabled(true);
-                } else {
-                    player.setShuffleModeEnabled(false);
-                }
+                player.setShuffleModeEnabled(shuffleMode.equals("SHUFFLE_ON"));
             });
             return MediaSession.ConnectionResult.accept(MediaSession.ConnectionResult.DEFAULT_SESSION_AND_LIBRARY_COMMANDS.buildUpon().add(new SessionCommand("LOOP_ALL", Bundle.EMPTY))
                                             .add(new SessionCommand("LOOP_SINGLE", Bundle.EMPTY))
@@ -106,7 +109,7 @@ public class SessionManager {
         }
             
         @Override
-        public void onPostConnect(MediaSession mediaSession, MediaSession.ControllerInfo controllerInfo) {
+        public void onPostConnect(MediaSession mediaSession, @NonNull MediaSession.ControllerInfo controllerInfo) {
             mediaSession.setAvailableCommands(controllerInfo, MediaSession.ConnectionResult.DEFAULT_SESSION_AND_LIBRARY_COMMANDS.buildUpon().add(new SessionCommand("LOOP_ALL", Bundle.EMPTY))
                                             .add(new SessionCommand("LOOP_SINGLE", Bundle.EMPTY))
                                             .add(new SessionCommand("LOOP_OFF", Bundle.EMPTY))
@@ -115,8 +118,9 @@ public class SessionManager {
             mediaSession.setCustomLayout(controllerInfo, commandsList);
         }
             
+        @NonNull
         @Override
-        public ListenableFuture<SessionResult> onCustomCommand(MediaSession mediaSession, MediaSession.ControllerInfo controllerInfo, SessionCommand sessionCommand, Bundle bundle) {
+        public ListenableFuture<SessionResult> onCustomCommand(@NonNull MediaSession mediaSession, @NonNull MediaSession.ControllerInfo controllerInfo, @NonNull SessionCommand sessionCommand, @NonNull Bundle bundle) {
             manager.getPlayerHandler().post(() -> {
                 loopMode = switch (sessionCommand.customAction) {
                     case "LOOP_ALL" -> {
@@ -170,8 +174,9 @@ public class SessionManager {
         }
             
             
+        @NonNull
         @Override
-        public ListenableFuture<MediaSession.MediaItemsWithStartPosition> onPlaybackResumption(MediaSession mediaSession, MediaSession.ControllerInfo controller, boolean isForPlayback) {
+        public ListenableFuture<MediaSession.MediaItemsWithStartPosition> onPlaybackResumption(@NonNull MediaSession mediaSession, @NonNull MediaSession.ControllerInfo controller, boolean isForPlayback) {
             SettableFuture<MediaSession.MediaItemsWithStartPosition> future = SettableFuture.create();
             executor.execute(() -> {
                 try {

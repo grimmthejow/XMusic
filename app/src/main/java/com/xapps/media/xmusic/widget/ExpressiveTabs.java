@@ -1,6 +1,7 @@
 package com.xapps.media.xmusic.widget;
 
 import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -11,8 +12,8 @@ import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
+import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.FloatPropertyCompat;
@@ -130,7 +131,7 @@ public class ExpressiveTabs extends HorizontalScrollView {
         this.listener = listener;
     }
 
-    private static class ExpressiveTab extends TextView {
+    private static class ExpressiveTab extends AppCompatTextView {
         private float currentGrad = 0f;
         private SpringAnimation scaleXAnim;
         private SpringAnimation scaleYAnim;
@@ -138,13 +139,14 @@ public class ExpressiveTabs extends HorizontalScrollView {
         private ValueAnimator bgColorAnim;
         private ValueAnimator textColorAnim;
         
-        private int sideMargin, verticalMargin;
+        private final int sideMargin;
+        private final int verticalMargin;
         
         private int currentBgColor = INACTIVE_BG_COLOR;
         private int currentTextColor = INACTIVE_TEXT_COLOR;
 
         private static final FloatPropertyCompat<ExpressiveTab> GRAD_PROPERTY =
-                new FloatPropertyCompat<ExpressiveTab>("grad") {
+                new FloatPropertyCompat<>("grad") {
                     @Override
                     public float getValue(ExpressiveTab tab) {
                         return tab.currentGrad;
@@ -165,6 +167,7 @@ public class ExpressiveTabs extends HorizontalScrollView {
             setupAnimations();
         }
 
+        @SuppressLint("ClickableViewAccessibility")
         private void setupView() {
             if (cachedFont == null) {
                 cachedFont = ResourcesCompat.getFont(getContext(), R.font.gsans_flex_full);

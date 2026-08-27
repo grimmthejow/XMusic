@@ -1,5 +1,6 @@
 package com.xapps.media.xmusic.fragment;
 
+import android.annotation.SuppressLint;
 import android.content.*;
 import android.graphics.*;
 import android.graphics.drawable.*;
@@ -307,6 +308,7 @@ public class MusicListFragment extends BaseFragment {
 			}
 		}
         
+        @SuppressLint("NotifyDataSetChanged")
         public void updateData(ArrayList<Song> a) {
             data = a;
             notifyDataSetChanged();

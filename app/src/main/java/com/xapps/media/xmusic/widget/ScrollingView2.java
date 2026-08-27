@@ -1105,8 +1105,7 @@ public abstract class ScrollingView2 extends View implements NestedScrollingChil
 				verticalScroll = motionEvent.getAxisValue(MotionEvent.AXIS_VSCROLL);
 				x = (int) motionEvent.getX();
 				axis = MotionEvent.AXIS_VSCROLL;
-			} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
-					MotionEventCompat.isFromSource(motionEvent, InputDevice.SOURCE_ROTARY_ENCODER)
+			} else if (MotionEventCompat.isFromSource(motionEvent, InputDevice.SOURCE_ROTARY_ENCODER)
 			) {
 				verticalScroll = motionEvent.getAxisValue(MotionEvent.AXIS_SCROLL);
 				// Since a Wear rotary event doesn't have a true X and we want to support proper

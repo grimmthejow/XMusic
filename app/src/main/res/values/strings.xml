@@ -112,4 +112,6 @@
     <string name="text_telegram_join_details">Check our community to give suggestions, view sneak peeks and more!</string>
     <string name="text_github">GitHub</string>
     <string name="text_open_github_details">Check out the official repository of XMusic</string>
+    <string name="about_contributions">Contributions</string>
+    <string name="about_contributions_desc">Get to know people who participated in making and improving XMusic</string>
 </resources>

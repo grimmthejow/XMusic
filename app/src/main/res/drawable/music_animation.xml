@@ -1,0 +1,6 @@
+<animated-selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/state_checked" android:drawable="@drawable/ic_music" android:state_checked="true" />
+    <item android:id="@+id/state_unchecked" android:drawable="@drawable/ic_music_outlined" />
+    <transition android:fromId="@id/state_unchecked" android:toId="@id/state_checked" android:drawable="@drawable/music_avd_in" />
+    <transition android:fromId="@id/state_checked" android:toId="@id/state_unchecked" android:drawable="@drawable/music_avd_out" />
+</animated-selector>

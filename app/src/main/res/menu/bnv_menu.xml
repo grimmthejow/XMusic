@@ -2,17 +2,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/menuHomeFragment"
-        android:icon="@drawable/ic_music_selector"
+        android:icon="@drawable/music_animation"
         android:title="Songs" />
     
     <item
         android:id="@+id/menuSearchFragment"
-        android:icon="@drawable/ic_search_black_24"
+        android:icon="@drawable/search_animation"
         android:title="Search" />
 
     <item
         android:id="@+id/menuSettingsFragment"
-        android:icon="@drawable/ic_settings_selector"
+        android:icon="@drawable/settings_animation"
         android:title="Settings" />
     
 </menu>
